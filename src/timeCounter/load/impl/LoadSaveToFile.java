@@ -34,7 +34,7 @@ public class LoadSaveToFile implements ILoadSaveToFile
 			}
 			catch (IOException ignore)
 			{
-				System.out.println("Возникли проблемы при загрузке файла!");
+				System.out.println("Some issues with data loading!");
 			}
 		}
 	}
@@ -53,7 +53,7 @@ public class LoadSaveToFile implements ILoadSaveToFile
 		}
 		catch (IOException e)
 		{
-			System.out.println("Возникли проблемы при сохранении файла!");
+			System.out.println("Some issues with data saving!");
 		}
 	}
 

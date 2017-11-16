@@ -114,17 +114,22 @@ public class GUIWindow implements IGUIWindow
 
 		frame = new JFrame(TITLE);
 		frame.setAlwaysOnTop(true);
-		frame.setLocationRelativeTo(null);
 		frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		frame.setResizable(false);
 		frame.setJMenuBar(menu);
-		frame.pack();
 		frame.getContentPane().add(BorderLayout.WEST, panelLeft);
 		frame.getContentPane().add(BorderLayout.CENTER, panelCenter);
 		frame.getContentPane().add(BorderLayout.EAST, panelRight);
 		frame.getContentPane().add(BorderLayout.SOUTH, checkRelaxReminder);
-		frame.setSize(380, 180);
+		frame.setPreferredSize(new Dimension(380, 180));
+		frame.pack();
 		frame.setVisible(true);
+		// centering of frame
+		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+		Point middle = new Point(screenSize.width / 2, screenSize.height / 2);
+		Point newLocation = new Point(middle.x - (frame.getWidth() / 2),
+				middle.y - (frame.getHeight() / 2));
+		frame.setLocation(newLocation);
 	}
 
 	@Override

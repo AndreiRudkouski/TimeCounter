@@ -19,9 +19,9 @@ public class TimeCounter implements ITimeCounter
 
 	private boolean beginCount;
 	private boolean pause;
-	private long currentTime; //Время текущей сессии
-	private long todayTime; //Сегодняшнее время
-	private long totalTime; //Общее время
+	private long currentTime; //The current session time
+	private long todayTime;
+	private long totalTime;
 	private LocalDate currentDate;
 	private LocalDate todayDate = LocalDate.now();
 	private Map<LocalDate, Long> dateTimeMap;
@@ -149,7 +149,7 @@ public class TimeCounter implements ITimeCounter
 				{
 					dateTimeMap.put(todayDate, currentTime);
 				}
-				//timeSave(fileName, dateTimeMap);
+				saver.saveTime(dateTimeMap);
 				setStartButton();
 				currentTime = 0;
 				todayTime = 0;
