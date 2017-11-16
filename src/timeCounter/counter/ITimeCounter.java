@@ -114,4 +114,9 @@ public interface ITimeCounter
 	 * Sets {@link ILoadSaveToFile}'s implementation for load and save data by the time counter.
 	 */
 	void setLoadSaveToFile(ILoadSaveToFile saver);
+
+	/**
+	 * Changes locale which is used in the time counter.
+	 */
+	void changeLocale();
 }

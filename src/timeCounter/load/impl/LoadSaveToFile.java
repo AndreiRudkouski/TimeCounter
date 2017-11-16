@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.util.Base64;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
 
 import timeCounter.load.ILoadSaveToFile;
 
@@ -17,7 +18,7 @@ public class LoadSaveToFile implements ILoadSaveToFile
 	private static final String DELIMITER = "/";
 
 	@Override
-	public void loadTime(Map<LocalDate, Long> dateTimeMap)
+	public void loadTime(Map<LocalDate, AtomicLong> dateTimeMap)
 	{
 		if (file.exists() && !file.isDirectory())
 		{
@@ -29,7 +30,7 @@ public class LoadSaveToFile implements ILoadSaveToFile
 					String[] stringTmp = decode(tmp).split(DELIMITER);
 					dateTimeMap.put(LocalDate.of(Integer.parseInt(stringTmp[2]),
 							Integer.parseInt(stringTmp[1]), Integer.parseInt(stringTmp[0])),
-							Long.parseLong(stringTmp[3]));
+							new AtomicLong(Long.parseLong(stringTmp[3])));
 				}
 			}
 			catch (IOException ignore)
@@ -40,11 +41,11 @@ public class LoadSaveToFile implements ILoadSaveToFile
 	}
 
 	@Override
-	public void saveTime(Map<LocalDate, Long> dateTimeMap)
+	public void saveTime(Map<LocalDate, AtomicLong> dateTimeMap)
 	{
 		try (FileWriter writer = new FileWriter(file))
 		{
-			for (Map.Entry<LocalDate, Long> tmp : dateTimeMap.entrySet())
+			for (Map.Entry<LocalDate, AtomicLong> tmp : dateTimeMap.entrySet())
 			{
 				writer.write(encode(tmp.getKey().getDayOfMonth() +
 						DELIMITER + tmp.getKey().getMonthValue() + DELIMITER + tmp.getKey().getYear() +

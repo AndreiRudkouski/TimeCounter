@@ -3,6 +3,8 @@ package timeCounter.counter.impl;
 import java.time.LocalDate;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
 
 import timeCounter.counter.ITimeCounter;
 import timeCounter.gui.IGUIWindow;
@@ -17,25 +19,20 @@ public class TimeCounter implements ITimeCounter
 	private ILoadSaveToFile saver;
 	private ITimeRunning timer;
 
-	private boolean beginCount;
-	private boolean pause;
-	private long currentTime; //The current session time
-	private long todayTime;
-	private long totalTime;
+	private AtomicBoolean beginCount = new AtomicBoolean();
+	private AtomicBoolean pause = new AtomicBoolean(true);
+	private AtomicLong currentTime = new AtomicLong(); //The current session time
+	private AtomicLong todayTime = new AtomicLong();
+	private AtomicLong totalTime = new AtomicLong();
 	private LocalDate currentDate;
 	private LocalDate todayDate = LocalDate.now();
-	private Map<LocalDate, Long> dateTimeMap;
+	private Map<LocalDate, AtomicLong> dateTimeMap = new TreeMap<>();
 
-	public TimeCounter()
-	{
-		pause = true;
-		dateTimeMap = new TreeMap<>();
-	}
 
 	@Override
 	public void incrementCurrentTime()
 	{
-		currentTime++;
+		currentTime.incrementAndGet();
 		window.getCurrentTimeField().setText(printTime(currentTime));
 	}
 
@@ -43,14 +40,14 @@ public class TimeCounter implements ITimeCounter
 	public void eraseCurrentTime()
 	{
 		setStartButton();
-		currentTime = 0;
+		currentTime.set(0);
 		window.getCurrentTimeField().setText(printTime(currentTime));
 	}
 
 	@Override
 	public void incrementTodayTime()
 	{
-		todayTime++;
+		todayTime.incrementAndGet();
 		window.getTodayTimeField().setText(printTime(todayTime));
 	}
 
@@ -58,14 +55,14 @@ public class TimeCounter implements ITimeCounter
 	public void eraseTodayTime()
 	{
 		setStartButton();
-		todayTime = 0;
+		todayTime.set(0);
 		window.getTodayTimeField().setText(printTime(todayTime));
 	}
 
 	@Override
 	public void incrementTotalTime()
 	{
-		totalTime++;
+		totalTime.incrementAndGet();
 		window.getTotalTimeField().setText(printTime(totalTime));
 	}
 
@@ -85,7 +82,7 @@ public class TimeCounter implements ITimeCounter
 
 	public void checkRelaxTime()
 	{
-		if (currentTime % MIN_TO_RELAX == 0 && isTimeRelaxSelect() && window.timeRelaxReminder())
+		if (currentTime.get() % MIN_TO_RELAX == 0 && isTimeRelaxSelect() && window.timeRelaxReminder())
 		{
 			setStartButton();
 		}
@@ -94,27 +91,27 @@ public class TimeCounter implements ITimeCounter
 	@Override
 	public boolean isBeginCount()
 	{
-		return beginCount;
+		return beginCount.get();
 	}
 
 	@Override
 	public boolean isPause()
 	{
-		return pause;
+		return pause.get();
 	}
 
 	@Override
 	public void setStopButton()
 	{
-		beginCount = true;
-		pause = false;
+		beginCount.set(true);
+		pause.set(false);
 		window.setStopTextButton();
 	}
 
 	@Override
 	public void setStartButton()
 	{
-		pause = true;
+		pause.set(true);
 		window.setStartTextButton();
 	}
 
@@ -143,7 +140,7 @@ public class TimeCounter implements ITimeCounter
 			{
 				if (dateTimeMap.containsKey(todayDate))
 				{
-					dateTimeMap.put(todayDate, dateTimeMap.get(todayDate) + currentTime);
+					dateTimeMap.put(todayDate, new AtomicLong(dateTimeMap.get(todayDate).getAndAdd(currentTime.get())));
 				}
 				else
 				{
@@ -151,8 +148,8 @@ public class TimeCounter implements ITimeCounter
 				}
 				saver.saveTime(dateTimeMap);
 				setStartButton();
-				currentTime = 0;
-				todayTime = 0;
+				currentTime.set(0);
+				todayTime.set(0);
 				window.getCurrentTimeField().setText(printTime(currentTime));
 				window.getTodayTimeField().setText(printTime(todayTime));
 			}
@@ -160,8 +157,9 @@ public class TimeCounter implements ITimeCounter
 		}
 	}
 
-	private String printTime(long sec)
+	private String printTime(AtomicLong second)
 	{
+		long sec = second.get();
 		long hour = sec / (60 * 60);
 		long min = (sec - hour * 60 * 60) / 60;
 		sec = sec - hour * 60 * 60 - min * 60;
@@ -170,10 +168,10 @@ public class TimeCounter implements ITimeCounter
 
 	private void assignTime()
 	{
-		currentTime = 0;
-		todayTime = dateTimeMap.containsKey(todayDate) ? dateTimeMap.get(todayDate) : 0;
-		totalTime = 0;
-		dateTimeMap.forEach((date, time) -> totalTime = totalTime + time);
+		currentTime.set(0);
+		todayTime = dateTimeMap.containsKey(todayDate) ? dateTimeMap.get(todayDate) : new AtomicLong(0);
+		totalTime.set(0);
+		dateTimeMap.forEach((date, time) -> totalTime.getAndAdd(time.get()));
 		window.getCurrentTimeField().setText(printTime(currentTime));
 		window.getTodayTimeField().setText(printTime(todayTime));
 		window.getTotalTimeField().setText(printTime(totalTime));
@@ -184,8 +182,8 @@ public class TimeCounter implements ITimeCounter
 	{
 		if (!dateTimeMap.isEmpty())
 		{
-			beginCount = false;
-			pause = true;
+			beginCount.set(false);
+			pause.set(true);
 			window.setStartTextButton();
 		}
 		saver.loadTime(dateTimeMap);
@@ -216,5 +214,11 @@ public class TimeCounter implements ITimeCounter
 	public void setLoadSaveToFile(ILoadSaveToFile saver)
 	{
 		this.saver = saver;
+	}
+
+	@Override
+	public void changeLocale()
+	{
+		
 	}
 }
