@@ -1,7 +1,5 @@
 package timeCounter.gui;
 
-import java.util.ResourceBundle;
-
 import javax.swing.*;
 
 import timeCounter.listener.ITimeListener;
@@ -71,16 +69,7 @@ public interface IGUIWindow
 			ITimeListener eraseTodayTimeListener, ITimeListener eraseTotalTimeListener, ITimeListener localeListener);
 
 	/**
-	 * Sets {@link ResourceBundle}'s implementation to GUI.
-	 *
-	 * @param bundle {@link ResourceBundle}'s implementation.
+	 * Changes locale which is used in GUI.
 	 */
-	void setResourceBundle(ResourceBundle bundle);
-
-	/**
-	 * Gets {@link ResourceBundle}'s implementation which is used in GUI.
-	 *
-	 * @return {@link ResourceBundle}'s implementation or null.
-	 */
-	ResourceBundle getResourceBundle();
+	void changeLocale();
 }

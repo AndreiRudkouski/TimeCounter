@@ -28,7 +28,6 @@ public class TimeCounter implements ITimeCounter
 	private LocalDate todayDate = LocalDate.now();
 	private Map<LocalDate, AtomicLong> dateTimeMap = new TreeMap<>();
 
-
 	@Override
 	public void incrementCurrentTime()
 	{
@@ -124,7 +123,8 @@ public class TimeCounter implements ITimeCounter
 	@Override
 	public void setTimer(ITimeRunning timer)
 	{
-		if (this.timer != null) {
+		if (this.timer != null)
+		{
 			this.timer.stopExecute();
 		}
 		this.timer = timer;
@@ -219,6 +219,6 @@ public class TimeCounter implements ITimeCounter
 	@Override
 	public void changeLocale()
 	{
-		
+		window.changeLocale();
 	}
 }
