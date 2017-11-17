@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.security.SecureRandom;
 import java.time.LocalDate;
 import java.util.Base64;
 import java.util.Map;
@@ -64,13 +65,21 @@ public class LoadSaveToFile implements ILoadSaveToFile
 		this.file = file;
 	}
 
-	private String encode(String str)
-	{
-		return new String(Base64.getEncoder().encode((str.getBytes())));
+	// encode string
+	private String encode(String input) {
+		byte[] salt = new byte[8];
+		new SecureRandom().nextBytes(salt);
+		return Base64.getEncoder().encodeToString(salt)
+				+ Base64.getEncoder().encodeToString(input.getBytes());
 	}
 
-	private String decode(String str)
-	{
-		return new String(Base64.getDecoder().decode(str));
+	// decode string
+	private String decode(String output) {
+		if (output.length() > 12)
+		{
+			output = output.substring(12);
+		}
+		return new String(Base64.getDecoder().decode(output));
 	}
+
 }
