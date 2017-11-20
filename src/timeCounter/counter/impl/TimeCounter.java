@@ -161,8 +161,13 @@ public class TimeCounter implements ITimeCounter
 	{
 		long sec = second.get();
 		long hour = sec / (60 * 60);
+		long day = hour / 24;
 		long min = (sec - hour * 60 * 60) / 60;
 		sec = sec - hour * 60 * 60 - min * 60;
+		hour = hour - day * 24;
+		if (day != 0) {
+			return String.format("%1$02d-%2$02d:%3$02d:%4$02d", day, hour, min, sec);
+		}
 		return String.format("%1$02d:%2$02d:%3$02d", hour, min, sec);
 	}
 
