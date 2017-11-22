@@ -11,6 +11,6 @@ public class LoadTimeListener implements ITimeListener
 	@Override
 	public void actionPerformed(ActionEvent a)
 	{
-		TIME_COUNTER.loadTime();
+		TIME_COUNTER.loadData();
 	}
 }

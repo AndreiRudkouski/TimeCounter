@@ -12,18 +12,26 @@ import java.util.concurrent.atomic.AtomicLong;
 public interface ILoadSaveToFile
 {
 	/**
-	 * Loads and decodes data from file and fills specified map.
+	 * Loads and decodes data from file.
 	 *
 	 * @param dateTimeMap {@link TreeMap} for data filling
 	 */
-	void loadTime(Map<LocalDate, AtomicLong> dateTimeMap);
+	void loadData(Map<LocalDate, AtomicLong> dateTimeMap);
 
 	/**
-	 * Encodes and saves data to file from specified map.
+	 * Loads and decodes application name.
+	 *
+	 * @return application name or null
+	 */
+	String loadApplication();
+
+	/**
+	 * Encodes and saves data to file.
 	 *
 	 * @param dateTimeMap {@link TreeMap} for data saving
+	 * @param file application name
 	 */
-	void saveTime(Map<LocalDate, AtomicLong> dateTimeMap);
+	void saveData(Map<LocalDate, AtomicLong> dateTimeMap, String file);
 
 	/**
 	 * Sets {@link File} file for working with it.

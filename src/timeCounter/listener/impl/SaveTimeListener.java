@@ -11,6 +11,6 @@ public class SaveTimeListener implements ITimeListener
 	@Override
 	public void actionPerformed(ActionEvent a)
 	{
-		TIME_COUNTER.saveTime();
+		TIME_COUNTER.saveData();
 	}
 }

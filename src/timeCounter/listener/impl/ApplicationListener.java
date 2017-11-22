@@ -6,11 +6,11 @@ import java.awt.event.ActionEvent;
 
 import timeCounter.listener.ITimeListener;
 
-public class EraseTodayTimeListener implements ITimeListener
+public class ApplicationListener implements ITimeListener
 {
 	@Override
-	public void actionPerformed(ActionEvent a)
+	public void actionPerformed(ActionEvent e)
 	{
-		TIME_COUNTER.eraseTodayTime();
+		TIME_COUNTER.chooseApplication();
 	}
 }

@@ -19,7 +19,7 @@ public class LoadSaveToFile implements ILoadSaveToFile
 	private static final String DELIMITER = "/";
 
 	@Override
-	public void loadTime(Map<LocalDate, AtomicLong> dateTimeMap)
+	public void loadData(Map<LocalDate, AtomicLong> dateTimeMap)
 	{
 		if (file.exists() && !file.isDirectory())
 		{
@@ -29,9 +29,12 @@ public class LoadSaveToFile implements ILoadSaveToFile
 				while ((tmp = reader.readLine()) != null)
 				{
 					String[] stringTmp = decode(tmp).split(DELIMITER);
-					dateTimeMap.put(LocalDate.of(Integer.parseInt(stringTmp[2]),
-							Integer.parseInt(stringTmp[1]), Integer.parseInt(stringTmp[0])),
-							new AtomicLong(Long.parseLong(stringTmp[3])));
+					if (stringTmp.length != 1)
+					{
+						dateTimeMap.put(LocalDate.of(Integer.parseInt(stringTmp[2]),
+								Integer.parseInt(stringTmp[1]), Integer.parseInt(stringTmp[0])),
+								new AtomicLong(Long.parseLong(stringTmp[3])));
+					}
 				}
 			}
 			catch (IOException ignore)
@@ -42,10 +45,36 @@ public class LoadSaveToFile implements ILoadSaveToFile
 	}
 
 	@Override
-	public void saveTime(Map<LocalDate, AtomicLong> dateTimeMap)
+	public String loadApplication()
+	{
+		if (file.exists() && !file.isDirectory())
+		{
+			try (BufferedReader reader = new BufferedReader(new FileReader(file)))
+			{
+				String tmp;
+				while ((tmp = reader.readLine()) != null)
+				{
+					String[] stringTmp = decode(tmp).split(DELIMITER);
+					if (stringTmp.length == 1)
+					{
+						return stringTmp[0];
+					}
+				}
+			}
+			catch (IOException ignore)
+			{
+				System.out.println("Some issues with data loading!");
+			}
+		}
+		return null;
+	}
+
+	@Override
+	public void saveData(Map<LocalDate, AtomicLong> dateTimeMap, String name)
 	{
 		try (FileWriter writer = new FileWriter(file))
 		{
+			writer.write(encode(name) + System.getProperty("line.separator"));
 			for (Map.Entry<LocalDate, AtomicLong> tmp : dateTimeMap.entrySet())
 			{
 				writer.write(encode(tmp.getKey().getDayOfMonth() +

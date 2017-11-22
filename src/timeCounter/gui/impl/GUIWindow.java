@@ -1,6 +1,7 @@
 package timeCounter.gui.impl;
 
 import java.awt.*;
+import java.io.File;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
@@ -12,6 +13,7 @@ import timeCounter.listener.ITimeListener;
 public class GUIWindow implements IGUIWindow
 {
 	private final String LABEL_CURRENT_TIME = "label_current_time";
+	private final String LABEL_APPLICATION = "label_application";
 	private final String LABEL_RELAX = "label_relax";
 	private final String LABEL_TODAY_TIME = "label_today_time";
 	private final String LABEL_TOTAL_TIME = "label_total_time";
@@ -23,6 +25,7 @@ public class GUIWindow implements IGUIWindow
 	private final String MENU_ITEM_ERASE_TODAY = "menu_item_erase_today";
 	private final String MENU_ITEM_ERASE_TOTAL = "menu_item_erase_total";
 	private final String MENU_ITEM_SETTING = "menu_item_setting";
+	private final String MENU_ITEM_SETTING_APPLICATION = "menu_item_setting_application";
 	private final String MENU_ITEM_SETTING_LOCALE = "menu_item_setting_locale";
 	private final String MESSAGE_CHANGE_DATE = "message_change_date";
 	private final String MESSAGE_RELAX_TIME = "message_relax_time";
@@ -32,7 +35,8 @@ public class GUIWindow implements IGUIWindow
 	private final String TITLE_CHANGE_DATE = "title_change_date";
 	private final String TITLE_RELAX_TIME = "title_relax_time";
 
-	private final Font fontLeftPanel = new Font("sanserif", Font.BOLD, 16);
+	private final Font fontTopPanel = new Font("sanserif", Font.BOLD, 12);
+	private final Font fontLeftPanel = new Font("sanserif", Font.BOLD, 15);
 	private final Font fontCenterPanel = new Font("sanserif", Font.BOLD, 16);
 
 	private static final String LOCALE_NAME = "timeCounter.resource.locale";
@@ -41,6 +45,7 @@ public class GUIWindow implements IGUIWindow
 	private ResourceBundle bundle = ResourceBundle.getBundle(LOCALE_NAME, LOCALE_EN);
 
 	private JFrame frame;
+	private JLabel labelApplication;
 	private JLabel labelCurrentTime;
 	private JLabel labelTodayTime;
 	private JLabel labelTotalTime;
@@ -55,6 +60,7 @@ public class GUIWindow implements IGUIWindow
 	private JMenuItem menuEraseToday;
 	private JMenuItem menuEraseTotal;
 	private JMenu menuSetting;
+	private JMenuItem menuSettingApplication;
 	private JMenuItem menuSettingLocale;
 	private JButton buttonStartStop;
 	private JCheckBox checkRelaxReminder;
@@ -64,10 +70,18 @@ public class GUIWindow implements IGUIWindow
 	private ITimeListener eraseCurrentTimeListener;
 	private ITimeListener eraseTodayTimeListener;
 	private ITimeListener eraseTotalTimeListener;
+	private ITimeListener applicationListener;
 	private ITimeListener localeListener;
 
 	private void create()
 	{
+		JPanel panelTop = new JPanel();
+		labelApplication = new JLabel();
+		labelApplication.setFont(fontTopPanel);
+		panelTop.add(labelApplication);
+		panelTop.setPreferredSize(new Dimension(370, 30));
+		panelTop.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, Color.LIGHT_GRAY));
+
 		JPanel panelLeft = new JPanel();
 		panelLeft.setPreferredSize(new Dimension(165, 100));
 		panelLeft.setLayout(new BoxLayout(panelLeft, BoxLayout.Y_AXIS));
@@ -115,6 +129,7 @@ public class GUIWindow implements IGUIWindow
 		checkRelaxReminder = new JCheckBox();
 
 		JMenuBar menu = new JMenuBar();
+		menu.setBackground(Color.LIGHT_GRAY);
 		// Create counter item of the menu
 		menuCounter = new JMenu();
 		menuCounterLoad = new JMenuItem();
@@ -136,8 +151,11 @@ public class GUIWindow implements IGUIWindow
 		menuErase.add(menuEraseTotal);
 		// Create setting item of the menu
 		menuSetting = new JMenu();
+		menuSettingApplication = new JMenuItem();
 		menuSettingLocale = new JMenuItem();
+		menuSettingApplication.addActionListener(applicationListener);
 		menuSettingLocale.addActionListener(localeListener);
+		menuSetting.add(menuSettingApplication);
 		menuSetting.add(menuSettingLocale);
 
 		menu.add(menuCounter);
@@ -149,14 +167,15 @@ public class GUIWindow implements IGUIWindow
 		frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		frame.setResizable(false);
 		frame.setJMenuBar(menu);
+		frame.getContentPane().add(BorderLayout.NORTH, panelTop);
 		frame.getContentPane().add(BorderLayout.WEST, panelLeft);
 		frame.getContentPane().add(BorderLayout.CENTER, panelCenter);
 		frame.getContentPane().add(BorderLayout.EAST, panelRight);
 		frame.getContentPane().add(BorderLayout.SOUTH, checkRelaxReminder);
-		frame.setPreferredSize(new Dimension(380, 180));
+		frame.setPreferredSize(new Dimension(380, 210));
 		frame.pack();
 		frame.setVisible(true);
-		// centering of frame
+		// Centering of frame
 		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 		Point middle = new Point(screenSize.width / 2, screenSize.height / 2);
 		Point newLocation = new Point(middle.x - (frame.getWidth() / 2),
@@ -168,6 +187,10 @@ public class GUIWindow implements IGUIWindow
 	private void initText()
 	{
 		frame.setTitle(bundle.getString(TITLE));
+		if (labelApplication.isEnabled())
+		{
+			labelApplication.setText(bundle.getString(LABEL_APPLICATION));
+		}
 		labelCurrentTime.setText(bundle.getString(LABEL_CURRENT_TIME));
 		labelTodayTime.setText(bundle.getString(LABEL_TODAY_TIME));
 		labelTotalTime.setText(bundle.getString(LABEL_TOTAL_TIME));
@@ -179,6 +202,7 @@ public class GUIWindow implements IGUIWindow
 		menuEraseToday.setText(bundle.getString(MENU_ITEM_ERASE_TODAY));
 		menuEraseTotal.setText(bundle.getString(MENU_ITEM_ERASE_TOTAL));
 		menuSetting.setText(bundle.getString(MENU_ITEM_SETTING));
+		menuSettingApplication.setText(bundle.getString(MENU_ITEM_SETTING_APPLICATION));
 		menuSettingLocale.setText(bundle.getString(MENU_ITEM_SETTING_LOCALE));
 		checkRelaxReminder.setText(bundle.getString(LABEL_RELAX));
 		if (buttonStartStop.isDefaultCapable())
@@ -250,7 +274,8 @@ public class GUIWindow implements IGUIWindow
 	@Override
 	public void setListenersAndCreate(ITimeListener startStopTimeListener, ITimeListener loadTimeListener,
 			ITimeListener saveTimeListener, ITimeListener eraseCurrentTimeListener,
-			ITimeListener eraseTodayTimeListener, ITimeListener eraseTotalTimeListener, ITimeListener localeListener)
+			ITimeListener eraseTodayTimeListener, ITimeListener eraseTotalTimeListener,
+			ITimeListener applicationListener, ITimeListener localeListener)
 	{
 		this.startStopTimeListener = startStopTimeListener;
 		this.loadTimeListener = loadTimeListener;
@@ -258,6 +283,7 @@ public class GUIWindow implements IGUIWindow
 		this.eraseCurrentTimeListener = eraseCurrentTimeListener;
 		this.eraseTodayTimeListener = eraseTodayTimeListener;
 		this.eraseTotalTimeListener = eraseTotalTimeListener;
+		this.applicationListener = applicationListener;
 		this.localeListener = localeListener;
 		create();
 	}
@@ -274,5 +300,20 @@ public class GUIWindow implements IGUIWindow
 			bundle = ResourceBundle.getBundle(LOCALE_NAME, LOCALE_EN);
 		}
 		initText();
+	}
+
+	@Override
+	public File chooseApplication()
+	{
+		JFileChooser fileChooser = new JFileChooser();
+		int result = fileChooser.showOpenDialog(frame);
+		return result == JFileChooser.APPROVE_OPTION ? fileChooser.getSelectedFile() : null;
+	}
+
+	@Override
+	public void setApplicationLabel(String name)
+	{
+		labelApplication.setText(name);
+		labelApplication.setEnabled(false);
 	}
 }
