@@ -44,6 +44,8 @@ public class GUIWindow implements IGUIWindow
 	private static final Locale LOCALE_RU = new Locale("ru");
 	private ResourceBundle bundle = ResourceBundle.getBundle(LOCALE_NAME, LOCALE_EN);
 
+	private static final String ICON_NAME = "icon.png";
+
 	private JFrame frame;
 	private JLabel labelApplication;
 	private JLabel labelCurrentTime;
@@ -181,6 +183,8 @@ public class GUIWindow implements IGUIWindow
 		Point newLocation = new Point(middle.x - (frame.getWidth() / 2),
 				middle.y - (frame.getHeight() / 2));
 		frame.setLocation(newLocation);
+		ImageIcon img = new ImageIcon(ICON_NAME);
+		frame.setIconImage(img.getImage());
 		initText();
 	}
 
