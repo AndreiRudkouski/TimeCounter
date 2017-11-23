@@ -1,12 +1,15 @@
 package timeCounter.counter.impl;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.time.LocalDate;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Stream;
 
 import javax.swing.*;
 
@@ -20,14 +23,7 @@ public class TimeCounter implements ITimeCounter
 
 	private IGUIWindow window;
 	private ILoadSaveToFile saver;
-	private Timer timer = new Timer(1000, (e) -> {
-		incrementCurrentTime();
-		incrementTodayTime();
-		incrementTotalTime();
-		checkRelaxTime();
-		checkChangeDate();
-		checkApplication();
-	});
+	private Timer timer = new Timer(1000, (e) -> checkApplication());
 
 	private AtomicBoolean beginCount = new AtomicBoolean();
 	private AtomicBoolean pause = new AtomicBoolean(true);
@@ -140,14 +136,18 @@ public class TimeCounter implements ITimeCounter
 		}
 	}
 
-	private boolean isTimeRelaxSelect()
+	@Override
+	public void closeApplication()
 	{
-		return window.isRelaxReminder();
+		if (process != null && process.isAlive())
+		{
+			process.destroy();
+		}
 	}
 
 	private void checkRelaxTime()
 	{
-		if (currentTime.get() % MIN_TO_RELAX == 0 && isTimeRelaxSelect() && window.timeRelaxReminder())
+		if (currentTime.get() % MIN_TO_RELAX == 0 && window.isRelaxReminder() && window.timeRelaxReminder())
 		{
 			setStartButton();
 		}
@@ -155,21 +155,62 @@ public class TimeCounter implements ITimeCounter
 
 	private void setStopButton()
 	{
+		if ((process == null || !process.isAlive()) && file != null)
+		{
+			if (isRunningProcess(file.getName()))
+			{
+				if (window.runningApplicationNotice())
+				{
+					setStartButton();
+					return;
+				}
+			}
+			else
+			{
+				try
+				{
+					process = Runtime.getRuntime().exec(file.getAbsolutePath());
+				}
+				catch (IOException e)
+				{
+					/*NOP*/
+				}
+			}
+		}
+
 		beginCount.set(true);
 		pause.set(false);
 		timer.start();
 		window.setStopTextButton();
+	}
+
+	private boolean isRunningProcess(String name)
+	{
+		// Determine OS type (Windows or Linux)
+		String delimiter = " ";
+		String env = Stream.of(System.getProperties().getProperty("os.name").split(delimiter)).anyMatch(
+				s -> s.equalsIgnoreCase("Windows")) ?
+				System.getenv("windir") + "\\system32\\" + "tasklist.exe" : "ps -e";
+
 		try
 		{
-			if ((process == null || !process.isAlive()) && file != null)
+			String line;
+			Process p = Runtime.getRuntime().exec(env);
+			BufferedReader input = new BufferedReader(new InputStreamReader(p.getInputStream()));
+			while ((line = input.readLine()) != null)
 			{
-				process = Runtime.getRuntime().exec(file.getAbsolutePath());
+				if (Stream.of(line.split(delimiter)).anyMatch(n -> n.equalsIgnoreCase(name)))
+				{
+					return true;
+				}
 			}
+			input.close();
 		}
 		catch (IOException e)
 		{
-			e.printStackTrace();
+			/*NOP*/
 		}
+		return false;
 	}
 
 	private void setStartButton()
@@ -252,6 +293,16 @@ public class TimeCounter implements ITimeCounter
 	private void checkApplication()
 	{
 		if (process != null && !process.isAlive())
-		setStartButton();
+		{
+			setStartButton();
+		}
+		else
+		{
+			incrementCurrentTime();
+			incrementTodayTime();
+			incrementTotalTime();
+			checkRelaxTime();
+			checkChangeDate();
+		}
 	}
 }

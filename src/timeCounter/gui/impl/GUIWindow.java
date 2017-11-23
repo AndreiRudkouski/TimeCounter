@@ -1,6 +1,10 @@
 package timeCounter.gui.impl;
 
+import static timeCounter.main.Main.TIME_COUNTER;
+
 import java.awt.*;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.File;
 import java.util.Locale;
 import java.util.ResourceBundle;
@@ -27,11 +31,13 @@ public class GUIWindow implements IGUIWindow
 	private final String MENU_ITEM_SETTING = "menu_item_setting";
 	private final String MENU_ITEM_SETTING_APPLICATION = "menu_item_setting_application";
 	private final String MENU_ITEM_SETTING_LOCALE = "menu_item_setting_locale";
+	private final String MESSAGE_APPLICATION_RESTART = "massage_application_restart";
 	private final String MESSAGE_CHANGE_DATE = "message_change_date";
 	private final String MESSAGE_RELAX_TIME = "message_relax_time";
 	private final String TEXT_BUTTON_START = "text_button_start";
 	private final String TEXT_BUTTON_STOP = "text_button_stop";
 	private final String TITLE = "title";
+	private final String TITLE_APPLICATION_RESTART = "title_application_restart";
 	private final String TITLE_CHANGE_DATE = "title_change_date";
 	private final String TITLE_RELAX_TIME = "title_relax_time";
 
@@ -186,6 +192,15 @@ public class GUIWindow implements IGUIWindow
 		ImageIcon img = new ImageIcon(ICON_NAME);
 		frame.setIconImage(img.getImage());
 		initText();
+		// Close the controlling application when the frame is closing
+		frame.addWindowListener(new WindowAdapter()
+		{
+			@Override
+			public void windowClosing(WindowEvent e)
+			{
+				TIME_COUNTER.closeApplication();
+			}
+		});
 	}
 
 	private void initText()
@@ -319,5 +334,14 @@ public class GUIWindow implements IGUIWindow
 	{
 		labelApplication.setText(name);
 		labelApplication.setEnabled(false);
+	}
+
+	@Override
+	public boolean runningApplicationNotice()
+	{
+		int select = JOptionPane.showConfirmDialog(frame, bundle.getString(MESSAGE_APPLICATION_RESTART),
+				bundle.getString(TITLE_APPLICATION_RESTART),
+				JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE);
+		return select == JOptionPane.YES_OPTION;
 	}
 }

@@ -29,7 +29,7 @@ public interface ILoadSaveToFile
 	 * Encodes and saves data to file.
 	 *
 	 * @param dateTimeMap {@link TreeMap} for data saving
-	 * @param file application name
+	 * @param file application name. The filename argument must be an absolute path name.
 	 */
 	void saveData(Map<LocalDate, AtomicLong> dateTimeMap, String file);
 

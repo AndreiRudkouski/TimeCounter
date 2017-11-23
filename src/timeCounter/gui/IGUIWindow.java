@@ -98,4 +98,11 @@ public interface IGUIWindow
 	 * @param name application name
 	 */
 	void setApplicationLabel(String name);
+
+	/**
+	 * Notices the user about already running application which is chosen for controlling.
+	 *
+	 * @return true if the user want to begin timing after restart the application which is chosen for controlling otherwise false
+	 */
+	boolean runningApplicationNotice();
 }

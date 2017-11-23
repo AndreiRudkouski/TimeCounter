@@ -46,4 +46,9 @@ public interface ITimeCounter
 	 * Pushes 'StartStop' button and run or stop the timer.
 	 */
 	void pushStartStopButton();
+
+	/**
+	 * Closes the application which is chosen for controlling.
+	 */
+	void closeApplication();
 }
