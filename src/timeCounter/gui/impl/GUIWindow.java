@@ -45,12 +45,12 @@ public class GUIWindow implements IGUIWindow
 	private final Font fontLeftPanel = new Font("sanserif", Font.BOLD, 15);
 	private final Font fontCenterPanel = new Font("sanserif", Font.BOLD, 16);
 
-	private static final String LOCALE_NAME = "timeCounter.resource.locale";
+	private static final String LOCALE_NAME = "timeCounter.resources.locale";
 	private static final Locale LOCALE_EN = Locale.ENGLISH;
 	private static final Locale LOCALE_RU = new Locale("ru");
 	private ResourceBundle bundle = ResourceBundle.getBundle(LOCALE_NAME, LOCALE_EN);
 
-	private static final String ICON_NAME = "icon.png";
+	private static final String ICON_NAME = "timeCounter/resources/image/icon.png";
 
 	private JFrame frame;
 	private JLabel labelApplication;
@@ -189,7 +189,7 @@ public class GUIWindow implements IGUIWindow
 		Point newLocation = new Point(middle.x - (frame.getWidth() / 2),
 				middle.y - (frame.getHeight() / 2));
 		frame.setLocation(newLocation);
-		ImageIcon img = new ImageIcon(ICON_NAME);
+		ImageIcon img = new ImageIcon(getClass().getClassLoader().getResource(ICON_NAME));
 		frame.setIconImage(img.getImage());
 		initText();
 		// Close the controlling application when the frame is closing
