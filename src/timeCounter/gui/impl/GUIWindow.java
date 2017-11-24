@@ -209,6 +209,7 @@ public class GUIWindow implements IGUIWindow
 		if (labelApplication.isEnabled())
 		{
 			labelApplication.setText(bundle.getString(LABEL_APPLICATION));
+			labelApplication.setForeground(Color.RED);
 		}
 		labelCurrentTime.setText(bundle.getString(LABEL_CURRENT_TIME));
 		labelTodayTime.setText(bundle.getString(LABEL_TODAY_TIME));
