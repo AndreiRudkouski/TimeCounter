@@ -136,8 +136,6 @@ public class GUIWindow implements IGUIWindow
 
 		checkRelaxReminder = new JCheckBox();
 
-		JMenuBar menu = new JMenuBar();
-		menu.setBackground(Color.LIGHT_GRAY);
 		// Create counter item of the menu
 		menuCounter = new JMenu();
 		menuCounterLoad = new JMenuItem();
@@ -166,6 +164,9 @@ public class GUIWindow implements IGUIWindow
 		menuSetting.add(menuSettingApplication);
 		menuSetting.add(menuSettingLocale);
 
+		JMenuBar menu = new JMenuBar();
+		menu.setBackground(Color.LIGHT_GRAY);
+		menu.setBorder(BorderFactory.createEmptyBorder());
 		menu.add(menuCounter);
 		menu.add(menuErase);
 		menu.add(menuSetting);
