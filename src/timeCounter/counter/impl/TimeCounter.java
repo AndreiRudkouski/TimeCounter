@@ -23,7 +23,7 @@ public class TimeCounter implements ITimeCounter
 
 	private IGUIWindow window;
 	private ILoadSaveToFile saver;
-	private Timer timer = new Timer(1000, (e) -> checkApplication());
+	private Timer timer;
 
 	private AtomicBoolean beginCount = new AtomicBoolean();
 	private AtomicBoolean pause = new AtomicBoolean(true);
@@ -36,14 +36,20 @@ public class TimeCounter implements ITimeCounter
 	private File file;
 	private Process process;
 
-	public TimeCounter()
-	{
-	}
+	// Settings for time counter
+	private int timerPause = 1000;
+	private int oneSecond = 1000;
+	private long countTime = 0;
 
 	public TimeCounter(IGUIWindow window, ILoadSaveToFile saver)
 	{
 		this.window = window;
 		this.saver = saver;
+		timer = new Timer(timerPause, (e) ->
+		{
+			correctTimeCounter();
+			checkApplication();
+		});
 	}
 
 	@Override
@@ -180,6 +186,7 @@ public class TimeCounter implements ITimeCounter
 
 		beginCount.set(true);
 		pause.set(false);
+		correctTimeCounter();
 		timer.start();
 		window.setStopTextButton();
 	}
@@ -225,6 +232,7 @@ public class TimeCounter implements ITimeCounter
 		currentDate = LocalDate.now();
 		if (!todayDate.equals(currentDate))
 		{
+			setStartButton();
 			if (window.changeDate())
 			{
 				if (dateTimeMap.containsKey(todayDate))
@@ -236,13 +244,13 @@ public class TimeCounter implements ITimeCounter
 					dateTimeMap.put(todayDate, currentTime);
 				}
 				saver.saveData(dateTimeMap, file.getAbsolutePath());
-				setStartButton();
 				currentTime.set(0);
 				todayTime.set(0);
 				window.getCurrentTimeField().setText(printTime(currentTime));
 				window.getTodayTimeField().setText(printTime(todayTime));
 			}
 			todayDate = currentDate;
+			setStopButton();
 		}
 	}
 
@@ -288,6 +296,21 @@ public class TimeCounter implements ITimeCounter
 	{
 		totalTime.incrementAndGet();
 		window.getTotalTimeField().setText(printTime(totalTime));
+	}
+
+	private void correctTimeCounter()
+	{
+		// Correct the delay of time counter
+		if (countTime != 0)
+		{
+			timerPause = timerPause - (int) Math.round((System.nanoTime() - countTime) / 1000000d - oneSecond);
+			countTime = System.nanoTime();
+			timer.setDelay(timerPause);
+		}
+		else
+		{
+			countTime = System.nanoTime();
+		}
 	}
 
 	private void checkApplication()
