@@ -19,7 +19,7 @@ import timeCounter.load.ILoadSaveToFile;
 
 public class TimeCounter implements ITimeCounter
 {
-	private final static int MIN_TO_RELAX = 50;
+	private final static int SEC_TO_RELAX = 10;
 
 	private IGUIWindow window;
 	private ILoadSaveToFile saver;
@@ -122,7 +122,7 @@ public class TimeCounter implements ITimeCounter
 	public void chooseApplication()
 	{
 		File chosenFile = window.chooseApplication();
-		if (file == null || chosenFile != null)
+		if (chosenFile != null)
 		{
 			file = chosenFile;
 			window.setApplicationLabel(file.getName());
@@ -153,9 +153,13 @@ public class TimeCounter implements ITimeCounter
 
 	private void checkRelaxTime()
 	{
-		if (currentTime.get() % MIN_TO_RELAX == 0 && window.isRelaxReminder() && window.timeRelaxReminder())
+		if (currentTime.get() % SEC_TO_RELAX == 0 && window.isRelaxReminder())
 		{
 			setStartButton();
+			if (!window.timeRelaxReminder())
+			{
+				setStopButton();
+			}
 		}
 	}
 
@@ -184,9 +188,9 @@ public class TimeCounter implements ITimeCounter
 			}
 		}
 
+		correctTimeCounter();
 		beginCount.set(true);
 		pause.set(false);
-		correctTimeCounter();
 		timer.start();
 		window.setStopTextButton();
 	}
@@ -232,7 +236,6 @@ public class TimeCounter implements ITimeCounter
 		currentDate = LocalDate.now();
 		if (!todayDate.equals(currentDate))
 		{
-			setStartButton();
 			if (window.changeDate())
 			{
 				if (dateTimeMap.containsKey(todayDate))
@@ -250,7 +253,6 @@ public class TimeCounter implements ITimeCounter
 				window.getTodayTimeField().setText(printTime(todayTime));
 			}
 			todayDate = currentDate;
-			setStopButton();
 		}
 	}
 
@@ -301,7 +303,7 @@ public class TimeCounter implements ITimeCounter
 	private void correctTimeCounter()
 	{
 		// Correct the delay of time counter
-		if (countTime != 0)
+		if (countTime != 0 && !pause.get())
 		{
 			timerPause = timerPause - (int) Math.round((System.nanoTime() - countTime) / 1000000d - oneSecond);
 			countTime = System.nanoTime();

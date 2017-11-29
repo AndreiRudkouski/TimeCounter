@@ -3,6 +3,8 @@ package timeCounter.gui.impl;
 import static timeCounter.main.Main.TIME_COUNTER;
 
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
@@ -18,7 +20,8 @@ public class GUIWindow implements IGUIWindow
 {
 	private final String LABEL_CURRENT_TIME = "label_current_time";
 	private final String LABEL_APPLICATION = "label_application";
-	private final String LABEL_RELAX = "label_relax";
+	private final String LABEL_BREAK = "label_break";
+	private final String LABEL_DATE = "label_date";
 	private final String LABEL_TODAY_TIME = "label_today_time";
 	private final String LABEL_TOTAL_TIME = "label_total_time";
 	private final String MENU_ITEM_COUNT = "menu_item_count";
@@ -50,7 +53,7 @@ public class GUIWindow implements IGUIWindow
 	private static final Locale LOCALE_RU = new Locale("ru");
 	private ResourceBundle bundle = ResourceBundle.getBundle(LOCALE_NAME, LOCALE_EN);
 
-	private static final String ICON_NAME = "timeCounter/resources/image/icon.png";
+	private static final String ICON_NAME = "src/timeCounter/resources/image/icon.png";
 
 	private JFrame frame;
 	private JLabel labelApplication;
@@ -71,7 +74,8 @@ public class GUIWindow implements IGUIWindow
 	private JMenuItem menuSettingApplication;
 	private JMenuItem menuSettingLocale;
 	private JButton buttonStartStop;
-	private JCheckBox checkRelaxReminder;
+	private JCheckBox checkBreak;
+	private JCheckBox checkDate;
 	private ITimeListener startStopTimeListener;
 	private ITimeListener loadTimeListener;
 	private ITimeListener saveTimeListener;
@@ -134,8 +138,6 @@ public class GUIWindow implements IGUIWindow
 		buttonStartStop.addActionListener(startStopTimeListener);
 		panelRight.add(buttonStartStop);
 
-		checkRelaxReminder = new JCheckBox();
-
 		// Create counter item of the menu
 		menuCounter = new JMenu();
 		menuCounterLoad = new JMenuItem();
@@ -161,8 +163,13 @@ public class GUIWindow implements IGUIWindow
 		menuSettingLocale = new JMenuItem();
 		menuSettingApplication.addActionListener(applicationListener);
 		menuSettingLocale.addActionListener(localeListener);
+		// Checkboxes
+		checkBreak = new JCheckBox();
+		checkDate = new JCheckBox();
 		menuSetting.add(menuSettingApplication);
 		menuSetting.add(menuSettingLocale);
+		menuSetting.add(checkBreak);
+		menuSetting.add(checkDate);
 
 		JMenuBar menu = new JMenuBar();
 		menu.setBackground(Color.LIGHT_GRAY);
@@ -180,8 +187,8 @@ public class GUIWindow implements IGUIWindow
 		frame.getContentPane().add(BorderLayout.WEST, panelLeft);
 		frame.getContentPane().add(BorderLayout.CENTER, panelCenter);
 		frame.getContentPane().add(BorderLayout.EAST, panelRight);
-		frame.getContentPane().add(BorderLayout.SOUTH, checkRelaxReminder);
-		frame.setPreferredSize(new Dimension(380, 210));
+		//frame.getContentPane().add(BorderLayout.SOUTH, checkBreak);
+		frame.setPreferredSize(new Dimension(380, 185));
 		frame.pack();
 		frame.setVisible(true);
 		// Centering of frame
@@ -190,16 +197,43 @@ public class GUIWindow implements IGUIWindow
 		Point newLocation = new Point(middle.x - (frame.getWidth() / 2),
 				middle.y - (frame.getHeight() / 2));
 		frame.setLocation(newLocation);
-		ImageIcon img = new ImageIcon(getClass().getClassLoader().getResource(ICON_NAME));
-		frame.setIconImage(img.getImage());
+		Image image = Toolkit.getDefaultToolkit().getImage(ICON_NAME);
+		frame.setIconImage(image);
 		initText();
-		// Close the controlling application when the frame is closing
+
+		// Hide frame to tray and close the controlling application when the frame is closing
 		frame.addWindowListener(new WindowAdapter()
 		{
 			@Override
-			public void windowClosing(WindowEvent e)
+			public void windowClosing(WindowEvent we)
 			{
 				TIME_COUNTER.closeApplication();
+			}
+
+			@Override
+			public void windowIconified(WindowEvent we)
+			{
+				// Hide window to tray
+				frame.setVisible(false);
+				TrayIcon trayIcon = new TrayIcon(image);
+				trayIcon.setToolTip(bundle.getString(TITLE));
+				try
+				{
+					SystemTray.getSystemTray().add(trayIcon);
+				}
+				catch (AWTException e)
+				{
+					/*NOP*/
+				}
+				trayIcon.addMouseListener(new MouseAdapter()
+				{
+					public void mouseClicked(MouseEvent e)
+					{
+						frame.setState(JFrame.NORMAL);
+						SystemTray.getSystemTray().remove(trayIcon);
+						frame.setVisible(true);
+					}
+				});
 			}
 		});
 	}
@@ -225,7 +259,10 @@ public class GUIWindow implements IGUIWindow
 		menuSetting.setText(bundle.getString(MENU_ITEM_SETTING));
 		menuSettingApplication.setText(bundle.getString(MENU_ITEM_SETTING_APPLICATION));
 		menuSettingLocale.setText(bundle.getString(MENU_ITEM_SETTING_LOCALE));
-		checkRelaxReminder.setText(bundle.getString(LABEL_RELAX));
+		checkBreak.setText(bundle.getString(LABEL_BREAK));
+		checkBreak.setSelected(true);
+		checkDate.setText(bundle.getString(LABEL_DATE));
+		checkDate.setSelected(true);
 		if (buttonStartStop.isDefaultCapable())
 		{
 			buttonStartStop.setText(bundle.getString(TEXT_BUTTON_START));
@@ -262,10 +299,7 @@ public class GUIWindow implements IGUIWindow
 	@Override
 	public boolean changeDate()
 	{
-		int select = JOptionPane.showConfirmDialog(frame, bundle.getString(MESSAGE_CHANGE_DATE),
-				bundle.getString(TITLE_CHANGE_DATE),
-				JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE);
-		return select == JOptionPane.YES_OPTION;
+		return checkDate.isSelected();
 	}
 
 	@Override
@@ -289,7 +323,7 @@ public class GUIWindow implements IGUIWindow
 	@Override
 	public boolean isRelaxReminder()
 	{
-		return checkRelaxReminder.isSelected();
+		return checkBreak.isSelected();
 	}
 
 	@Override
