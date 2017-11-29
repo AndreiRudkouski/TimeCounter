@@ -7,6 +7,7 @@ import timeCounter.counter.impl.TimeCounter;
 import timeCounter.gui.IGUIWindow;
 import timeCounter.gui.impl.GUIWindow;
 import timeCounter.listener.impl.ApplicationListener;
+import timeCounter.listener.impl.EraseApplicationListener;
 import timeCounter.listener.impl.EraseCurrentTimeListener;
 import timeCounter.listener.impl.EraseTodayTimeListener;
 import timeCounter.listener.impl.EraseTotalTimeListener;
@@ -30,7 +31,7 @@ public class Main
 		WINDOW.setListenersAndCreate(new StartStopTimeListener(), new LoadTimeListener(),
 				new SaveTimeListener(), new EraseCurrentTimeListener(),
 				new EraseTodayTimeListener(), new EraseTotalTimeListener(), new ApplicationListener(),
-				new LocaleListener());
+				new LocaleListener(), new EraseApplicationListener());
 		File file = new File(FILE_NAME);
 		SAVER.setFile(file);
 

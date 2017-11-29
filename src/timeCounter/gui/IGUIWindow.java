@@ -99,7 +99,7 @@ public interface IGUIWindow
 	/**
 	 * Sets the label of application which is chosen.
 	 *
-	 * @param name application name
+	 * @param name application name or null to set in initial condition
 	 */
 	void setApplicationLabel(String name);
 

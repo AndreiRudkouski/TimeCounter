@@ -28,6 +28,7 @@ public class GUIWindow implements IGUIWindow
 	private final String MENU_ITEM_COUNT_LOAD = "menu_item_count_load";
 	private final String MENU_ITEM_COUNT_SAVE = "menu_item_count_save";
 	private final String MENU_ITEM_ERASE = "menu_item_erase";
+	private final String MENU_ITEM_ERASE_APPLICATION = "menu_item_erase_application";
 	private final String MENU_ITEM_ERASE_CURRENT = "menu_item_erase_current";
 	private final String MENU_ITEM_ERASE_TODAY = "menu_item_erase_today";
 	private final String MENU_ITEM_ERASE_TOTAL = "menu_item_erase_total";
@@ -65,6 +66,7 @@ public class GUIWindow implements IGUIWindow
 	private JMenuItem menuCounterLoad;
 	private JMenuItem menuCounterSave;
 	private JMenu menuErase;
+	private JMenuItem menuEraseApplication;
 	private JMenuItem menuEraseCurrent;
 	private JMenuItem menuEraseToday;
 	private JMenuItem menuEraseTotal;
@@ -81,6 +83,7 @@ public class GUIWindow implements IGUIWindow
 	private ITimeListener eraseCurrentTimeListener;
 	private ITimeListener eraseTodayTimeListener;
 	private ITimeListener eraseTotalTimeListener;
+	private ITimeListener eraseApplicationListener;
 	private ITimeListener applicationListener;
 	private ITimeListener localeListener;
 
@@ -153,9 +156,12 @@ public class GUIWindow implements IGUIWindow
 		menuEraseToday.addActionListener(eraseTodayTimeListener);
 		menuEraseTotal = new JMenuItem();
 		menuEraseTotal.addActionListener(eraseTotalTimeListener);
+		menuEraseApplication = new JMenuItem();
+		menuEraseApplication.addActionListener(eraseApplicationListener);
 		menuErase.add(menuEraseCurrent);
 		menuErase.add(menuEraseToday);
 		menuErase.add(menuEraseTotal);
+		menuErase.add(menuEraseApplication);
 		// Create setting item of the menu
 		menuSetting = new JMenu();
 		menuSettingApplication = new JMenuItem();
@@ -251,6 +257,7 @@ public class GUIWindow implements IGUIWindow
 		menuCounterLoad.setText(bundle.getString(MENU_ITEM_COUNT_LOAD));
 		menuCounterSave.setText(bundle.getString(MENU_ITEM_COUNT_SAVE));
 		menuErase.setText(bundle.getString(MENU_ITEM_ERASE));
+		menuEraseApplication.setText(bundle.getString(MENU_ITEM_ERASE_APPLICATION));
 		menuEraseCurrent.setText(bundle.getString(MENU_ITEM_ERASE_CURRENT));
 		menuEraseToday.setText(bundle.getString(MENU_ITEM_ERASE_TODAY));
 		menuEraseTotal.setText(bundle.getString(MENU_ITEM_ERASE_TOTAL));
@@ -384,8 +391,17 @@ public class GUIWindow implements IGUIWindow
 	@Override
 	public void setApplicationLabel(String name)
 	{
-		labelApplication.setText(name);
-		labelApplication.setEnabled(false);
+		if (name != null)
+		{
+			labelApplication.setText(name);
+			labelApplication.setEnabled(false);
+		}
+		else
+		{
+			labelApplication.setText(bundle.getString(LABEL_APPLICATION));
+			labelApplication.setForeground(Color.RED);
+			labelApplication.setEnabled(true);
+		}
 	}
 
 	@Override

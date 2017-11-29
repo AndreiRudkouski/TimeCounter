@@ -153,6 +153,13 @@ public class TimeCounter implements ITimeCounter
 		}
 	}
 
+	@Override
+	public void eraseApplication()
+	{
+		file = null;
+		window.setApplicationLabel(null);
+	}
+
 	private void checkRelaxTime()
 	{
 		if (currentTime.get() % SEC_TO_RELAX == 0 && window.isRelaxReminder())

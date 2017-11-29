@@ -43,6 +43,11 @@ public interface ITimeCounter
 	void chooseApplication();
 
 	/**
+	 * Erases {@link File} file which is controlled.
+	 */
+	void eraseApplication();
+
+	/**
 	 * Pushes 'StartStop' button and run or stop the timer.
 	 */
 	void pushStartStopButton();
