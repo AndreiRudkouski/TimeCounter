@@ -51,7 +51,7 @@ public class GUIWindow implements IGUIWindow
 	private static final Locale LOCALE_RU = new Locale("ru");
 	private ResourceBundle bundle = ResourceBundle.getBundle(LOCALE_NAME, LOCALE_EN);
 
-	private static final String ICON_NAME = "src/timeCounter/resources/image/icon.png";
+	private static final String ICON_NAME = "timeCounter/resources/image/icon.png";
 
 	private JFrame frame;
 	private JLabel labelApplication;
@@ -186,7 +186,6 @@ public class GUIWindow implements IGUIWindow
 		frame.getContentPane().add(BorderLayout.WEST, panelLeft);
 		frame.getContentPane().add(BorderLayout.CENTER, panelCenter);
 		frame.getContentPane().add(BorderLayout.EAST, panelRight);
-		//frame.getContentPane().add(BorderLayout.SOUTH, checkBreak);
 		frame.setPreferredSize(new Dimension(380, 185));
 		frame.pack();
 		frame.setVisible(true);
@@ -196,7 +195,7 @@ public class GUIWindow implements IGUIWindow
 		Point newLocation = new Point(middle.x - (frame.getWidth() / 2),
 				middle.y - (frame.getHeight() / 2));
 		frame.setLocation(newLocation);
-		Image image = Toolkit.getDefaultToolkit().getImage(ICON_NAME);
+		Image image = Toolkit.getDefaultToolkit().getImage(getClass().getClassLoader().getResource(ICON_NAME));
 		frame.setIconImage(image);
 		initText();
 
