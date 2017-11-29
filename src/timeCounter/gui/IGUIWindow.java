@@ -29,11 +29,18 @@ public interface IGUIWindow
 	boolean timeRelaxReminder();
 
 	/**
-	 * Checks if the user has selected date changing.
+	 * Checks if "checkDate" checkbox is selected.
 	 *
-	 * @return true if the user has selected date changing otherwise false.
+	 * @return true if the checkbox is selected otherwise false.
 	 */
-	boolean changeDate();
+	boolean isAutoChangeDate();
+
+	/**
+	 * Sets "checkDate" checkbox.
+	 *
+	 * @param check parameter for checkbox.
+	 */
+	void setAutoChangeDate(boolean check);
 
 	/**
 	 * Returns {@link JTextField}'s field of the current time from GUI.
@@ -57,11 +64,18 @@ public interface IGUIWindow
 	JTextField getTotalTimeField();
 
 	/**
-	 * Checks if "RelaxReminder" checkbox is selected.
+	 * Checks if "checkBreak" checkbox is selected.
 	 *
 	 * @return true if the checkbox is selected otherwise false.
 	 */
 	boolean isRelaxReminder();
+
+	/**
+	 * Sets "checkBreak" checkbox.
+	 *
+	 * @param check parameter for checkbox.
+	 */
+	void setRelaxReminder(boolean check);
 
 	/**
 	 * Sets {@link ITimeListener}'s listeners to GUI and create it.

@@ -295,9 +295,15 @@ public class GUIWindow implements IGUIWindow
 	}
 
 	@Override
-	public boolean changeDate()
+	public boolean isAutoChangeDate()
 	{
 		return checkDate.isSelected();
+	}
+
+	@Override
+	public void setAutoChangeDate(boolean check)
+	{
+		checkDate.setSelected(check);
 	}
 
 	@Override
@@ -322,6 +328,12 @@ public class GUIWindow implements IGUIWindow
 	public boolean isRelaxReminder()
 	{
 		return checkBreak.isSelected();
+	}
+
+	@Override
+	public void setRelaxReminder(boolean check)
+	{
+		checkBreak.setSelected(check);
 	}
 
 	@Override

@@ -6,21 +6,20 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.security.SecureRandom;
-import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Base64;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicLong;
+import java.util.List;
 
 import timeCounter.load.ILoadSaveToFile;
 
 public class LoadSaveToFile implements ILoadSaveToFile
 {
 	private File file;
-	private static final String DELIMITER = "/";
 
 	@Override
-	public void loadData(Map<LocalDate, AtomicLong> dateTimeMap)
+	public List<String> loadData()
 	{
+		List<String> result = new ArrayList<>();
 		if (file.exists() && !file.isDirectory())
 		{
 			try (BufferedReader reader = new BufferedReader(new FileReader(file)))
@@ -28,13 +27,7 @@ public class LoadSaveToFile implements ILoadSaveToFile
 				String tmp;
 				while ((tmp = reader.readLine()) != null)
 				{
-					String[] stringTmp = decode(tmp).split(DELIMITER);
-					if (stringTmp.length != 1)
-					{
-						dateTimeMap.put(LocalDate.of(Integer.parseInt(stringTmp[2]),
-								Integer.parseInt(stringTmp[1]), Integer.parseInt(stringTmp[0])),
-								new AtomicLong(Long.parseLong(stringTmp[3])));
-					}
+					result.add(decode(tmp));
 				}
 			}
 			catch (IOException ignore)
@@ -42,44 +35,17 @@ public class LoadSaveToFile implements ILoadSaveToFile
 				System.out.println("Some issues with data loading!");
 			}
 		}
+		return result;
 	}
 
 	@Override
-	public String loadApplication()
-	{
-		if (file.exists() && !file.isDirectory())
-		{
-			try (BufferedReader reader = new BufferedReader(new FileReader(file)))
-			{
-				String tmp;
-				while ((tmp = reader.readLine()) != null)
-				{
-					String[] stringTmp = decode(tmp).split(DELIMITER);
-					if (stringTmp.length == 1)
-					{
-						return stringTmp[0];
-					}
-				}
-			}
-			catch (IOException ignore)
-			{
-				System.out.println("Some issues with data loading!");
-			}
-		}
-		return null;
-	}
-
-	@Override
-	public void saveData(Map<LocalDate, AtomicLong> dateTimeMap, String name)
+	public void saveData(List<String> dataToSave)
 	{
 		try (FileWriter writer = new FileWriter(file))
 		{
-			writer.write(encode(name) + System.getProperty("line.separator"));
-			for (Map.Entry<LocalDate, AtomicLong> tmp : dateTimeMap.entrySet())
+			for (String tmp : dataToSave)
 			{
-				writer.write(encode(tmp.getKey().getDayOfMonth() +
-						DELIMITER + tmp.getKey().getMonthValue() + DELIMITER + tmp.getKey().getYear() +
-						DELIMITER + tmp.getValue()) + System.getProperty("line.separator"));
+				writer.write(encode(tmp) + System.getProperty("line.separator"));
 			}
 		}
 		catch (IOException e)
@@ -95,7 +61,8 @@ public class LoadSaveToFile implements ILoadSaveToFile
 	}
 
 	// encode string
-	private String encode(String input) {
+	private String encode(String input)
+	{
 		byte[] salt = new byte[8];
 		new SecureRandom().nextBytes(salt);
 		return Base64.getEncoder().encodeToString(salt)
@@ -103,12 +70,12 @@ public class LoadSaveToFile implements ILoadSaveToFile
 	}
 
 	// decode string
-	private String decode(String output) {
+	private String decode(String output)
+	{
 		if (output.length() > 12)
 		{
 			output = output.substring(12);
 		}
 		return new String(Base64.getDecoder().decode(output));
 	}
-
 }

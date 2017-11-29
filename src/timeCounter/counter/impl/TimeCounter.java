@@ -5,6 +5,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -40,6 +42,8 @@ public class TimeCounter implements ITimeCounter
 	private int timerPause = 1000;
 	private int oneSecond = 1000;
 	private long countTime = 0;
+
+	private static final String DELIMITER = "/";
 
 	public TimeCounter(IGUIWindow window, ILoadSaveToFile saver)
 	{
@@ -86,11 +90,9 @@ public class TimeCounter implements ITimeCounter
 			pause.set(true);
 			window.setStartTextButton();
 		}
-		saver.loadData(dateTimeMap);
-		String name = saver.loadApplication();
-		if (name != null)
+		loadDataFromFile();
+		if (file != null)
 		{
-			file = new File(name);
 			window.setApplicationLabel(file.getName());
 		}
 		assignTime();
@@ -109,7 +111,7 @@ public class TimeCounter implements ITimeCounter
 		{
 			dateTimeMap.put(todayDate, currentTime);
 		}
-		saver.saveData(dateTimeMap, file.getAbsolutePath());
+		saveDataToFile();
 	}
 
 	@Override
@@ -236,7 +238,7 @@ public class TimeCounter implements ITimeCounter
 		currentDate = LocalDate.now();
 		if (!todayDate.equals(currentDate))
 		{
-			if (window.changeDate())
+			if (window.isAutoChangeDate())
 			{
 				if (dateTimeMap.containsKey(todayDate))
 				{
@@ -246,7 +248,7 @@ public class TimeCounter implements ITimeCounter
 				{
 					dateTimeMap.put(todayDate, currentTime);
 				}
-				saver.saveData(dateTimeMap, file.getAbsolutePath());
+				saveDataToFile();
 				currentTime.set(0);
 				todayTime.set(0);
 				window.getCurrentTimeField().setText(printTime(currentTime));
@@ -328,6 +330,43 @@ public class TimeCounter implements ITimeCounter
 			incrementTotalTime();
 			checkRelaxTime();
 			checkChangeDate();
+		}
+	}
+
+	private void saveDataToFile()
+	{
+		List<String> dataToSave = new ArrayList<>();
+		String fileName = file != null ? file.getAbsolutePath() : "";
+		dataToSave.add(fileName + DELIMITER + window.isRelaxReminder() + DELIMITER + window.isAutoChangeDate());
+		for (Map.Entry<LocalDate, AtomicLong> tmp : dateTimeMap.entrySet())
+		{
+			dataToSave.add(tmp.getKey().getDayOfMonth() + DELIMITER + tmp.getKey().getMonthValue() + DELIMITER +
+					tmp.getKey().getYear() + DELIMITER + tmp.getValue());
+		}
+		saver.saveData(dataToSave);
+	}
+
+	private void loadDataFromFile()
+	{
+		List<String> loadData = saver.loadData();
+		for (String tmp : loadData)
+		{
+			String[] stringTmp = tmp.split(DELIMITER);
+			if (stringTmp.length != 3)
+			{
+				dateTimeMap.put(LocalDate.of(Integer.parseInt(stringTmp[2]),
+						Integer.parseInt(stringTmp[1]), Integer.parseInt(stringTmp[0])),
+						new AtomicLong(Long.parseLong(stringTmp[3])));
+			}
+			else
+			{
+				if (stringTmp[0] != null && !stringTmp[0].isEmpty())
+				{
+					file = new File(stringTmp[0]);
+				}
+				window.setRelaxReminder(Boolean.parseBoolean(stringTmp[1]));
+				window.setAutoChangeDate(Boolean.parseBoolean(stringTmp[2]));
+			}
 		}
 	}
 }
