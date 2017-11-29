@@ -66,19 +66,9 @@ public interface IGUIWindow
 	/**
 	 * Sets {@link ITimeListener}'s listeners to GUI and create it.
 	 *
-	 * @param startStopTimeListener {@link ITimeListener}'s implementation for 'StartStop' button
-	 * @param loadTimeListener {@link ITimeListener}'s implementation for load menu
-	 * @param saveTimeListener {@link ITimeListener}'s implementation for save menu
-	 * @param eraseCurrentTimeListener {@link ITimeListener}'s implementation for erase the current time menu
-	 * @param eraseTodayTimeListener {@link ITimeListener}'s implementation for erase the today time menu
-	 * @param eraseTotalTimeListener {@link ITimeListener}'s implementation for erase the total time menu
-	 * @param applicationListener {@link ITimeListener}'s implementation for application menu
-	 * @param localeListener {@link ITimeListener}'s implementation for locale menu
+	 * @param listeners {@link ITimeListener}'s implementations for add to buttons
 	 */
-	void setListenersAndCreate(ITimeListener startStopTimeListener, ITimeListener loadTimeListener,
-			ITimeListener saveTimeListener, ITimeListener eraseCurrentTimeListener,
-			ITimeListener eraseTodayTimeListener, ITimeListener eraseTotalTimeListener,
-			ITimeListener applicationListener, ITimeListener localeListener);
+	void setListenersAndCreate(ITimeListener... listeners);
 
 	/**
 	 * Changes locale which is used in GUI.
@@ -102,7 +92,8 @@ public interface IGUIWindow
 	/**
 	 * Notices the user about already running application which is chosen for controlling.
 	 *
-	 * @return true if the user want to begin timing after restart the application which is chosen for controlling otherwise false
+	 * @return true if the user want to begin timing after restart the application which is chosen for controlling
+	 * otherwise false
 	 */
 	boolean runningApplicationNotice();
 }

@@ -35,13 +35,11 @@ public class GUIWindow implements IGUIWindow
 	private final String MENU_ITEM_SETTING_APPLICATION = "menu_item_setting_application";
 	private final String MENU_ITEM_SETTING_LOCALE = "menu_item_setting_locale";
 	private final String MESSAGE_APPLICATION_RESTART = "massage_application_restart";
-	private final String MESSAGE_CHANGE_DATE = "message_change_date";
 	private final String MESSAGE_RELAX_TIME = "message_relax_time";
 	private final String TEXT_BUTTON_START = "text_button_start";
 	private final String TEXT_BUTTON_STOP = "text_button_stop";
 	private final String TITLE = "title";
 	private final String TITLE_APPLICATION_RESTART = "title_application_restart";
-	private final String TITLE_CHANGE_DATE = "title_change_date";
 	private final String TITLE_RELAX_TIME = "title_relax_time";
 
 	private final Font fontTopPanel = new Font("sanserif", Font.BOLD, 12);
@@ -76,6 +74,7 @@ public class GUIWindow implements IGUIWindow
 	private JButton buttonStartStop;
 	private JCheckBox checkBreak;
 	private JCheckBox checkDate;
+	// Listener names should be equals class names of ITimeListener implementations
 	private ITimeListener startStopTimeListener;
 	private ITimeListener loadTimeListener;
 	private ITimeListener saveTimeListener;
@@ -327,19 +326,25 @@ public class GUIWindow implements IGUIWindow
 	}
 
 	@Override
-	public void setListenersAndCreate(ITimeListener startStopTimeListener, ITimeListener loadTimeListener,
-			ITimeListener saveTimeListener, ITimeListener eraseCurrentTimeListener,
-			ITimeListener eraseTodayTimeListener, ITimeListener eraseTotalTimeListener,
-			ITimeListener applicationListener, ITimeListener localeListener)
+	public void setListenersAndCreate(ITimeListener... listeners)
 	{
-		this.startStopTimeListener = startStopTimeListener;
-		this.loadTimeListener = loadTimeListener;
-		this.saveTimeListener = saveTimeListener;
-		this.eraseCurrentTimeListener = eraseCurrentTimeListener;
-		this.eraseTodayTimeListener = eraseTodayTimeListener;
-		this.eraseTotalTimeListener = eraseTotalTimeListener;
-		this.applicationListener = applicationListener;
-		this.localeListener = localeListener;
+		for (ITimeListener listener : listeners)
+		{
+			if (listener != null)
+			{
+				String name = listener.getClass().getSimpleName();
+				char c[] = name.toCharArray();
+				c[0] = Character.toLowerCase(c[0]);
+				try
+				{
+					this.getClass().getDeclaredField(new String(c)).set(this, listener);
+				}
+				catch (IllegalAccessException | NoSuchFieldException e)
+				{
+					/*NOP*/
+				}
+			}
+		}
 		create();
 	}
 

@@ -19,7 +19,7 @@ import timeCounter.load.ILoadSaveToFile;
 
 public class TimeCounter implements ITimeCounter
 {
-	private final static int SEC_TO_RELAX = 10;
+	private final static int SEC_TO_RELAX = 3000;
 
 	private IGUIWindow window;
 	private ILoadSaveToFile saver;
