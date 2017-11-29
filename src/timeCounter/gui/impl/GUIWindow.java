@@ -202,7 +202,7 @@ public class GUIWindow implements IGUIWindow
 				middle.y - (frame.getHeight() / 2));
 		frame.setLocation(newLocation);
 		Image image = Toolkit.getDefaultToolkit().getImage(getClass().getClassLoader().getResource(ICON_NAME));
-		frame.setIconImage(image);
+		frame.setIconImage(image.getScaledInstance(32, 32, Image.SCALE_AREA_AVERAGING));
 		initText();
 
 		// Hide frame to tray and close the controlling application when the frame is closing
@@ -219,7 +219,7 @@ public class GUIWindow implements IGUIWindow
 			{
 				// Hide window to tray
 				frame.setVisible(false);
-				TrayIcon trayIcon = new TrayIcon(image);
+				TrayIcon trayIcon = new TrayIcon(image.getScaledInstance(16, 16, Image.SCALE_AREA_AVERAGING));
 				trayIcon.setToolTip(bundle.getString(TITLE));
 				try
 				{
