@@ -18,31 +18,6 @@ import timeCounter.listener.ITimeListener;
 
 public class GUIWindow implements IGUIWindow
 {
-	private final String LABEL_CURRENT_TIME = "label_current_time";
-	private final String LABEL_APPLICATION = "label_application";
-	private final String LABEL_BREAK = "label_break";
-	private final String LABEL_DATE = "label_date";
-	private final String LABEL_TODAY_TIME = "label_today_time";
-	private final String LABEL_TOTAL_TIME = "label_total_time";
-	private final String MENU_ITEM_COUNT = "menu_item_count";
-	private final String MENU_ITEM_COUNT_LOAD = "menu_item_count_load";
-	private final String MENU_ITEM_COUNT_SAVE = "menu_item_count_save";
-	private final String MENU_ITEM_ERASE = "menu_item_erase";
-	private final String MENU_ITEM_ERASE_APPLICATION = "menu_item_erase_application";
-	private final String MENU_ITEM_ERASE_CURRENT = "menu_item_erase_current";
-	private final String MENU_ITEM_ERASE_TODAY = "menu_item_erase_today";
-	private final String MENU_ITEM_ERASE_TOTAL = "menu_item_erase_total";
-	private final String MENU_ITEM_SETTING = "menu_item_setting";
-	private final String MENU_ITEM_SETTING_APPLICATION = "menu_item_setting_application";
-	private final String MENU_ITEM_SETTING_LOCALE = "menu_item_setting_locale";
-	private final String MESSAGE_APPLICATION_RESTART = "massage_application_restart";
-	private final String MESSAGE_RELAX_TIME = "message_relax_time";
-	private final String TEXT_BUTTON_START = "text_button_start";
-	private final String TEXT_BUTTON_STOP = "text_button_stop";
-	private final String TITLE = "title";
-	private final String TITLE_APPLICATION_RESTART = "title_application_restart";
-	private final String TITLE_RELAX_TIME = "title_relax_time";
-
 	private final Font fontTopPanel = new Font("sanserif", Font.BOLD, 12);
 	private final Font fontLeftPanel = new Font("sanserif", Font.BOLD, 15);
 	private final Font fontCenterPanel = new Font("sanserif", Font.BOLD, 16);
@@ -187,7 +162,7 @@ public class GUIWindow implements IGUIWindow
 
 		frame = new JFrame();
 		frame.setAlwaysOnTop(true);
-		frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+		frame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 		frame.setResizable(false);
 		frame.setJMenuBar(menu);
 		frame.getContentPane().add(BorderLayout.NORTH, panelTop);
@@ -213,7 +188,17 @@ public class GUIWindow implements IGUIWindow
 			@Override
 			public void windowClosing(WindowEvent we)
 			{
-				TIME_COUNTER.closeApplication();
+				if (TIME_COUNTER.closeTimeCounter(false))
+				{
+					int select = JOptionPane.showConfirmDialog(frame, bundle.getString("message_save"),
+							bundle.getString("title_save"),
+							JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE);
+					if (select == JOptionPane.YES_OPTION || select == JOptionPane.NO_OPTION)
+					{
+						TIME_COUNTER.closeTimeCounter(true);
+						System.exit(0);
+					}
+				}
 			}
 
 			@Override
@@ -222,7 +207,7 @@ public class GUIWindow implements IGUIWindow
 				// Hide window to tray
 				frame.setVisible(false);
 				TrayIcon trayIcon = new TrayIcon(image.getScaledInstance(16, 16, Image.SCALE_AREA_AVERAGING));
-				trayIcon.setToolTip(bundle.getString(TITLE));
+				trayIcon.setToolTip(bundle.getString("title"));
 				try
 				{
 					SystemTray.getSystemTray().add(trayIcon);
@@ -246,57 +231,57 @@ public class GUIWindow implements IGUIWindow
 
 	private void initText()
 	{
-		frame.setTitle(bundle.getString(TITLE));
+		frame.setTitle(bundle.getString("title"));
 		if (labelApplication.isEnabled())
 		{
-			labelApplication.setText(bundle.getString(LABEL_APPLICATION));
+			labelApplication.setText(bundle.getString("label_application"));
 			labelApplication.setForeground(Color.RED);
 		}
-		labelCurrentTime.setText(bundle.getString(LABEL_CURRENT_TIME));
-		labelTodayTime.setText(bundle.getString(LABEL_TODAY_TIME));
-		labelTotalTime.setText(bundle.getString(LABEL_TOTAL_TIME));
-		menuCounter.setText(bundle.getString(MENU_ITEM_COUNT));
-		menuCounterLoad.setText(bundle.getString(MENU_ITEM_COUNT_LOAD));
-		menuCounterSave.setText(bundle.getString(MENU_ITEM_COUNT_SAVE));
-		menuErase.setText(bundle.getString(MENU_ITEM_ERASE));
-		menuEraseApplication.setText(bundle.getString(MENU_ITEM_ERASE_APPLICATION));
-		menuEraseCurrent.setText(bundle.getString(MENU_ITEM_ERASE_CURRENT));
-		menuEraseToday.setText(bundle.getString(MENU_ITEM_ERASE_TODAY));
-		menuEraseTotal.setText(bundle.getString(MENU_ITEM_ERASE_TOTAL));
-		menuSetting.setText(bundle.getString(MENU_ITEM_SETTING));
-		menuSettingApplication.setText(bundle.getString(MENU_ITEM_SETTING_APPLICATION));
-		menuSettingLocale.setText(bundle.getString(MENU_ITEM_SETTING_LOCALE));
-		checkBreak.setText(bundle.getString(LABEL_BREAK));
-		checkDate.setText(bundle.getString(LABEL_DATE));
+		labelCurrentTime.setText(bundle.getString("label_current_time"));
+		labelTodayTime.setText(bundle.getString("label_today_time"));
+		labelTotalTime.setText(bundle.getString("label_total_time"));
+		menuCounter.setText(bundle.getString("menu_item_count"));
+		menuCounterLoad.setText(bundle.getString("menu_item_count_load"));
+		menuCounterSave.setText(bundle.getString("menu_item_count_save"));
+		menuErase.setText(bundle.getString("menu_item_erase"));
+		menuEraseApplication.setText(bundle.getString("menu_item_erase_application"));
+		menuEraseCurrent.setText(bundle.getString("menu_item_erase_current"));
+		menuEraseToday.setText(bundle.getString("menu_item_erase_today"));
+		menuEraseTotal.setText(bundle.getString("menu_item_erase_total"));
+		menuSetting.setText(bundle.getString("menu_item_setting"));
+		menuSettingApplication.setText(bundle.getString("menu_item_setting_application"));
+		menuSettingLocale.setText(bundle.getString("menu_item_setting_locale"));
+		checkBreak.setText(bundle.getString("label_break"));
+		checkDate.setText(bundle.getString("label_date"));
 		if (buttonStartStop.isDefaultCapable())
 		{
-			buttonStartStop.setText(bundle.getString(TEXT_BUTTON_START));
+			buttonStartStop.setText(bundle.getString("text_button_start"));
 		}
 		else
 		{
-			buttonStartStop.setText(bundle.getString(TEXT_BUTTON_STOP));
+			buttonStartStop.setText(bundle.getString("text_button_stop"));
 		}
 	}
 
 	@Override
 	public void setStopTextButton()
 	{
-		buttonStartStop.setText(bundle.getString(TEXT_BUTTON_STOP));
+		buttonStartStop.setText(bundle.getString("text_button_stop"));
 		buttonStartStop.setDefaultCapable(false);
 	}
 
 	@Override
 	public void setStartTextButton()
 	{
-		buttonStartStop.setText(bundle.getString(TEXT_BUTTON_START));
+		buttonStartStop.setText(bundle.getString("text_button_start"));
 		buttonStartStop.setDefaultCapable(true);
 	}
 
 	@Override
 	public boolean timeRelaxReminder()
 	{
-		int select = JOptionPane.showConfirmDialog(frame, bundle.getString(MESSAGE_RELAX_TIME),
-				bundle.getString(TITLE_RELAX_TIME),
+		int select = JOptionPane.showConfirmDialog(frame, bundle.getString("message_relax_time"),
+				bundle.getString("title_relax_time"),
 				JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE);
 		return select == JOptionPane.YES_OPTION;
 	}
@@ -398,7 +383,7 @@ public class GUIWindow implements IGUIWindow
 		}
 		else
 		{
-			labelApplication.setText(bundle.getString(LABEL_APPLICATION));
+			labelApplication.setText(bundle.getString("label_application"));
 			labelApplication.setForeground(Color.RED);
 			labelApplication.setEnabled(true);
 		}
@@ -407,8 +392,8 @@ public class GUIWindow implements IGUIWindow
 	@Override
 	public boolean runningApplicationNotice()
 	{
-		int select = JOptionPane.showConfirmDialog(frame, bundle.getString(MESSAGE_APPLICATION_RESTART),
-				bundle.getString(TITLE_APPLICATION_RESTART),
+		int select = JOptionPane.showConfirmDialog(frame, bundle.getString("massage_application_restart"),
+				bundle.getString("title_application_restart"),
 				JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE);
 		return select == JOptionPane.YES_OPTION;
 	}

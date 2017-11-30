@@ -145,12 +145,27 @@ public class TimeCounter implements ITimeCounter
 	}
 
 	@Override
-	public void closeApplication()
+	public boolean closeTimeCounter(boolean close)
 	{
+		setStartButton();
+		boolean result = false;
+		if ((!dateTimeMap.isEmpty() && (dateTimeMap.containsKey(todayDate) && !dateTimeMap.get(todayDate).equals(
+				todayTime)) || (!dateTimeMap.containsKey(todayDate) && todayTime.get() != 0)) || (dateTimeMap.isEmpty()
+				&& todayTime.get() != 0))
+		{
+			result = true;
+		}
+
+		if (close)
+		{
+			saveData();
+		}
+
 		if (process != null && process.isAlive())
 		{
 			process.destroy();
 		}
+		return result;
 	}
 
 	@Override
@@ -253,7 +268,7 @@ public class TimeCounter implements ITimeCounter
 				}
 				else
 				{
-					dateTimeMap.put(todayDate, currentTime);
+					dateTimeMap.put(todayDate, new AtomicLong(currentTime.get()));
 				}
 				saveDataToFile();
 				currentTime.set(0);
@@ -283,7 +298,8 @@ public class TimeCounter implements ITimeCounter
 	private void assignTime()
 	{
 		currentTime.set(0);
-		todayTime = dateTimeMap.containsKey(todayDate) ? dateTimeMap.get(todayDate) : new AtomicLong(0);
+		todayTime = dateTimeMap.containsKey(todayDate) ? new AtomicLong(dateTimeMap.get(todayDate).get()) :
+				new AtomicLong(0);
 		totalTime.set(0);
 		dateTimeMap.forEach((date, time) -> totalTime.getAndAdd(time.get()));
 		window.getCurrentTimeField().setText(printTime(currentTime));

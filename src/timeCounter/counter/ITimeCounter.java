@@ -54,6 +54,9 @@ public interface ITimeCounter
 
 	/**
 	 * Closes the application which is chosen for controlling.
+	 *
+	 * @param close user choice for saving data
+	 * @return true if these is data for saving otherwise false
 	 */
-	void closeApplication();
+	boolean closeTimeCounter(boolean close);
 }
