@@ -170,7 +170,9 @@ public class GUIWindow implements IGUIWindow
 		menuSettingLocale.addActionListener(localeListener);
 		// Checkboxes
 		checkBreak = new JCheckBox();
+		checkBreak.setSelected(true);
 		checkDate = new JCheckBox();
+		checkDate.setSelected(true);
 		menuSetting.add(menuSettingApplication);
 		menuSetting.add(menuSettingLocale);
 		menuSetting.add(checkBreak);
@@ -265,9 +267,7 @@ public class GUIWindow implements IGUIWindow
 		menuSettingApplication.setText(bundle.getString(MENU_ITEM_SETTING_APPLICATION));
 		menuSettingLocale.setText(bundle.getString(MENU_ITEM_SETTING_LOCALE));
 		checkBreak.setText(bundle.getString(LABEL_BREAK));
-		checkBreak.setSelected(true);
 		checkDate.setText(bundle.getString(LABEL_DATE));
-		checkDate.setSelected(true);
 		if (buttonStartStop.isDefaultCapable())
 		{
 			buttonStartStop.setText(bundle.getString(TEXT_BUTTON_START));
