@@ -196,9 +196,13 @@ public class GUIWindow implements IGUIWindow
 					if (select == JOptionPane.YES_OPTION || select == JOptionPane.NO_OPTION)
 					{
 						TIME_COUNTER.closeTimeCounter(true);
-						System.exit(0);
+					}
+					else
+					{
+						return;
 					}
 				}
+				System.exit(0);
 			}
 
 			@Override

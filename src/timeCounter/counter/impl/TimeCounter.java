@@ -149,9 +149,9 @@ public class TimeCounter implements ITimeCounter
 	{
 		setStartButton();
 		boolean result = false;
-		if ((!dateTimeMap.isEmpty() && (dateTimeMap.containsKey(todayDate) && !dateTimeMap.get(todayDate).equals(
-				todayTime)) || (!dateTimeMap.containsKey(todayDate) && todayTime.get() != 0)) || (dateTimeMap.isEmpty()
-				&& todayTime.get() != 0))
+		if ((!dateTimeMap.isEmpty() && ((dateTimeMap.containsKey(todayDate) && dateTimeMap.get(todayDate).get()
+				!= todayTime.get()) || (!dateTimeMap.containsKey(todayDate) && todayTime.get() != 0))) ||
+				(dateTimeMap.isEmpty() && todayTime.get() != 0))
 		{
 			result = true;
 		}
