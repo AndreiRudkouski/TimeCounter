@@ -193,14 +193,11 @@ public class GUIWindow implements IGUIWindow
 					int select = JOptionPane.showConfirmDialog(frame, bundle.getString("message_save"),
 							bundle.getString("title_save"),
 							JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE);
-					if (select == JOptionPane.YES_OPTION || select == JOptionPane.NO_OPTION)
-					{
-						TIME_COUNTER.closeTimeCounter(true);
-					}
-					else
+					if (select != JOptionPane.YES_OPTION && select != JOptionPane.NO_OPTION)
 					{
 						return;
 					}
+					TIME_COUNTER.closeTimeCounter(true);
 				}
 				System.exit(0);
 			}
