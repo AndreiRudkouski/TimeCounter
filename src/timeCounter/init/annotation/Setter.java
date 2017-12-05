@@ -16,5 +16,5 @@ public @interface Setter
 	/**
 	 * Returns the name of registered class instance.
 	 */
-	String name() default "";
+	String name();
 }

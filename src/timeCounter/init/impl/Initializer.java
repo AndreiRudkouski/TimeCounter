@@ -1,6 +1,5 @@
 package timeCounter.init.impl;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -55,8 +54,7 @@ public class Initializer implements IInitializer
 					{
 						if (method.isAnnotationPresent(Instance.class))
 						{
-							Annotation annotation = method.getAnnotation(Instance.class);
-							Instance instance = (Instance) annotation;
+							Instance instance = method.getAnnotation(Instance.class);
 							if (instance.name().equals(""))
 							{
 								classInstances.put(method.getName(), method.invoke(clazz.newInstance()));
@@ -101,8 +99,7 @@ public class Initializer implements IInitializer
 				{
 					if (method.isAnnotationPresent(Setter.class))
 					{
-						Annotation annotation = method.getAnnotation(Setter.class);
-						Setter setter = (Setter) annotation;
+						Setter setter = method.getAnnotation(Setter.class);
 						if (setter.name().equals(""))
 						{
 							method.invoke(obj, classInstances.get(method.getParameterTypes()[0].getSimpleName()));
