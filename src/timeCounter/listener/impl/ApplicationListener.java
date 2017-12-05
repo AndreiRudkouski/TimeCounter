@@ -1,16 +1,14 @@
 package timeCounter.listener.impl;
 
-import static timeCounter.main.Main.TIME_COUNTER;
-
 import java.awt.event.ActionEvent;
 
-import timeCounter.listener.ITimeListener;
+import timeCounter.listener.AbstractTimeListener;
 
-public class ApplicationListener implements ITimeListener
+public class ApplicationListener extends AbstractTimeListener
 {
 	@Override
 	public void actionPerformed(ActionEvent e)
 	{
-		TIME_COUNTER.chooseApplication();
+		timeCounter.chooseApplication();
 	}
 }

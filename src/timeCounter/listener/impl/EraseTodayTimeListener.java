@@ -1,16 +1,14 @@
 package timeCounter.listener.impl;
 
-import static timeCounter.main.Main.TIME_COUNTER;
-
 import java.awt.event.ActionEvent;
 
-import timeCounter.listener.ITimeListener;
+import timeCounter.listener.AbstractTimeListener;
 
-public class EraseTodayTimeListener implements ITimeListener
+public class EraseTodayTimeListener extends AbstractTimeListener
 {
 	@Override
 	public void actionPerformed(ActionEvent a)
 	{
-		TIME_COUNTER.eraseTodayTime();
+		timeCounter.eraseTodayTime();
 	}
 }

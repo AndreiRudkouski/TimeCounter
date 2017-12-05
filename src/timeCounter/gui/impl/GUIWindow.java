@@ -1,7 +1,5 @@
 package timeCounter.gui.impl;
 
-import static timeCounter.main.Main.TIME_COUNTER;
-
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -13,8 +11,10 @@ import java.util.ResourceBundle;
 
 import javax.swing.*;
 
+import timeCounter.counter.ITimeCounter;
 import timeCounter.gui.IGUIWindow;
-import timeCounter.listener.ITimeListener;
+import timeCounter.init.annotation.Setter;
+import timeCounter.listener.AbstractTimeListener;
 
 public class GUIWindow implements IGUIWindow
 {
@@ -51,18 +51,21 @@ public class GUIWindow implements IGUIWindow
 	private JButton buttonStartStop;
 	private JCheckBox checkBreak;
 	private JCheckBox checkDate;
-	// Listener names should be equals class names of ITimeListener implementations
-	private ITimeListener startStopTimeListener;
-	private ITimeListener loadTimeListener;
-	private ITimeListener saveTimeListener;
-	private ITimeListener eraseCurrentTimeListener;
-	private ITimeListener eraseTodayTimeListener;
-	private ITimeListener eraseTotalTimeListener;
-	private ITimeListener eraseApplicationListener;
-	private ITimeListener applicationListener;
-	private ITimeListener localeListener;
 
-	private void create()
+	private AbstractTimeListener startStopTimeListener;
+	private AbstractTimeListener loadTimeListener;
+	private AbstractTimeListener saveTimeListener;
+	private AbstractTimeListener eraseCurrentTimeListener;
+	private AbstractTimeListener eraseTodayTimeListener;
+	private AbstractTimeListener eraseTotalTimeListener;
+	private AbstractTimeListener eraseApplicationListener;
+	private AbstractTimeListener applicationListener;
+	private AbstractTimeListener localeListener;
+
+	private ITimeCounter timeCounter;
+
+	@Override
+	public void create()
 	{
 		JPanel panelTop = new JPanel();
 		labelApplication = new JLabel();
@@ -188,7 +191,7 @@ public class GUIWindow implements IGUIWindow
 			@Override
 			public void windowClosing(WindowEvent we)
 			{
-				if (TIME_COUNTER.closeTimeCounter(false))
+				if (timeCounter.closeTimeCounter(false))
 				{
 					int select = JOptionPane.showConfirmDialog(frame, bundle.getString("message_save"),
 							bundle.getString("title_save"),
@@ -197,7 +200,7 @@ public class GUIWindow implements IGUIWindow
 					{
 						return;
 					}
-					TIME_COUNTER.closeTimeCounter(true);
+					timeCounter.closeTimeCounter(select == JOptionPane.YES_OPTION);
 				}
 				System.exit(0);
 			}
@@ -330,29 +333,6 @@ public class GUIWindow implements IGUIWindow
 	}
 
 	@Override
-	public void setListenersAndCreate(ITimeListener... listeners)
-	{
-		for (ITimeListener listener : listeners)
-		{
-			if (listener != null)
-			{
-				String name = listener.getClass().getSimpleName();
-				char c[] = name.toCharArray();
-				c[0] = Character.toLowerCase(c[0]);
-				try
-				{
-					this.getClass().getDeclaredField(new String(c)).set(this, listener);
-				}
-				catch (IllegalAccessException | NoSuchFieldException e)
-				{
-					/*NOP*/
-				}
-			}
-		}
-		create();
-	}
-
-	@Override
 	public void changeLocale()
 	{
 		if (bundle.getLocale().equals(LOCALE_EN))
@@ -397,5 +377,121 @@ public class GUIWindow implements IGUIWindow
 				bundle.getString("title_application_restart"),
 				JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE);
 		return select == JOptionPane.YES_OPTION;
+	}
+
+	//////////////////////////////////////////////
+	//
+	// Getters & Setters
+	//
+	//////////////////////////////////////////////
+
+	public AbstractTimeListener getStartStopTimeListener()
+	{
+		return startStopTimeListener;
+	}
+
+	@Setter(name = "startStopTimeListener")
+	public void setStartStopTimeListener(AbstractTimeListener startStopTimeListener)
+	{
+		this.startStopTimeListener = startStopTimeListener;
+	}
+
+	public AbstractTimeListener getLoadTimeListener()
+	{
+		return loadTimeListener;
+	}
+
+	@Setter(name = "loadTimeListener")
+	public void setLoadTimeListener(AbstractTimeListener loadTimeListener)
+	{
+		this.loadTimeListener = loadTimeListener;
+	}
+
+	public AbstractTimeListener getSaveTimeListener()
+	{
+		return saveTimeListener;
+	}
+
+	@Setter(name = "saveTimeListener")
+	public void setSaveTimeListener(AbstractTimeListener saveTimeListener)
+	{
+		this.saveTimeListener = saveTimeListener;
+	}
+
+	public AbstractTimeListener getEraseCurrentTimeListener()
+	{
+		return eraseCurrentTimeListener;
+	}
+
+	@Setter(name = "eraseCurrentTimeListener")
+	public void setEraseCurrentTimeListener(AbstractTimeListener eraseCurrentTimeListener)
+	{
+		this.eraseCurrentTimeListener = eraseCurrentTimeListener;
+	}
+
+	public AbstractTimeListener getEraseTodayTimeListener()
+	{
+		return eraseTodayTimeListener;
+	}
+
+	@Setter(name = "eraseTodayTimeListener")
+	public void setEraseTodayTimeListener(AbstractTimeListener eraseTodayTimeListener)
+	{
+		this.eraseTodayTimeListener = eraseTodayTimeListener;
+	}
+
+	public AbstractTimeListener getEraseTotalTimeListener()
+	{
+		return eraseTotalTimeListener;
+	}
+
+	@Setter(name = "eraseTotalTimeListener")
+	public void setEraseTotalTimeListener(AbstractTimeListener eraseTotalTimeListener)
+	{
+		this.eraseTotalTimeListener = eraseTotalTimeListener;
+	}
+
+	public AbstractTimeListener getEraseApplicationListener()
+	{
+		return eraseApplicationListener;
+	}
+
+	@Setter(name = "eraseApplicationListener")
+	public void setEraseApplicationListener(AbstractTimeListener eraseApplicationListener)
+	{
+		this.eraseApplicationListener = eraseApplicationListener;
+	}
+
+	public AbstractTimeListener getApplicationListener()
+	{
+		return applicationListener;
+	}
+
+	@Setter(name = "applicationListener")
+	public void setApplicationListener(AbstractTimeListener applicationListener)
+	{
+		this.applicationListener = applicationListener;
+	}
+
+	public AbstractTimeListener getLocaleListener()
+	{
+		return localeListener;
+	}
+
+	@Setter(name = "localeListener")
+	public void setLocaleListener(AbstractTimeListener localeListener)
+	{
+		this.localeListener = localeListener;
+	}
+
+	public ITimeCounter getTimeCounter()
+	{
+		return timeCounter;
+	}
+
+	@Setter(name = "timeCounter")
+	public void setTimeCounter(ITimeCounter timeCounter)
+	{
+		this.timeCounter = timeCounter;
 	}
 }

@@ -4,8 +4,6 @@ import java.io.File;
 
 import javax.swing.*;
 
-import timeCounter.listener.ITimeListener;
-
 /**
  * This interface identifies methods for working with GUI.
  */
@@ -78,13 +76,6 @@ public interface IGUIWindow
 	void setRelaxReminder(boolean check);
 
 	/**
-	 * Sets {@link ITimeListener}'s listeners to GUI and create it.
-	 *
-	 * @param listeners {@link ITimeListener}'s implementations for add to buttons
-	 */
-	void setListenersAndCreate(ITimeListener... listeners);
-
-	/**
 	 * Changes locale which is used in GUI.
 	 */
 	void changeLocale();
@@ -110,4 +101,9 @@ public interface IGUIWindow
 	 * otherwise false
 	 */
 	boolean runningApplicationNotice();
+
+	/**
+	 * Creates implementation of this interface.
+	 */
+	void create();
 }

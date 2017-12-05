@@ -17,6 +17,8 @@ import javax.swing.*;
 
 import timeCounter.counter.ITimeCounter;
 import timeCounter.gui.IGUIWindow;
+import timeCounter.init.annotation.Run;
+import timeCounter.init.annotation.Setter;
 import timeCounter.load.ILoadSaveToFile;
 
 public class TimeCounter implements ITimeCounter
@@ -45,10 +47,8 @@ public class TimeCounter implements ITimeCounter
 
 	private static final String DELIMITER = "/";
 
-	public TimeCounter(IGUIWindow window, ILoadSaveToFile saver)
+	public TimeCounter()
 	{
-		this.window = window;
-		this.saver = saver;
 		timer = new Timer(timerPause, (e) ->
 		{
 			correctTimeCounter();
@@ -82,8 +82,10 @@ public class TimeCounter implements ITimeCounter
 	}
 
 	@Override
+	@Run
 	public void loadData()
 	{
+		window.create();
 		if (!dateTimeMap.isEmpty())
 		{
 			beginCount.set(false);
@@ -391,5 +393,33 @@ public class TimeCounter implements ITimeCounter
 				window.setAutoChangeDate(Boolean.parseBoolean(stringTmp[2]));
 			}
 		}
+	}
+
+	//////////////////////////////////////////////
+	//
+	// Getters & Setters
+	//
+	//////////////////////////////////////////////
+
+	public IGUIWindow getWindow()
+	{
+		return window;
+	}
+
+	@Setter(name = "guiWindow")
+	public void setWindow(IGUIWindow window)
+	{
+		this.window = window;
+	}
+
+	public ILoadSaveToFile getSaver()
+	{
+		return saver;
+	}
+
+	@Setter(name = "loadSaveToFile")
+	public void setSaver(ILoadSaveToFile saver)
+	{
+		this.saver = saver;
 	}
 }

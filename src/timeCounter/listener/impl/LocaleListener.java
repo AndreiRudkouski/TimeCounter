@@ -1,16 +1,14 @@
 package timeCounter.listener.impl;
 
-import static timeCounter.main.Main.TIME_COUNTER;
-
 import java.awt.event.ActionEvent;
 
-import timeCounter.listener.ITimeListener;
+import timeCounter.listener.AbstractTimeListener;
 
-public class LocaleListener implements ITimeListener
+public class LocaleListener extends AbstractTimeListener
 {
 	@Override
 	public void actionPerformed(ActionEvent e)
 	{
-		TIME_COUNTER.changeLocale();
+		timeCounter.changeLocale();
 	}
 }

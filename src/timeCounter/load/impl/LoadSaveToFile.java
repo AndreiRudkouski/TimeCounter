@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 
+import timeCounter.init.annotation.Setter;
 import timeCounter.load.ILoadSaveToFile;
 
 public class LoadSaveToFile implements ILoadSaveToFile
@@ -54,12 +55,6 @@ public class LoadSaveToFile implements ILoadSaveToFile
 		}
 	}
 
-	@Override
-	public void setFile(File file)
-	{
-		this.file = file;
-	}
-
 	// encode string
 	private String encode(String input)
 	{
@@ -77,5 +72,22 @@ public class LoadSaveToFile implements ILoadSaveToFile
 			output = output.substring(12);
 		}
 		return new String(Base64.getDecoder().decode(output));
+	}
+
+	//////////////////////////////////////////////
+	//
+	// Getters & Setters
+	//
+	//////////////////////////////////////////////
+
+	public File getFile()
+	{
+		return file;
+	}
+
+	@Setter(name = "file")
+	public void setFile(File file)
+	{
+		this.file = file;
 	}
 }

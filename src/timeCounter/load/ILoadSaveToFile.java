@@ -1,6 +1,5 @@
 package timeCounter.load;
 
-import java.io.File;
 import java.util.List;
 
 /**
@@ -21,11 +20,4 @@ public interface ILoadSaveToFile
 	 * @param dataToSave list of parameter for saving
 	 */
 	void saveData(List<String> dataToSave);
-
-	/**
-	 * Sets {@link File} file for working with it.
-	 *
-	 * @param file {@link File} file
-	 */
-	void setFile(File file);
 }
