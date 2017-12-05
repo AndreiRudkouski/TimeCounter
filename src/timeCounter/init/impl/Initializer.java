@@ -29,9 +29,11 @@ public class Initializer implements IInitializer
 	}
 
 	/**
-	 * Creates instances of all classes which are marked by {@link Config} annotation.
+	 * Creates instances of classes which have appropriate method with {@link Instance} annotation and the method is
+	 * situated in class with {@link Config} annotation.
 	 *
-	 * @param configs names of config files (Files should be located in the same package as the initializer)
+	 * @param configs names of config files with {@link Config} annotation (Files should be located in the same package
+	 * as the initializer)
 	 */
 	private void createInstances(String... configs)
 	{
