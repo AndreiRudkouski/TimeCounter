@@ -23,7 +23,7 @@ public abstract class AbstractTimeListener implements ActionListener
 		return timeCounter;
 	}
 
-	@Setter(name = "timeCounter")
+	@Setter
 	public void setTimeCounter(ITimeCounter timeCounter)
 	{
 		this.timeCounter = timeCounter;

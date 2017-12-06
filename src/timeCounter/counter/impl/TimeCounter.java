@@ -406,7 +406,7 @@ public class TimeCounter implements ITimeCounter
 		return window;
 	}
 
-	@Setter(name = "guiWindow")
+	@Setter
 	public void setWindow(IGUIWindow window)
 	{
 		this.window = window;
@@ -417,7 +417,7 @@ public class TimeCounter implements ITimeCounter
 		return saver;
 	}
 
-	@Setter(name = "loadSaveToFile")
+	@Setter
 	public void setSaver(ILoadSaveToFile saver)
 	{
 		this.saver = saver;

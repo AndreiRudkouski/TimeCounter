@@ -1,15 +1,13 @@
 package timeCounter.init.impl;
 
-import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import timeCounter.init.IInitializer;
 import timeCounter.init.annotation.Config;
@@ -39,17 +37,16 @@ public class Initializer implements IInitializer
 	{
 		try
 		{
-			Field f = ClassLoader.class.getDeclaredField("classes");
-			f.setAccessible(true);
 			ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 			for (String config : configs)
 			{
-				classLoader.loadClass(
+				Class cl = classLoader.loadClass(
 						Initializer.class.getName().split(Initializer.class.getSimpleName())[0] + config);
+				classInstances.put(cl.getSimpleName(), cl.newInstance());
 			}
-			Set<Class> loadedClasses = new HashSet<>((List<Class>) f.get(classLoader));
-			for (Class clazz : loadedClasses)
+			for (Map.Entry<String, Object> classInstance : classInstances.entrySet())
 			{
+				Class clazz = classInstance.getValue().getClass();
 				if (clazz.isAnnotationPresent(Config.class))
 				{
 					for (Method method : clazz.getDeclaredMethods())
@@ -59,20 +56,21 @@ public class Initializer implements IInitializer
 							Instance instance = method.getAnnotation(Instance.class);
 							if (instance.name().equals(""))
 							{
-								classInstances.put(method.getName(), method.invoke(clazz.newInstance()));
+								classInstances.put(method.getReturnType().getSimpleName(),
+										method.invoke(classInstance.getValue()));
 							}
 							else
 							{
-								classInstances.put(instance.name(), method.invoke(clazz.newInstance()));
+								classInstances.put(instance.name(), method.invoke(classInstance.getValue()));
 							}
 						}
 					}
 				}
 			}
 		}
-		catch (Exception e)
+		catch (InstantiationException | IllegalAccessException | InvocationTargetException | ClassNotFoundException e)
 		{
-			e.printStackTrace();
+			/*NOP*/
 		}
 	}
 
@@ -81,6 +79,10 @@ public class Initializer implements IInitializer
 	 */
 	private void initFields()
 	{
+		/*for (Map.Entry<String, Object> classInstance : classInstances.entrySet())
+		{
+			System.out.println(classInstance.getKey() + "-----------" + classInstance.getValue());
+		}*/
 		try
 		{
 			for (Map.Entry<String, Object> classInstance : classInstances.entrySet())
@@ -114,9 +116,9 @@ public class Initializer implements IInitializer
 				}
 			}
 		}
-		catch (Exception e)
+		catch (IllegalAccessException | InvocationTargetException e)
 		{
-			e.printStackTrace();
+			/*NOP*/
 		}
 	}
 
@@ -139,9 +141,9 @@ public class Initializer implements IInitializer
 				}
 			}
 		}
-		catch (Exception e)
+		catch (IllegalAccessException | InvocationTargetException e)
 		{
-			e.printStackTrace();
+			/*NOP*/
 		}
 	}
 }

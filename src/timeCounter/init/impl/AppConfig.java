@@ -39,55 +39,55 @@ public class AppConfig
 		return new GUIWindow();
 	}
 
-	@Instance
+	@Instance(name = "applicationListener")
 	public AbstractTimeListener applicationListener()
 	{
 		return new ApplicationListener();
 	}
 
-	@Instance
+	@Instance(name = "eraseApplicationListener")
 	public AbstractTimeListener eraseApplicationListener()
 	{
 		return new EraseApplicationListener();
 	}
 
-	@Instance
+	@Instance(name = "eraseCurrentTimeListener")
 	public AbstractTimeListener eraseCurrentTimeListener()
 	{
 		return new EraseCurrentTimeListener();
 	}
 
-	@Instance
+	@Instance(name = "eraseTodayTimeListener")
 	public AbstractTimeListener eraseTodayTimeListener()
 	{
 		return new EraseTodayTimeListener();
 	}
 
-	@Instance
+	@Instance(name = "eraseTotalTimeListener")
 	public AbstractTimeListener eraseTotalTimeListener()
 	{
 		return new EraseTotalTimeListener();
 	}
 
-	@Instance
+	@Instance(name = "loadTimeListener")
 	public AbstractTimeListener loadTimeListener()
 	{
 		return new LoadTimeListener();
 	}
 
-	@Instance
+	@Instance(name = "localeListener")
 	public AbstractTimeListener localeListener()
 	{
 		return new LocaleListener();
 	}
 
-	@Instance
+	@Instance(name = "saveTimeListener")
 	public AbstractTimeListener saveTimeListener()
 	{
 		return new SaveTimeListener();
 	}
 
-	@Instance
+	@Instance(name = "startStopTimeListener")
 	public AbstractTimeListener startStopTimeListener()
 	{
 		return new StartStopTimeListener();

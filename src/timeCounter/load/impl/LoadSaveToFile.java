@@ -85,7 +85,7 @@ public class LoadSaveToFile implements ILoadSaveToFile
 		return file;
 	}
 
-	@Setter(name = "file")
+	@Setter
 	public void setFile(File file)
 	{
 		this.file = file;
