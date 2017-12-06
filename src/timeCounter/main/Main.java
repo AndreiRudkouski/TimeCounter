@@ -1,7 +1,6 @@
 package timeCounter.main;
 
 import java.io.IOException;
-import java.time.LocalDate;
 import java.util.logging.FileHandler;
 import java.util.logging.Handler;
 import java.util.logging.Logger;
@@ -17,7 +16,7 @@ public class Main
 		{
 			// Configure the logger with handler and formatter
 			Logger logger = Logger.getLogger("MainLogger");
-			Handler handler = new FileHandler("log." + LocalDate.now() + ".txt", false);
+			Handler handler = new FileHandler("log.txt", false);
 			logger.addHandler(handler);
 			SimpleFormatter formatter = new SimpleFormatter();
 			handler.setFormatter(formatter);
