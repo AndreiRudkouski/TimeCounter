@@ -9,6 +9,7 @@ import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
+import java.util.logging.Logger;
 
 import timeCounter.init.annotation.Setter;
 import timeCounter.load.ILoadSaveToFile;
@@ -31,9 +32,9 @@ public class LoadSaveToFile implements ILoadSaveToFile
 					result.add(decode(tmp));
 				}
 			}
-			catch (IOException ignore)
+			catch (IOException e)
 			{
-				System.out.println("Some issues with data loading!");
+				Logger.getLogger("MainLogger").severe(e.toString());
 			}
 		}
 		return result;
@@ -51,7 +52,7 @@ public class LoadSaveToFile implements ILoadSaveToFile
 		}
 		catch (IOException e)
 		{
-			System.out.println("Some issues with data saving!");
+			Logger.getLogger("MainLogger").severe(e.toString());
 		}
 	}
 

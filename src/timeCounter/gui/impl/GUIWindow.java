@@ -8,6 +8,7 @@ import java.awt.event.WindowEvent;
 import java.io.File;
 import java.util.Locale;
 import java.util.ResourceBundle;
+import java.util.logging.Logger;
 
 import javax.swing.*;
 
@@ -218,7 +219,7 @@ public class GUIWindow implements IGUIWindow
 				}
 				catch (AWTException e)
 				{
-					/*NOP*/
+					Logger.getLogger("MainLogger").severe(e.toString());
 				}
 				trayIcon.addMouseListener(new MouseAdapter()
 				{

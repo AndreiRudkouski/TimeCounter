@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import timeCounter.init.IInitializer;
 import timeCounter.init.annotation.Config;
@@ -70,7 +71,7 @@ public class Initializer implements IInitializer
 		}
 		catch (InstantiationException | IllegalAccessException | InvocationTargetException | ClassNotFoundException e)
 		{
-			/*NOP*/
+			Logger.getLogger("MainLogger").severe(e.toString());
 		}
 	}
 
@@ -79,10 +80,7 @@ public class Initializer implements IInitializer
 	 */
 	private void initFields()
 	{
-		/*for (Map.Entry<String, Object> classInstance : classInstances.entrySet())
-		{
-			System.out.println(classInstance.getKey() + "-----------" + classInstance.getValue());
-		}*/
+
 		try
 		{
 			for (Map.Entry<String, Object> classInstance : classInstances.entrySet())
@@ -118,7 +116,7 @@ public class Initializer implements IInitializer
 		}
 		catch (IllegalAccessException | InvocationTargetException e)
 		{
-			/*NOP*/
+			Logger.getLogger("MainLogger").severe(e.toString());
 		}
 	}
 
@@ -143,7 +141,7 @@ public class Initializer implements IInitializer
 		}
 		catch (IllegalAccessException | InvocationTargetException e)
 		{
-			/*NOP*/
+			Logger.getLogger("MainLogger").severe(e.toString());
 		}
 	}
 }
