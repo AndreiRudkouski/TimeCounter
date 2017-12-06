@@ -8,7 +8,6 @@ import java.awt.event.WindowEvent;
 import java.io.File;
 import java.util.Locale;
 import java.util.ResourceBundle;
-import java.util.logging.Logger;
 
 import javax.swing.*;
 
@@ -16,6 +15,7 @@ import timeCounter.counter.ITimeCounter;
 import timeCounter.gui.IGUIWindow;
 import timeCounter.init.annotation.Setter;
 import timeCounter.listener.AbstractTimeListener;
+import timeCounter.logger.MainLogger;
 
 public class GUIWindow implements IGUIWindow
 {
@@ -219,7 +219,7 @@ public class GUIWindow implements IGUIWindow
 				}
 				catch (AWTException e)
 				{
-					Logger.getLogger("MainLogger").severe(e.toString());
+					MainLogger.getLogger().severe(e.toString());
 				}
 				trayIcon.addMouseListener(new MouseAdapter()
 				{

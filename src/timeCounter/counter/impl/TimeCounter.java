@@ -11,7 +11,6 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.logging.Logger;
 import java.util.stream.Stream;
 
 import javax.swing.*;
@@ -21,6 +20,7 @@ import timeCounter.gui.IGUIWindow;
 import timeCounter.init.annotation.Run;
 import timeCounter.init.annotation.Setter;
 import timeCounter.load.ILoadSaveToFile;
+import timeCounter.logger.MainLogger;
 
 public class TimeCounter implements ITimeCounter
 {
@@ -210,7 +210,7 @@ public class TimeCounter implements ITimeCounter
 				}
 				catch (IOException e)
 				{
-					Logger.getLogger("MainLogger").severe(e.toString());
+					MainLogger.getLogger().severe(e.toString());
 				}
 			}
 		}
@@ -246,7 +246,7 @@ public class TimeCounter implements ITimeCounter
 		}
 		catch (IOException e)
 		{
-			Logger.getLogger("MainLogger").severe(e.toString());
+			MainLogger.getLogger().severe(e.toString());
 		}
 		return false;
 	}

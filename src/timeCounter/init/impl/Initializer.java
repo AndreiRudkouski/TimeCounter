@@ -8,13 +8,13 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Logger;
 
 import timeCounter.init.IInitializer;
 import timeCounter.init.annotation.Config;
 import timeCounter.init.annotation.Instance;
 import timeCounter.init.annotation.Run;
 import timeCounter.init.annotation.Setter;
+import timeCounter.logger.MainLogger;
 
 public class Initializer implements IInitializer
 {
@@ -71,7 +71,7 @@ public class Initializer implements IInitializer
 		}
 		catch (InstantiationException | IllegalAccessException | InvocationTargetException | ClassNotFoundException e)
 		{
-			Logger.getLogger("MainLogger").severe(e.toString());
+			MainLogger.getLogger().severe(e.toString());
 		}
 	}
 
@@ -116,7 +116,7 @@ public class Initializer implements IInitializer
 		}
 		catch (IllegalAccessException | InvocationTargetException e)
 		{
-			Logger.getLogger("MainLogger").severe(e.toString());
+			MainLogger.getLogger().severe(e.toString());
 		}
 	}
 
@@ -141,7 +141,7 @@ public class Initializer implements IInitializer
 		}
 		catch (IllegalAccessException | InvocationTargetException e)
 		{
-			Logger.getLogger("MainLogger").severe(e.toString());
+			MainLogger.getLogger().severe(e.toString());
 		}
 	}
 }

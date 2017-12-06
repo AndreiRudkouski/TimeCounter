@@ -9,10 +9,10 @@ import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
-import java.util.logging.Logger;
 
 import timeCounter.init.annotation.Setter;
 import timeCounter.load.ILoadSaveToFile;
+import timeCounter.logger.MainLogger;
 
 public class LoadSaveToFile implements ILoadSaveToFile
 {
@@ -34,7 +34,7 @@ public class LoadSaveToFile implements ILoadSaveToFile
 			}
 			catch (IOException e)
 			{
-				Logger.getLogger("MainLogger").severe(e.toString());
+				MainLogger.getLogger().severe(e.toString());
 			}
 		}
 		return result;
@@ -52,7 +52,7 @@ public class LoadSaveToFile implements ILoadSaveToFile
 		}
 		catch (IOException e)
 		{
-			Logger.getLogger("MainLogger").severe(e.toString());
+			MainLogger.getLogger().severe(e.toString());
 		}
 	}
 
