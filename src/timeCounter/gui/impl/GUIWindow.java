@@ -10,6 +10,7 @@ import java.util.Locale;
 import java.util.ResourceBundle;
 
 import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 import timeCounter.counter.ITimeCounter;
 import timeCounter.gui.IGUIWindow;
@@ -29,6 +30,8 @@ public class GUIWindow implements IGUIWindow
 	private ResourceBundle bundle = ResourceBundle.getBundle(LOCALE_NAME, LOCALE_EN);
 
 	private static final String ICON_NAME = "timeCounter/resources/image/icon.png";
+	private static final String EXE_EXTENSION = "exe";
+	private static final String DOT = ".";
 
 	private JFrame frame;
 	private JLabel labelApplication;
@@ -351,8 +354,20 @@ public class GUIWindow implements IGUIWindow
 	public File chooseApplication()
 	{
 		JFileChooser fileChooser = new JFileChooser();
+		fileChooser.setAcceptAllFileFilterUsed(false);
+		fileChooser.setFileFilter(new FileNameExtensionFilter(DOT + EXE_EXTENSION, EXE_EXTENSION));
 		int result = fileChooser.showOpenDialog(frame);
-		return result == JFileChooser.APPROVE_OPTION ? fileChooser.getSelectedFile() : null;
+		if (result == JFileChooser.APPROVE_OPTION)
+		{
+			String fileName = fileChooser.getSelectedFile().getName();
+			int index = fileName.lastIndexOf(DOT);
+			if (index > 0 && index < fileName.length() - 1 && fileName.substring(index + 1).equalsIgnoreCase(
+					EXE_EXTENSION))
+			{
+				return fileChooser.getSelectedFile();
+			}
+		}
+		return null;
 	}
 
 	@Override
