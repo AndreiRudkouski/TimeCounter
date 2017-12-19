@@ -12,12 +12,6 @@ public abstract class AbstractTimeListener implements ActionListener
 {
 	protected ITimeCounter timeCounter;
 
-	//////////////////////////////////////////////
-	//
-	// Getters & Setters
-	//
-	//////////////////////////////////////////////
-
 	public ITimeCounter getTimeCounter()
 	{
 		return timeCounter;

@@ -1,13 +1,14 @@
 package timeCounter.init.impl;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import timeCounter.init.IInitializer;
 import timeCounter.init.annotation.Config;
@@ -86,30 +87,45 @@ public class Initializer implements IInitializer
 			for (Map.Entry<String, Object> classInstance : classInstances.entrySet())
 			{
 				Object obj = classInstance.getValue();
-				List<Method> methods = new ArrayList<>(Arrays.asList(obj.getClass().getDeclaredMethods()));
-
+				List<Method> setterMethods = Arrays.stream(obj.getClass().getDeclaredMethods()).filter(
+						m -> m.isAnnotationPresent(Setter.class)).collect(Collectors.toList());
+				List<Field> setterFields = Arrays.stream(obj.getClass().getDeclaredFields()).filter(
+						f -> f.isAnnotationPresent(Setter.class)).collect(Collectors.toList());
 				// If class has superclass and the superclass is abstract and not Object, add superclass methods
 				Class clazz = obj.getClass();
 				while (!clazz.getSuperclass().getSimpleName().equals("Object") && Modifier.isAbstract(
 						clazz.getSuperclass().getModifiers()))
 				{
-					methods.addAll(Arrays.asList(obj.getClass().getSuperclass().getDeclaredMethods()));
+					setterMethods.addAll(Arrays.stream(obj.getClass().getSuperclass().getDeclaredMethods())
+							.filter(m -> m.isAnnotationPresent(Setter.class)).collect(Collectors.toList()));
+					setterFields.addAll(Arrays.stream(obj.getClass().getSuperclass().getDeclaredFields())
+							.filter(f -> f.isAnnotationPresent(Setter.class)).collect(Collectors.toList()));
 					clazz = clazz.getSuperclass();
 				}
 
-				for (Method method : methods)
+				for (Method method : setterMethods)
 				{
-					if (method.isAnnotationPresent(Setter.class))
+					Setter setter = method.getAnnotation(Setter.class);
+					if (setter.name().equals(""))
 					{
-						Setter setter = method.getAnnotation(Setter.class);
-						if (setter.name().equals(""))
-						{
-							method.invoke(obj, classInstances.get(method.getParameterTypes()[0].getSimpleName()));
-						}
-						else
-						{
-							method.invoke(obj, classInstances.get(setter.name()));
-						}
+						method.invoke(obj, classInstances.get(method.getParameterTypes()[0].getSimpleName()));
+					}
+					else
+					{
+						method.invoke(obj, classInstances.get(setter.name()));
+					}
+				}
+				for (Field field : setterFields)
+				{
+					Setter setter = field.getAnnotation(Setter.class);
+					field.setAccessible(true);
+					if (setter.name().equals(""))
+					{
+						field.set(obj, classInstances.get(field.getType().getSimpleName()));
+					}
+					else
+					{
+						field.set(obj, classInstances.get(setter.name()));
 					}
 				}
 			}
@@ -129,13 +145,13 @@ public class Initializer implements IInitializer
 		{
 			for (Map.Entry<String, Object> classInstance : classInstances.entrySet())
 			{
-				for (Method method : classInstance.getValue().getClass().getDeclaredMethods())
+				Method method = Arrays.stream(classInstance.getValue().getClass().getDeclaredMethods())
+						.filter(m -> m.isAnnotationPresent(Run.class)).findFirst().orElse(null);
+				if (method != null)
 				{
-					if (method.isAnnotationPresent(Run.class))
-					{
-						method.invoke(classInstance.getValue());
-						return;
-					}
+					method.setAccessible(true);
+					method.invoke(classInstance.getValue());
+					return;
 				}
 			}
 		}

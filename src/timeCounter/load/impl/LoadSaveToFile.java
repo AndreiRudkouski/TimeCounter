@@ -75,17 +75,6 @@ public class LoadSaveToFile implements ILoadSaveToFile
 		return new String(Base64.getDecoder().decode(output));
 	}
 
-	//////////////////////////////////////////////
-	//
-	// Getters & Setters
-	//
-	//////////////////////////////////////////////
-
-	public File getFile()
-	{
-		return file;
-	}
-
 	@Setter
 	public void setFile(File file)
 	{

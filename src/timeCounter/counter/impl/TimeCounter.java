@@ -26,8 +26,8 @@ public class TimeCounter implements ITimeCounter
 {
 	private final static int SEC_TO_RELAX = 3000;
 
-	private IGUIWindow window;
-	private ILoadSaveToFile saver;
+	@Setter private IGUIWindow window;
+	@Setter private ILoadSaveToFile saver;
 	private Timer timer;
 
 	private AtomicBoolean beginCount = new AtomicBoolean();
@@ -83,10 +83,8 @@ public class TimeCounter implements ITimeCounter
 	}
 
 	@Override
-	@Run
 	public void loadData()
 	{
-		window.create();
 		if (!dateTimeMap.isEmpty())
 		{
 			beginCount.set(false);
@@ -101,6 +99,13 @@ public class TimeCounter implements ITimeCounter
 		assignTime();
 		timer.restart();
 		timer.stop();
+	}
+
+	@Run
+	private void initLoadData()
+	{
+		window.create();
+		loadData();
 	}
 
 	@Override
@@ -394,33 +399,5 @@ public class TimeCounter implements ITimeCounter
 				window.setAutoChangeDate(Boolean.parseBoolean(stringTmp[2]));
 			}
 		}
-	}
-
-	//////////////////////////////////////////////
-	//
-	// Getters & Setters
-	//
-	//////////////////////////////////////////////
-
-	public IGUIWindow getWindow()
-	{
-		return window;
-	}
-
-	@Setter
-	public void setWindow(IGUIWindow window)
-	{
-		this.window = window;
-	}
-
-	public ILoadSaveToFile getSaver()
-	{
-		return saver;
-	}
-
-	@Setter
-	public void setSaver(ILoadSaveToFile saver)
-	{
-		this.saver = saver;
 	}
 }

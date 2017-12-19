@@ -20,9 +20,9 @@ import timeCounter.logger.MainLogger;
 
 public class GUIWindow implements IGUIWindow
 {
-	private final Font fontTopPanel = new Font("sanserif", Font.BOLD, 12);
-	private final Font fontLeftPanel = new Font("sanserif", Font.BOLD, 15);
-	private final Font fontCenterPanel = new Font("sanserif", Font.BOLD, 16);
+	private static final Font FONT_TOP_PANEL = new Font("sanserif", Font.BOLD, 12);
+	private static final Font FONT_LEFT_PANEL = new Font("sanserif", Font.BOLD, 15);
+	private static final Font FONT_CENTER_PANEL = new Font("sanserif", Font.BOLD, 16);
 
 	private static final String LOCALE_NAME = "timeCounter.resources.locale";
 	private static final Locale LOCALE_EN = Locale.ENGLISH;
@@ -56,16 +56,25 @@ public class GUIWindow implements IGUIWindow
 	private JCheckBox checkBreak;
 	private JCheckBox checkDate;
 
+	@Setter(name = "startStopTimeListener")
 	private AbstractTimeListener startStopTimeListener;
+	@Setter(name = "loadTimeListener")
 	private AbstractTimeListener loadTimeListener;
+	@Setter(name = "saveTimeListener")
 	private AbstractTimeListener saveTimeListener;
+	@Setter(name = "eraseCurrentTimeListener")
 	private AbstractTimeListener eraseCurrentTimeListener;
+	@Setter(name = "eraseTodayTimeListener")
 	private AbstractTimeListener eraseTodayTimeListener;
+	@Setter(name = "eraseTotalTimeListener")
 	private AbstractTimeListener eraseTotalTimeListener;
+	@Setter(name = "eraseApplicationListener")
 	private AbstractTimeListener eraseApplicationListener;
+	@Setter(name = "applicationListener")
 	private AbstractTimeListener applicationListener;
+	@Setter(name = "localeListener")
 	private AbstractTimeListener localeListener;
-
+	@Setter
 	private ITimeCounter timeCounter;
 
 	@Override
@@ -73,7 +82,7 @@ public class GUIWindow implements IGUIWindow
 	{
 		JPanel panelTop = new JPanel();
 		labelApplication = new JLabel();
-		labelApplication.setFont(fontTopPanel);
+		labelApplication.setFont(FONT_TOP_PANEL);
 		panelTop.add(labelApplication);
 		panelTop.setPreferredSize(new Dimension(370, 30));
 		panelTop.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, Color.LIGHT_GRAY));
@@ -83,11 +92,11 @@ public class GUIWindow implements IGUIWindow
 		panelLeft.setLayout(new BoxLayout(panelLeft, BoxLayout.Y_AXIS));
 		panelLeft.setBorder(BorderFactory.createEmptyBorder(10, 15, 10, 0));
 		labelCurrentTime = new JLabel();
-		labelCurrentTime.setFont(fontLeftPanel);
+		labelCurrentTime.setFont(FONT_LEFT_PANEL);
 		labelTodayTime = new JLabel();
-		labelTodayTime.setFont(fontLeftPanel);
+		labelTodayTime.setFont(FONT_LEFT_PANEL);
 		labelTotalTime = new JLabel();
-		labelTotalTime.setFont(fontLeftPanel);
+		labelTotalTime.setFont(FONT_LEFT_PANEL);
 		panelLeft.add(labelCurrentTime);
 		panelLeft.add(Box.createVerticalStrut(12));
 		panelLeft.add(labelTodayTime);
@@ -98,17 +107,17 @@ public class GUIWindow implements IGUIWindow
 		panelCenter.setBorder(BorderFactory.createEmptyBorder(5, 0, 5, 0));
 		currentTimeField = new JTextField(8);
 		currentTimeField.setHorizontalAlignment(JTextField.CENTER);
-		currentTimeField.setFont(fontCenterPanel);
+		currentTimeField.setFont(FONT_CENTER_PANEL);
 		currentTimeField.setEditable(false);
 		currentTimeField.setBackground(Color.white);
 		todayTimeField = new JTextField(8);
 		todayTimeField.setHorizontalAlignment(JTextField.CENTER);
-		todayTimeField.setFont(fontCenterPanel);
+		todayTimeField.setFont(FONT_CENTER_PANEL);
 		todayTimeField.setEditable(false);
 		todayTimeField.setBackground(Color.white);
 		totalTimeField = new JTextField(8);
 		totalTimeField.setHorizontalAlignment(JTextField.CENTER);
-		totalTimeField.setFont(fontCenterPanel);
+		totalTimeField.setFont(FONT_CENTER_PANEL);
 		totalTimeField.setEditable(false);
 		totalTimeField.setBackground(Color.white);
 		panelCenter.add(currentTimeField);
@@ -393,121 +402,5 @@ public class GUIWindow implements IGUIWindow
 				bundle.getString("title_application_restart"),
 				JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE);
 		return select == JOptionPane.YES_OPTION;
-	}
-
-	//////////////////////////////////////////////
-	//
-	// Getters & Setters
-	//
-	//////////////////////////////////////////////
-
-	public AbstractTimeListener getStartStopTimeListener()
-	{
-		return startStopTimeListener;
-	}
-
-	@Setter(name = "startStopTimeListener")
-	public void setStartStopTimeListener(AbstractTimeListener startStopTimeListener)
-	{
-		this.startStopTimeListener = startStopTimeListener;
-	}
-
-	public AbstractTimeListener getLoadTimeListener()
-	{
-		return loadTimeListener;
-	}
-
-	@Setter(name = "loadTimeListener")
-	public void setLoadTimeListener(AbstractTimeListener loadTimeListener)
-	{
-		this.loadTimeListener = loadTimeListener;
-	}
-
-	public AbstractTimeListener getSaveTimeListener()
-	{
-		return saveTimeListener;
-	}
-
-	@Setter(name = "saveTimeListener")
-	public void setSaveTimeListener(AbstractTimeListener saveTimeListener)
-	{
-		this.saveTimeListener = saveTimeListener;
-	}
-
-	public AbstractTimeListener getEraseCurrentTimeListener()
-	{
-		return eraseCurrentTimeListener;
-	}
-
-	@Setter(name = "eraseCurrentTimeListener")
-	public void setEraseCurrentTimeListener(AbstractTimeListener eraseCurrentTimeListener)
-	{
-		this.eraseCurrentTimeListener = eraseCurrentTimeListener;
-	}
-
-	public AbstractTimeListener getEraseTodayTimeListener()
-	{
-		return eraseTodayTimeListener;
-	}
-
-	@Setter(name = "eraseTodayTimeListener")
-	public void setEraseTodayTimeListener(AbstractTimeListener eraseTodayTimeListener)
-	{
-		this.eraseTodayTimeListener = eraseTodayTimeListener;
-	}
-
-	public AbstractTimeListener getEraseTotalTimeListener()
-	{
-		return eraseTotalTimeListener;
-	}
-
-	@Setter(name = "eraseTotalTimeListener")
-	public void setEraseTotalTimeListener(AbstractTimeListener eraseTotalTimeListener)
-	{
-		this.eraseTotalTimeListener = eraseTotalTimeListener;
-	}
-
-	public AbstractTimeListener getEraseApplicationListener()
-	{
-		return eraseApplicationListener;
-	}
-
-	@Setter(name = "eraseApplicationListener")
-	public void setEraseApplicationListener(AbstractTimeListener eraseApplicationListener)
-	{
-		this.eraseApplicationListener = eraseApplicationListener;
-	}
-
-	public AbstractTimeListener getApplicationListener()
-	{
-		return applicationListener;
-	}
-
-	@Setter(name = "applicationListener")
-	public void setApplicationListener(AbstractTimeListener applicationListener)
-	{
-		this.applicationListener = applicationListener;
-	}
-
-	public AbstractTimeListener getLocaleListener()
-	{
-		return localeListener;
-	}
-
-	@Setter(name = "localeListener")
-	public void setLocaleListener(AbstractTimeListener localeListener)
-	{
-		this.localeListener = localeListener;
-	}
-
-	public ITimeCounter getTimeCounter()
-	{
-		return timeCounter;
-	}
-
-	@Setter
-	public void setTimeCounter(ITimeCounter timeCounter)
-	{
-		this.timeCounter = timeCounter;
 	}
 }
