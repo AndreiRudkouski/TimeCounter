@@ -77,7 +77,7 @@ public class Initializer implements IInitializer
 	}
 
 	/**
-	 * Initializes all fields which are marked by {@link Setter} annotation.
+	 * Initializes all fields which are marked by {@link Setter} annotation or have setter methods with the annotation.
 	 */
 	private void initFields()
 	{
