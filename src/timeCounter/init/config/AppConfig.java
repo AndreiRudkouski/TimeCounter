@@ -1,4 +1,4 @@
-package timeCounter.init.impl;
+package timeCounter.init.config;
 
 import java.io.File;
 

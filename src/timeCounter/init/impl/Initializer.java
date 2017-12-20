@@ -32,8 +32,7 @@ public class Initializer implements IInitializer
 	 * Creates instances of classes which have appropriate method with {@link Instance} annotation and the method is
 	 * situated in class with {@link Config} annotation.
 	 *
-	 * @param configs names of config files with {@link Config} annotation (Files should be located in the same package
-	 * as the initializer)
+	 * @param configs names of config files with {@link Config} annotation
 	 */
 	private void createInstances(String... configs)
 	{
@@ -42,8 +41,7 @@ public class Initializer implements IInitializer
 			ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 			for (String config : configs)
 			{
-				Class cl = classLoader.loadClass(
-						Initializer.class.getName().split(Initializer.class.getSimpleName())[0] + config);
+				Class cl = classLoader.loadClass(config);
 				classInstances.put(cl.getSimpleName(), cl.newInstance());
 			}
 			for (Map.Entry<String, Object> classInstance : classInstances.entrySet())
