@@ -87,8 +87,10 @@ public class Initializer implements IInitializer
 			for (Map.Entry<String, Object> classInstance : classInstances.entrySet())
 			{
 				Object obj = classInstance.getValue();
+				// Collect all setter methods and fields of class which are marked by Setter annotation
 				List<Method> setterMethods = Arrays.stream(obj.getClass().getDeclaredMethods()).filter(
-						m -> m.isAnnotationPresent(Setter.class)).collect(Collectors.toList());
+						m -> m.isAnnotationPresent(Setter.class) && m.getName().startsWith("set")).collect(
+						Collectors.toList());
 				List<Field> setterFields = Arrays.stream(obj.getClass().getDeclaredFields()).filter(
 						f -> f.isAnnotationPresent(Setter.class)).collect(Collectors.toList());
 				// If class has superclass and the superclass is abstract and not Object, add superclass methods
@@ -97,7 +99,8 @@ public class Initializer implements IInitializer
 						clazz.getSuperclass().getModifiers()))
 				{
 					setterMethods.addAll(Arrays.stream(obj.getClass().getSuperclass().getDeclaredMethods())
-							.filter(m -> m.isAnnotationPresent(Setter.class)).collect(Collectors.toList()));
+							.filter(m -> m.isAnnotationPresent(Setter.class) && m.getName().startsWith("set"))
+							.collect(Collectors.toList()));
 					setterFields.addAll(Arrays.stream(obj.getClass().getSuperclass().getDeclaredFields())
 							.filter(f -> f.isAnnotationPresent(Setter.class)).collect(Collectors.toList()));
 					clazz = clazz.getSuperclass();
