@@ -4,8 +4,8 @@ import java.io.File;
 
 import timeCounter.counter.ITimeCounter;
 import timeCounter.counter.impl.TimeCounter;
-import timeCounter.gui.IGUIWindow;
-import timeCounter.gui.impl.GUIWindow;
+import timeCounter.view.IView;
+import timeCounter.view.impl.View;
 import timeCounter.init.annotation.Config;
 import timeCounter.init.annotation.Instance;
 import timeCounter.listener.AbstractTimeListener;
@@ -34,9 +34,9 @@ public class AppConfig
 	}
 
 	@Instance
-	public IGUIWindow guiWindow()
+	public IView guiWindow()
 	{
-		return new GUIWindow();
+		return new View();
 	}
 
 	@Instance(name = "applicationListener")

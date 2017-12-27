@@ -1,4 +1,4 @@
-package timeCounter.gui.impl;
+package timeCounter.view.impl;
 
 import java.awt.*;
 import java.awt.event.MouseAdapter;
@@ -13,12 +13,12 @@ import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import timeCounter.counter.ITimeCounter;
-import timeCounter.gui.IGUIWindow;
+import timeCounter.view.IView;
 import timeCounter.init.annotation.Setter;
 import timeCounter.listener.AbstractTimeListener;
 import timeCounter.logger.MainLogger;
 
-public class GUIWindow implements IGUIWindow
+public class View implements IView
 {
 	private static final Font FONT_TOP_PANEL = new Font("sanserif", Font.BOLD, 12);
 	private static final Font FONT_LEFT_PANEL = new Font("sanserif", Font.BOLD, 15);
@@ -78,7 +78,7 @@ public class GUIWindow implements IGUIWindow
 	private ITimeCounter timeCounter;
 
 	@Override
-	public void create()
+	public void createView()
 	{
 		JPanel panelTop = new JPanel();
 		labelApplication = new JLabel();

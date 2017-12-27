@@ -1,4 +1,4 @@
-package timeCounter.gui;
+package timeCounter.view;
 
 import java.io.File;
 
@@ -7,7 +7,7 @@ import javax.swing.*;
 /**
  * This interface identifies methods for working with GUI.
  */
-public interface IGUIWindow
+public interface IView
 {
 	/**
 	 * Sets the text of "StartStop" button to "Stop".
@@ -105,5 +105,5 @@ public interface IGUIWindow
 	/**
 	 * Creates implementation of this interface.
 	 */
-	void create();
+	void createView();
 }

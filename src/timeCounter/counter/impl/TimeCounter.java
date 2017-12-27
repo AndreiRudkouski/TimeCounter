@@ -16,7 +16,7 @@ import java.util.stream.Stream;
 import javax.swing.*;
 
 import timeCounter.counter.ITimeCounter;
-import timeCounter.gui.IGUIWindow;
+import timeCounter.view.IView;
 import timeCounter.init.annotation.Run;
 import timeCounter.init.annotation.Setter;
 import timeCounter.load.ILoadSaveToFile;
@@ -26,7 +26,7 @@ public class TimeCounter implements ITimeCounter
 {
 	private final static int SEC_TO_RELAX = 3000;
 
-	@Setter private IGUIWindow window;
+	@Setter private IView window;
 	@Setter private ILoadSaveToFile saver;
 	private Timer timer;
 
@@ -104,7 +104,7 @@ public class TimeCounter implements ITimeCounter
 	@Run
 	private void initLoadData()
 	{
-		window.create();
+		window.createView();
 		loadData();
 	}
 
