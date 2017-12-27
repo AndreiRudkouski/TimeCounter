@@ -9,18 +9,17 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
 
 import javax.swing.*;
 
 import timeCounter.counter.ITimeCounter;
-import timeCounter.view.IView;
 import timeCounter.init.annotation.Run;
 import timeCounter.init.annotation.Setter;
 import timeCounter.load.ILoadSaveToFile;
 import timeCounter.logger.MainLogger;
+import timeCounter.view.IView;
 
 public class TimeCounter implements ITimeCounter
 {
@@ -30,8 +29,6 @@ public class TimeCounter implements ITimeCounter
 	@Setter private ILoadSaveToFile saver;
 	private Timer timer;
 
-	private AtomicBoolean beginCount = new AtomicBoolean();
-	private AtomicBoolean pause = new AtomicBoolean(true);
 	private AtomicLong currentTime = new AtomicLong(); //The current session time
 	private AtomicLong todayTime = new AtomicLong();
 	private AtomicLong totalTime = new AtomicLong();
@@ -60,7 +57,7 @@ public class TimeCounter implements ITimeCounter
 	@Override
 	public void eraseCurrentTime()
 	{
-		setStartButton();
+		setButtonToStart();
 		currentTime.set(0);
 		window.getCurrentTimeField().setText(printTime(currentTime));
 	}
@@ -68,7 +65,7 @@ public class TimeCounter implements ITimeCounter
 	@Override
 	public void eraseTodayTime()
 	{
-		setStartButton();
+		setButtonToStart();
 		eraseCurrentTime();
 		todayTime.set(0);
 		window.getTodayTimeField().setText(printTime(todayTime));
@@ -77,7 +74,7 @@ public class TimeCounter implements ITimeCounter
 	@Override
 	public void eraseTotalTime()
 	{
-		setStartButton();
+		setButtonToStart();
 		dateTimeMap.clear();
 		assignTime();
 	}
@@ -85,12 +82,7 @@ public class TimeCounter implements ITimeCounter
 	@Override
 	public void loadData()
 	{
-		if (!dateTimeMap.isEmpty())
-		{
-			beginCount.set(false);
-			pause.set(true);
-			window.setStartTextButton();
-		}
+		window.setButtonTextToStart();
 		loadDataFromFile();
 		if (file != null)
 		{
@@ -142,20 +134,20 @@ public class TimeCounter implements ITimeCounter
 	@Override
 	public void pushStartStopButton()
 	{
-		if (!beginCount.get() || pause.get())
+		if (timer.isRunning())
 		{
-			setStopButton();
+			setButtonToStart();
 		}
 		else
 		{
-			setStartButton();
+			setButtonToStop();
 		}
 	}
 
 	@Override
 	public boolean closeTimeCounter(boolean close)
 	{
-		setStartButton();
+		setButtonToStart();
 		boolean result = false;
 		if ((!dateTimeMap.isEmpty() && ((dateTimeMap.containsKey(todayDate) && dateTimeMap.get(todayDate).get()
 				!= todayTime.get()) || (!dateTimeMap.containsKey(todayDate) && todayTime.get() != 0))) ||
@@ -187,15 +179,15 @@ public class TimeCounter implements ITimeCounter
 	{
 		if (currentTime.get() % SEC_TO_RELAX == 0 && window.isRelaxReminder())
 		{
-			setStartButton();
+			setButtonToStart();
 			if (!window.timeRelaxReminder())
 			{
-				setStopButton();
+				setButtonToStop();
 			}
 		}
 	}
 
-	private void setStopButton()
+	private void setButtonToStop()
 	{
 		if ((process == null || !process.isAlive()) && file != null)
 		{
@@ -203,7 +195,7 @@ public class TimeCounter implements ITimeCounter
 			{
 				if (window.runningApplicationNotice())
 				{
-					setStartButton();
+					setButtonToStart();
 					return;
 				}
 			}
@@ -221,10 +213,8 @@ public class TimeCounter implements ITimeCounter
 		}
 
 		correctTimeCounter();
-		beginCount.set(true);
-		pause.set(false);
 		timer.start();
-		window.setStopTextButton();
+		window.setButtonTextToStop();
 	}
 
 	private boolean isRunningProcess(String name)
@@ -256,10 +246,9 @@ public class TimeCounter implements ITimeCounter
 		return false;
 	}
 
-	private void setStartButton()
+	private void setButtonToStart()
 	{
-		pause.set(true);
-		window.setStartTextButton();
+		window.setButtonTextToStart();
 		timer.stop();
 	}
 
@@ -315,20 +304,12 @@ public class TimeCounter implements ITimeCounter
 		window.getTotalTimeField().setText(printTime(totalTime));
 	}
 
-	private void incrementCurrentTime()
+	private void incrementTime()
 	{
 		currentTime.incrementAndGet();
 		window.getCurrentTimeField().setText(printTime(currentTime));
-	}
-
-	private void incrementTodayTime()
-	{
 		todayTime.incrementAndGet();
 		window.getTodayTimeField().setText(printTime(todayTime));
-	}
-
-	private void incrementTotalTime()
-	{
 		totalTime.incrementAndGet();
 		window.getTotalTimeField().setText(printTime(totalTime));
 	}
@@ -336,7 +317,7 @@ public class TimeCounter implements ITimeCounter
 	private void correctTimeCounter()
 	{
 		// Correct the delay of time counter
-		if (countTime != 0 && !pause.get())
+		if (countTime != 0 && timer.isRunning())
 		{
 			timerPause = timerPause - (int) Math.round((System.nanoTime() - countTime) / 1000000d - oneSecond);
 			countTime = System.nanoTime();
@@ -352,13 +333,11 @@ public class TimeCounter implements ITimeCounter
 	{
 		if (process != null && !process.isAlive())
 		{
-			setStartButton();
+			setButtonToStart();
 		}
 		else
 		{
-			incrementCurrentTime();
-			incrementTodayTime();
-			incrementTotalTime();
+			incrementTime();
 			checkRelaxTime();
 			checkChangeDate();
 		}

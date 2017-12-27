@@ -12,12 +12,12 @@ public interface IView
 	/**
 	 * Sets the text of "StartStop" button to "Stop".
 	 */
-	void setStopTextButton();
+	void setButtonTextToStop();
 
 	/**
 	 * Sets the text of "StartStop" button to "Start".
 	 */
-	void setStartTextButton();
+	void setButtonTextToStart();
 
 	/**
 	 * Checks if the user has selected relaxation.

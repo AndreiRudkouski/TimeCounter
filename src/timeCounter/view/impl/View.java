@@ -281,14 +281,14 @@ public class View implements IView
 	}
 
 	@Override
-	public void setStopTextButton()
+	public void setButtonTextToStop()
 	{
 		buttonStartStop.setText(bundle.getString("text_button_stop"));
 		buttonStartStop.setDefaultCapable(false);
 	}
 
 	@Override
-	public void setStartTextButton()
+	public void setButtonTextToStart()
 	{
 		buttonStartStop.setText(bundle.getString("text_button_start"));
 		buttonStartStop.setDefaultCapable(true);
