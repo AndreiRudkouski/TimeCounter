@@ -115,12 +115,6 @@ public class TimeCounter implements ITimeCounter
 	}
 
 	@Override
-	public void changeLocale()
-	{
-		window.changeLocale();
-	}
-
-	@Override
 	public void chooseApplication()
 	{
 		File chosenFile = window.chooseApplication();
@@ -132,7 +126,7 @@ public class TimeCounter implements ITimeCounter
 	}
 
 	@Override
-	public void pushStartStopButton()
+	public void startStopTimer()
 	{
 		if (timer.isRunning())
 		{

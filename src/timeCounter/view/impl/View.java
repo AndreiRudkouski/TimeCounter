@@ -17,11 +17,9 @@ import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import timeCounter.controller.IController;
-import timeCounter.counter.ITimeCounter;
-import timeCounter.view.IView;
 import timeCounter.init.annotation.Setter;
-import timeCounter.listener.AbstractTimeListener;
 import timeCounter.logger.MainLogger;
+import timeCounter.view.IView;
 
 public class View implements IView, ActionListener
 {
@@ -61,26 +59,6 @@ public class View implements IView, ActionListener
 	private JCheckBox checkBreak;
 	private JCheckBox checkDate;
 
-	@Setter(name = "startStopTimeListener")
-	private AbstractTimeListener startStopTimeListener;
-	@Setter(name = "loadTimeListener")
-	private AbstractTimeListener loadTimeListener;
-	@Setter(name = "saveTimeListener")
-	private AbstractTimeListener saveTimeListener;
-	@Setter(name = "eraseCurrentTimeListener")
-	private AbstractTimeListener eraseCurrentTimeListener;
-	@Setter(name = "eraseTodayTimeListener")
-	private AbstractTimeListener eraseTodayTimeListener;
-	@Setter(name = "eraseTotalTimeListener")
-	private AbstractTimeListener eraseTotalTimeListener;
-	@Setter(name = "eraseApplicationListener")
-	private AbstractTimeListener eraseApplicationListener;
-	@Setter(name = "applicationListener")
-	private AbstractTimeListener applicationListener;
-	@Setter(name = "localeListener")
-	private AbstractTimeListener localeListener;
-	@Setter
-	private ITimeCounter timeCounter;
 	@Setter
 	private IController controller;
 
@@ -142,21 +120,27 @@ public class View implements IView, ActionListener
 		// Create counter item of the menu
 		menuCounter = new JMenu();
 		menuCounterLoad = new JMenuItem();
-		menuCounterLoad.addActionListener(loadTimeListener);
+		menuCounterLoad.addActionListener(this);
+		menuCounterLoad.setActionCommand("loadData");
 		menuCounterSave = new JMenuItem();
-		menuCounterSave.addActionListener(saveTimeListener);
+		menuCounterSave.addActionListener(this);
+		menuCounterSave.setActionCommand("saveData");
 		menuCounter.add(menuCounterLoad);
 		menuCounter.add(menuCounterSave);
 		// Create erase item of the menu
 		menuErase = new JMenu();
 		menuEraseCurrent = new JMenuItem();
-		menuEraseCurrent.addActionListener(eraseCurrentTimeListener);
+		menuEraseCurrent.addActionListener(this);
+		menuEraseCurrent.setActionCommand("eraseCurrentTime");
 		menuEraseToday = new JMenuItem();
-		menuEraseToday.addActionListener(eraseTodayTimeListener);
+		menuEraseToday.addActionListener(this);
+		menuEraseToday.setActionCommand("eraseTodayTime");
 		menuEraseTotal = new JMenuItem();
-		menuEraseTotal.addActionListener(eraseTotalTimeListener);
+		menuEraseTotal.addActionListener(this);
+		menuEraseTotal.setActionCommand("eraseTotalTime");
 		menuEraseApplication = new JMenuItem();
-		menuEraseApplication.addActionListener(eraseApplicationListener);
+		menuEraseApplication.addActionListener(this);
+		menuEraseApplication.setActionCommand("eraseApplication");
 		menuErase.add(menuEraseCurrent);
 		menuErase.add(menuEraseToday);
 		menuErase.add(menuEraseTotal);
@@ -165,8 +149,9 @@ public class View implements IView, ActionListener
 		menuSetting = new JMenu();
 		menuSettingApplication = new JMenuItem();
 		menuSettingLocale = new JMenuItem();
-		menuSettingApplication.addActionListener(applicationListener);
-		menuSettingLocale.addActionListener(localeListener);
+		menuSettingApplication.addActionListener(this);
+		menuSettingApplication.setActionCommand("chooseApplication");
+		menuSettingLocale.addActionListener(e -> this.changeLocale());
 		// Checkboxes
 		checkBreak = new JCheckBox();
 		checkBreak.setSelected(true);
@@ -212,7 +197,7 @@ public class View implements IView, ActionListener
 			@Override
 			public void windowClosing(WindowEvent we)
 			{
-				if (timeCounter.closeTimeCounter(false))
+				if (controller.closeTimeCounter(false))
 				{
 					int select = JOptionPane.showConfirmDialog(frame, bundle.getString("message_save"),
 							bundle.getString("title_save"),
@@ -221,7 +206,7 @@ public class View implements IView, ActionListener
 					{
 						return;
 					}
-					timeCounter.closeTimeCounter(select == JOptionPane.YES_OPTION);
+					controller.closeTimeCounter(select == JOptionPane.YES_OPTION);
 				}
 				System.exit(0);
 			}
@@ -286,6 +271,19 @@ public class View implements IView, ActionListener
 		{
 			buttonStartStop.setText(bundle.getString("text_button_stop"));
 		}
+	}
+
+	private void changeLocale()
+	{
+		if (bundle.getLocale().equals(LOCALE_EN))
+		{
+			bundle = ResourceBundle.getBundle(LOCALE_NAME, LOCALE_RU);
+		}
+		else
+		{
+			bundle = ResourceBundle.getBundle(LOCALE_NAME, LOCALE_EN);
+		}
+		initText();
 	}
 
 	@Override
@@ -354,20 +352,6 @@ public class View implements IView, ActionListener
 	}
 
 	@Override
-	public void changeLocale()
-	{
-		if (bundle.getLocale().equals(LOCALE_EN))
-		{
-			bundle = ResourceBundle.getBundle(LOCALE_NAME, LOCALE_RU);
-		}
-		else
-		{
-			bundle = ResourceBundle.getBundle(LOCALE_NAME, LOCALE_EN);
-		}
-		initText();
-	}
-
-	@Override
 	public File chooseApplication()
 	{
 		JFileChooser fileChooser = new JFileChooser();
@@ -417,7 +401,7 @@ public class View implements IView, ActionListener
 	{
 		try
 		{
-			Method method = controller.getClass().getMethod(event.getActionCommand(), null);
+			Method method = controller.getClass().getMethod(event.getActionCommand(),null);
 			method.invoke(controller, null);
 		}
 		catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e)

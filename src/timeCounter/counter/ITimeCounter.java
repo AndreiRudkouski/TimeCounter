@@ -33,11 +33,6 @@ public interface ITimeCounter
 	void saveData();
 
 	/**
-	 * Changes locale which is used in the time counter.
-	 */
-	void changeLocale();
-
-	/**
 	 * Chooses {@link File} file which is controlled.
 	 */
 	void chooseApplication();
@@ -48,9 +43,9 @@ public interface ITimeCounter
 	void eraseApplication();
 
 	/**
-	 * Pushes 'StartStop' button and run or stop the timer.
+	 * Runs or stops the timer.
 	 */
-	void pushStartStopButton();
+	void startStopTimer();
 
 	/**
 	 * Closes the application which is chosen for controlling.

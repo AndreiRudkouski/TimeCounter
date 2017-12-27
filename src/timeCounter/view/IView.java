@@ -76,11 +76,6 @@ public interface IView
 	void setRelaxReminder(boolean check);
 
 	/**
-	 * Changes locale which is used in GUI.
-	 */
-	void changeLocale();
-
-	/**
 	 * Returns {@link File} file which is controlled.
 	 *
 	 * @return {@link File} file or null.
