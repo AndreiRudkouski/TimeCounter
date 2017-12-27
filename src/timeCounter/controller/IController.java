@@ -1,5 +1,6 @@
 package timeCounter.controller;
 
-public class IController
+public interface IController
 {
+	void startStopTimer();
 }

@@ -2,6 +2,8 @@ package timeCounter.init.config;
 
 import java.io.File;
 
+import timeCounter.controller.IController;
+import timeCounter.controller.impl.Controller;
 import timeCounter.counter.ITimeCounter;
 import timeCounter.counter.impl.TimeCounter;
 import timeCounter.view.IView;
@@ -103,5 +105,11 @@ public class AppConfig
 	public File file()
 	{
 		return new File("set.txt");
+	}
+
+	@Instance
+	public IController controller()
+	{
+		return new Controller();
 	}
 }

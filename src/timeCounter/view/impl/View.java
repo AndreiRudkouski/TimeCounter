@@ -1,24 +1,29 @@
 package timeCounter.view.impl;
 
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
+import timeCounter.controller.IController;
 import timeCounter.counter.ITimeCounter;
 import timeCounter.view.IView;
 import timeCounter.init.annotation.Setter;
 import timeCounter.listener.AbstractTimeListener;
 import timeCounter.logger.MainLogger;
 
-public class View implements IView
+public class View implements IView, ActionListener
 {
 	private static final Font FONT_TOP_PANEL = new Font("sanserif", Font.BOLD, 12);
 	private static final Font FONT_LEFT_PANEL = new Font("sanserif", Font.BOLD, 15);
@@ -76,6 +81,8 @@ public class View implements IView
 	private AbstractTimeListener localeListener;
 	@Setter
 	private ITimeCounter timeCounter;
+	@Setter
+	private IController controller;
 
 	@Override
 	public void createView()
@@ -128,7 +135,8 @@ public class View implements IView
 		panelRight.setBorder(BorderFactory.createEmptyBorder(5, 0, 5, 10));
 		buttonStartStop = new JButton();
 		buttonStartStop.setPreferredSize(new Dimension(70, 25));
-		buttonStartStop.addActionListener(startStopTimeListener);
+		buttonStartStop.addActionListener(this);
+		buttonStartStop.setActionCommand("startStopTimer");
 		panelRight.add(buttonStartStop);
 
 		// Create counter item of the menu
@@ -402,5 +410,19 @@ public class View implements IView
 				bundle.getString("title_application_restart"),
 				JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE);
 		return select == JOptionPane.YES_OPTION;
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent event)
+	{
+		try
+		{
+			Method method = controller.getClass().getMethod(event.getActionCommand(), null);
+			method.invoke(controller, null);
+		}
+		catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e)
+		{
+			MainLogger.getLogger().severe(e.toString());
+		}
 	}
 }
