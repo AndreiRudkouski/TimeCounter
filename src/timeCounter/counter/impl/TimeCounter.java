@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -14,6 +15,7 @@ import java.util.stream.Stream;
 
 import javax.swing.*;
 
+import timeCounter.controller.IController;
 import timeCounter.counter.ITimeCounter;
 import timeCounter.init.annotation.Run;
 import timeCounter.init.annotation.Setter;
@@ -25,8 +27,10 @@ public class TimeCounter implements ITimeCounter
 {
 	private final static int SEC_TO_RELAX = 3000;
 
-	@Setter private IView window;
-	@Setter private ILoadSaveToFile saver;
+	@Setter
+	private IView window;
+	@Setter
+	private IController controller;
 	private Timer timer;
 
 	private AtomicLong currentTime = new AtomicLong(); //The current session time
@@ -59,16 +63,16 @@ public class TimeCounter implements ITimeCounter
 	{
 		setButtonToStart();
 		currentTime.set(0);
-		window.getCurrentTimeField().setText(printTime(currentTime));
+		controller.updateTimeFields(Arrays.asList(currentTime, null, null));
 	}
 
 	@Override
 	public void eraseTodayTime()
 	{
 		setButtonToStart();
-		eraseCurrentTime();
+		currentTime.set(0);
 		todayTime.set(0);
-		window.getTodayTimeField().setText(printTime(todayTime));
+		controller.updateTimeFields(Arrays.asList(currentTime, todayTime, null));
 	}
 
 	@Override
@@ -174,7 +178,7 @@ public class TimeCounter implements ITimeCounter
 		if (currentTime.get() % SEC_TO_RELAX == 0 && window.isRelaxReminder())
 		{
 			setButtonToStart();
-			if (!window.timeRelaxReminder())
+			if (!window.isChosenRelax())
 			{
 				setButtonToStop();
 			}
@@ -264,26 +268,10 @@ public class TimeCounter implements ITimeCounter
 				saveDataToFile();
 				currentTime.set(0);
 				todayTime.set(0);
-				window.getCurrentTimeField().setText(printTime(currentTime));
-				window.getTodayTimeField().setText(printTime(todayTime));
+				controller.updateTimeFields(Arrays.asList(currentTime, todayTime, null));
 			}
 			todayDate = currentDate;
 		}
-	}
-
-	private String printTime(AtomicLong second)
-	{
-		long sec = second.get();
-		long hour = sec / (60 * 60);
-		long day = hour / 24;
-		long min = (sec - hour * 60 * 60) / 60;
-		sec = sec - hour * 60 * 60 - min * 60;
-		hour = hour - day * 24;
-		if (day != 0)
-		{
-			return String.format("%1$02d-%2$02d:%3$02d:%4$02d", day, hour, min, sec);
-		}
-		return String.format("%1$02d:%2$02d:%3$02d", hour, min, sec);
 	}
 
 	private void assignTime()
@@ -293,19 +281,16 @@ public class TimeCounter implements ITimeCounter
 				new AtomicLong(0);
 		totalTime.set(0);
 		dateTimeMap.forEach((date, time) -> totalTime.getAndAdd(time.get()));
-		window.getCurrentTimeField().setText(printTime(currentTime));
-		window.getTodayTimeField().setText(printTime(todayTime));
-		window.getTotalTimeField().setText(printTime(totalTime));
+
+		controller.updateTimeFields(Arrays.asList(currentTime, todayTime, totalTime));
 	}
 
 	private void incrementTime()
 	{
 		currentTime.incrementAndGet();
-		window.getCurrentTimeField().setText(printTime(currentTime));
 		todayTime.incrementAndGet();
-		window.getTodayTimeField().setText(printTime(todayTime));
 		totalTime.incrementAndGet();
-		window.getTotalTimeField().setText(printTime(totalTime));
+		controller.updateTimeFields(Arrays.asList(currentTime, todayTime, totalTime));
 	}
 
 	private void correctTimeCounter()

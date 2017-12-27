@@ -10,8 +10,10 @@ import java.awt.event.WindowEvent;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
+import java.util.concurrent.atomic.AtomicLong;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -286,6 +288,41 @@ public class View implements IView, ActionListener
 		initText();
 	}
 
+	private String viewTimeFormater(AtomicLong second)
+	{
+		long sec = second.get();
+		long hour = sec / (60 * 60);
+		long day = hour / 24;
+		long min = (sec - hour * 60 * 60) / 60;
+		sec = sec - hour * 60 * 60 - min * 60;
+		hour = hour - day * 24;
+		if (day != 0)
+		{
+			return String.format("%1$02d-%2$02d:%3$02d:%4$02d", day, hour, min, sec);
+		}
+		return String.format("%1$02d:%2$02d:%3$02d", hour, min, sec);
+	}
+
+	@Override
+	public void updateTimeFields(List<AtomicLong> timeList)
+	{
+		if (timeList != null && timeList.size() == 3)
+		{
+			if (timeList.get(0) != null)
+			{
+				currentTimeField.setText(viewTimeFormater(timeList.get(0)));
+			}
+			if (timeList.get(1) != null)
+			{
+				todayTimeField.setText(viewTimeFormater(timeList.get(1)));
+			}
+			if (timeList.get(2) != null)
+			{
+				totalTimeField.setText(viewTimeFormater(timeList.get(2)));
+			}
+		}
+	}
+
 	@Override
 	public void setButtonTextToStop()
 	{
@@ -301,7 +338,7 @@ public class View implements IView, ActionListener
 	}
 
 	@Override
-	public boolean timeRelaxReminder()
+	public boolean isChosenRelax()
 	{
 		int select = JOptionPane.showConfirmDialog(frame, bundle.getString("message_relax_time"),
 				bundle.getString("title_relax_time"),
@@ -319,24 +356,6 @@ public class View implements IView, ActionListener
 	public void setAutoChangeDate(boolean check)
 	{
 		checkDate.setSelected(check);
-	}
-
-	@Override
-	public JTextField getCurrentTimeField()
-	{
-		return currentTimeField;
-	}
-
-	@Override
-	public JTextField getTodayTimeField()
-	{
-		return todayTimeField;
-	}
-
-	@Override
-	public JTextField getTotalTimeField()
-	{
-		return totalTimeField;
 	}
 
 	@Override

@@ -1,8 +1,8 @@
 package timeCounter.view;
 
 import java.io.File;
-
-import javax.swing.*;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * This interface identifies methods for working with GUI.
@@ -24,7 +24,7 @@ public interface IView
 	 *
 	 * @return true if the user has selected relaxation otherwise false.
 	 */
-	boolean timeRelaxReminder();
+	boolean isChosenRelax();
 
 	/**
 	 * Checks if "checkDate" checkbox is selected.
@@ -39,27 +39,6 @@ public interface IView
 	 * @param check parameter for checkbox.
 	 */
 	void setAutoChangeDate(boolean check);
-
-	/**
-	 * Returns {@link JTextField}'s field of the current time from GUI.
-	 *
-	 * @return {@link JTextField}'s field of the current time.
-	 */
-	JTextField getCurrentTimeField();
-
-	/**
-	 * Returns {@link JTextField}'s field of the today time from GUI.
-	 *
-	 * @return {@link JTextField}'s field of the today time.
-	 */
-	JTextField getTodayTimeField();
-
-	/**
-	 * Returns {@link JTextField}'s field of the total time from GUI.
-	 *
-	 * @return {@link JTextField}'s field of the total time.
-	 */
-	JTextField getTotalTimeField();
 
 	/**
 	 * Checks if "checkBreak" checkbox is selected.
@@ -101,4 +80,11 @@ public interface IView
 	 * Creates implementation of this interface.
 	 */
 	void createView();
+
+	/**
+	 * Updates time fields of view.
+	 *
+	 * @param timeList list of new time values (index 0 - the current time, 1 - the today time, 2 - the total time)
+	 */
+	void updateTimeFields(List<AtomicLong> timeList);
 }
