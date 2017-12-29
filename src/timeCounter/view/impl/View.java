@@ -377,8 +377,8 @@ public class View implements IView, ActionListener
 	{
 		try
 		{
-			Method method = timeCounter.getClass().getMethod(event.getActionCommand(), null);
-			method.invoke(timeCounter, null);
+			Method method = timeCounter.getClass().getMethod(event.getActionCommand());
+			method.invoke(timeCounter);
 		}
 		catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e)
 		{
