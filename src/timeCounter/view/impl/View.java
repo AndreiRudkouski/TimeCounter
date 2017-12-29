@@ -1,24 +1,31 @@
-package timeCounter.gui.impl;
+package timeCounter.view.impl;
 
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
+import java.util.concurrent.atomic.AtomicLong;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import timeCounter.counter.ITimeCounter;
-import timeCounter.gui.IGUIWindow;
 import timeCounter.init.annotation.Setter;
-import timeCounter.listener.AbstractTimeListener;
 import timeCounter.logger.MainLogger;
+import timeCounter.observer.ITimeObserver;
+import timeCounter.view.IView;
 
-public class GUIWindow implements IGUIWindow
+public class View implements IView, ActionListener
 {
 	private static final Font FONT_TOP_PANEL = new Font("sanserif", Font.BOLD, 12);
 	private static final Font FONT_LEFT_PANEL = new Font("sanserif", Font.BOLD, 15);
@@ -32,6 +39,12 @@ public class GUIWindow implements IGUIWindow
 	private static final String ICON_NAME = "timeCounter/resources/image/icon.png";
 	private static final String EXE_EXTENSION = "exe";
 	private static final String DOT = ".";
+
+	private static final String COMMAND_ERASE_CURRENT_DATE = "eraseCurrentTime";
+	private static final String COMMAND_LOAD_DATA = "loadData";
+	private static final String COMMAND_SAVE_DATA = "saveData";
+	private static final String COMMAND_ERASE_TODAY_DATE = "eraseTodayTime";
+	private static final String COMMAND_ERASE_TOTAL_DATE = "eraseTotalTime";
 
 	private JFrame frame;
 	private JLabel labelApplication;
@@ -55,30 +68,15 @@ public class GUIWindow implements IGUIWindow
 	private JButton buttonStartStop;
 	private JCheckBox checkBreak;
 	private JCheckBox checkDate;
+	private JFileChooser fileChooser;
 
-	@Setter(name = "startStopTimeListener")
-	private AbstractTimeListener startStopTimeListener;
-	@Setter(name = "loadTimeListener")
-	private AbstractTimeListener loadTimeListener;
-	@Setter(name = "saveTimeListener")
-	private AbstractTimeListener saveTimeListener;
-	@Setter(name = "eraseCurrentTimeListener")
-	private AbstractTimeListener eraseCurrentTimeListener;
-	@Setter(name = "eraseTodayTimeListener")
-	private AbstractTimeListener eraseTodayTimeListener;
-	@Setter(name = "eraseTotalTimeListener")
-	private AbstractTimeListener eraseTotalTimeListener;
-	@Setter(name = "eraseApplicationListener")
-	private AbstractTimeListener eraseApplicationListener;
-	@Setter(name = "applicationListener")
-	private AbstractTimeListener applicationListener;
-	@Setter(name = "localeListener")
-	private AbstractTimeListener localeListener;
 	@Setter
 	private ITimeCounter timeCounter;
 
+	private List<ITimeObserver> observers = new ArrayList<>();
+
 	@Override
-	public void create()
+	public void createView()
 	{
 		JPanel panelTop = new JPanel();
 		labelApplication = new JLabel();
@@ -128,27 +126,38 @@ public class GUIWindow implements IGUIWindow
 		panelRight.setBorder(BorderFactory.createEmptyBorder(5, 0, 5, 10));
 		buttonStartStop = new JButton();
 		buttonStartStop.setPreferredSize(new Dimension(70, 25));
-		buttonStartStop.addActionListener(startStopTimeListener);
+		buttonStartStop.addActionListener(e -> {
+			updateTiming(!buttonStartStop.getText().equalsIgnoreCase(bundle.getString("text_button_stop")));
+			notifyTimeObserversAboutTiming();
+		});
 		panelRight.add(buttonStartStop);
 
 		// Create counter item of the menu
 		menuCounter = new JMenu();
 		menuCounterLoad = new JMenuItem();
-		menuCounterLoad.addActionListener(loadTimeListener);
+		menuCounterLoad.addActionListener(this);
+		menuCounterLoad.setActionCommand(COMMAND_LOAD_DATA);
 		menuCounterSave = new JMenuItem();
-		menuCounterSave.addActionListener(saveTimeListener);
+		menuCounterSave.addActionListener(this);
+		menuCounterSave.setActionCommand(COMMAND_SAVE_DATA);
 		menuCounter.add(menuCounterLoad);
 		menuCounter.add(menuCounterSave);
 		// Create erase item of the menu
 		menuErase = new JMenu();
 		menuEraseCurrent = new JMenuItem();
-		menuEraseCurrent.addActionListener(eraseCurrentTimeListener);
+		menuEraseCurrent.addActionListener(this);
+		menuEraseCurrent.setActionCommand(COMMAND_ERASE_CURRENT_DATE);
 		menuEraseToday = new JMenuItem();
-		menuEraseToday.addActionListener(eraseTodayTimeListener);
+		menuEraseToday.addActionListener(this);
+		menuEraseToday.setActionCommand(COMMAND_ERASE_TODAY_DATE);
 		menuEraseTotal = new JMenuItem();
-		menuEraseTotal.addActionListener(eraseTotalTimeListener);
+		menuEraseTotal.addActionListener(this);
+		menuEraseTotal.setActionCommand(COMMAND_ERASE_TOTAL_DATE);
 		menuEraseApplication = new JMenuItem();
-		menuEraseApplication.addActionListener(eraseApplicationListener);
+		menuEraseApplication.addActionListener(e -> {
+			changeApplicationLabel(null);
+			notifyTimeObserversAboutSettings();
+		});
 		menuErase.add(menuEraseCurrent);
 		menuErase.add(menuEraseToday);
 		menuErase.add(menuEraseTotal);
@@ -157,12 +166,14 @@ public class GUIWindow implements IGUIWindow
 		menuSetting = new JMenu();
 		menuSettingApplication = new JMenuItem();
 		menuSettingLocale = new JMenuItem();
-		menuSettingApplication.addActionListener(applicationListener);
-		menuSettingLocale.addActionListener(localeListener);
+		menuSettingApplication.addActionListener(e -> chooseApplication());
+		menuSettingLocale.addActionListener(e -> changeLocale());
 		// Checkboxes
 		checkBreak = new JCheckBox();
+		checkBreak.addActionListener(e -> notifyTimeObserversAboutSettings());
 		checkBreak.setSelected(true);
 		checkDate = new JCheckBox();
+		checkDate.addActionListener(e -> notifyTimeObserversAboutSettings());
 		checkDate.setSelected(true);
 		menuSetting.add(menuSettingApplication);
 		menuSetting.add(menuSettingLocale);
@@ -204,7 +215,7 @@ public class GUIWindow implements IGUIWindow
 			@Override
 			public void windowClosing(WindowEvent we)
 			{
-				if (timeCounter.closeTimeCounter(false))
+				if (timeCounter.closeTimeCounter(false, false))
 				{
 					int select = JOptionPane.showConfirmDialog(frame, bundle.getString("message_save"),
 							bundle.getString("title_save"),
@@ -213,7 +224,7 @@ public class GUIWindow implements IGUIWindow
 					{
 						return;
 					}
-					timeCounter.closeTimeCounter(select == JOptionPane.YES_OPTION);
+					timeCounter.closeTimeCounter(select == JOptionPane.YES_OPTION, true);
 				}
 				System.exit(0);
 			}
@@ -270,7 +281,7 @@ public class GUIWindow implements IGUIWindow
 		menuSettingLocale.setText(bundle.getString("menu_item_setting_locale"));
 		checkBreak.setText(bundle.getString("label_break"));
 		checkDate.setText(bundle.getString("label_date"));
-		if (buttonStartStop.isDefaultCapable())
+		if (buttonStartStop.getText().equalsIgnoreCase(bundle.getString("text_button_stop")))
 		{
 			buttonStartStop.setText(bundle.getString("text_button_start"));
 		}
@@ -280,73 +291,7 @@ public class GUIWindow implements IGUIWindow
 		}
 	}
 
-	@Override
-	public void setStopTextButton()
-	{
-		buttonStartStop.setText(bundle.getString("text_button_stop"));
-		buttonStartStop.setDefaultCapable(false);
-	}
-
-	@Override
-	public void setStartTextButton()
-	{
-		buttonStartStop.setText(bundle.getString("text_button_start"));
-		buttonStartStop.setDefaultCapable(true);
-	}
-
-	@Override
-	public boolean timeRelaxReminder()
-	{
-		int select = JOptionPane.showConfirmDialog(frame, bundle.getString("message_relax_time"),
-				bundle.getString("title_relax_time"),
-				JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE);
-		return select == JOptionPane.YES_OPTION;
-	}
-
-	@Override
-	public boolean isAutoChangeDate()
-	{
-		return checkDate.isSelected();
-	}
-
-	@Override
-	public void setAutoChangeDate(boolean check)
-	{
-		checkDate.setSelected(check);
-	}
-
-	@Override
-	public JTextField getCurrentTimeField()
-	{
-		return currentTimeField;
-	}
-
-	@Override
-	public JTextField getTodayTimeField()
-	{
-		return todayTimeField;
-	}
-
-	@Override
-	public JTextField getTotalTimeField()
-	{
-		return totalTimeField;
-	}
-
-	@Override
-	public boolean isRelaxReminder()
-	{
-		return checkBreak.isSelected();
-	}
-
-	@Override
-	public void setRelaxReminder(boolean check)
-	{
-		checkBreak.setSelected(check);
-	}
-
-	@Override
-	public void changeLocale()
+	private void changeLocale()
 	{
 		if (bundle.getLocale().equals(LOCALE_EN))
 		{
@@ -359,10 +304,33 @@ public class GUIWindow implements IGUIWindow
 		initText();
 	}
 
-	@Override
-	public File chooseApplication()
+	private String viewTimeFormatter(AtomicLong second)
 	{
-		JFileChooser fileChooser = new JFileChooser();
+		long sec = second.get();
+		long hour = sec / (60 * 60);
+		long day = hour / 24;
+		long min = (sec - hour * 60 * 60) / 60;
+		sec = sec - hour * 60 * 60 - min * 60;
+		hour = hour - day * 24;
+		if (day != 0)
+		{
+			return String.format("%1$02d-%2$02d:%3$02d:%4$02d", day, hour, min, sec);
+		}
+		return String.format("%1$02d:%2$02d:%3$02d", hour, min, sec);
+	}
+
+	@Override
+	public boolean isChosenRelax()
+	{
+		int select = JOptionPane.showConfirmDialog(frame, bundle.getString("message_relax_time"),
+				bundle.getString("title_relax_time"),
+				JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE);
+		return select == JOptionPane.YES_OPTION;
+	}
+
+	private void chooseApplication()
+	{
+		fileChooser = new JFileChooser();
 		fileChooser.setAcceptAllFileFilterUsed(false);
 		fileChooser.setFileFilter(new FileNameExtensionFilter(DOT + EXE_EXTENSION, EXE_EXTENSION));
 		int result = fileChooser.showOpenDialog(frame);
@@ -373,15 +341,15 @@ public class GUIWindow implements IGUIWindow
 			if (index > 0 && index < fileName.length() - 1 && fileName.substring(index + 1).equalsIgnoreCase(
 					EXE_EXTENSION))
 			{
-				return fileChooser.getSelectedFile();
+				changeApplicationLabel(fileChooser.getSelectedFile());
+				notifyTimeObserversAboutSettings();
 			}
 		}
-		return null;
 	}
 
-	@Override
-	public void setApplicationLabel(String name)
+	private void changeApplicationLabel(File file)
 	{
+		String name = file != null ? file.getName() : null;
 		if (name != null)
 		{
 			labelApplication.setText(name);
@@ -402,5 +370,79 @@ public class GUIWindow implements IGUIWindow
 				bundle.getString("title_application_restart"),
 				JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE);
 		return select == JOptionPane.YES_OPTION;
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent event)
+	{
+		try
+		{
+			Method method = timeCounter.getClass().getMethod(event.getActionCommand(), null);
+			method.invoke(timeCounter, null);
+		}
+		catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e)
+		{
+			MainLogger.getLogger().severe(e.toString());
+		}
+	}
+
+	@Override
+	public void updateTime(List<AtomicLong> timeList)
+	{
+		if (timeList != null && timeList.size() == 3)
+		{
+			if (timeList.get(0) != null)
+			{
+				currentTimeField.setText(viewTimeFormatter(timeList.get(0)));
+			}
+			if (timeList.get(1) != null)
+			{
+				todayTimeField.setText(viewTimeFormatter(timeList.get(1)));
+			}
+			if (timeList.get(2) != null)
+			{
+				totalTimeField.setText(viewTimeFormatter(timeList.get(2)));
+			}
+		}
+	}
+
+	@Override
+	public void updateSettings(boolean autoChangeDate, boolean relaxReminder, File file)
+	{
+		checkDate.setSelected(autoChangeDate);
+		checkBreak.setSelected(relaxReminder);
+		changeApplicationLabel(file);
+	}
+
+	@Override
+	public void updateTiming(boolean isStart)
+	{
+		buttonStartStop.setText(isStart ? bundle.getString("text_button_stop") : bundle.getString("text_button_start"));
+	}
+
+	@Override
+	public void addTimeObserver(ITimeObserver observer)
+	{
+		observers.add(observer);
+	}
+
+	@Override
+	public void notifyTimeObserversAboutTime()
+	{
+		MainLogger.getLogger().severe("Operation is not supported");
+	}
+
+	@Override
+	public void notifyTimeObserversAboutSettings()
+	{
+		observers.forEach(obs -> obs.updateSettings(checkDate.isSelected(), checkBreak.isSelected(),
+				fileChooser != null ? fileChooser.getSelectedFile() : null));
+	}
+
+	@Override
+	public void notifyTimeObserversAboutTiming()
+	{
+		observers.forEach(obs -> obs
+				.updateTiming(buttonStartStop.getText().equalsIgnoreCase(bundle.getString("text_button_stop"))));
 	}
 }
