@@ -15,12 +15,11 @@ import java.util.stream.Stream;
 
 import javax.swing.*;
 
-import timeCounter.controller.IController;
 import timeCounter.counter.ITimeCounter;
-import timeCounter.init.annotation.Run;
 import timeCounter.init.annotation.Setter;
 import timeCounter.load.ILoadSaveToFile;
 import timeCounter.logger.MainLogger;
+import timeCounter.observer.ITimeObserver;
 import timeCounter.view.IView;
 
 public class TimeCounter implements ITimeCounter
@@ -28,9 +27,9 @@ public class TimeCounter implements ITimeCounter
 	private final static int SEC_TO_RELAX = 3000;
 
 	@Setter
-	private IView window;
+	private IView view;
 	@Setter
-	private IController controller;
+	private ILoadSaveToFile saver;
 	private Timer timer;
 
 	private AtomicLong currentTime = new AtomicLong(); //The current session time
@@ -39,8 +38,12 @@ public class TimeCounter implements ITimeCounter
 	private LocalDate currentDate;
 	private LocalDate todayDate = LocalDate.now();
 	private Map<LocalDate, AtomicLong> dateTimeMap = new TreeMap<>();
+	private boolean autoChangeDate;
+	private boolean relaxReminder;
 	private File file;
 	private Process process;
+
+	private List<ITimeObserver> observers = new ArrayList<>();
 
 	// Settings for time counter
 	private int timerPause = 1000;
@@ -61,24 +64,24 @@ public class TimeCounter implements ITimeCounter
 	@Override
 	public void eraseCurrentTime()
 	{
-		setButtonToStart();
+		stopTimer();
 		currentTime.set(0);
-		controller.updateTimeFields(Arrays.asList(currentTime, null, null));
+		notifyTimeObserversAboutTime();
 	}
 
 	@Override
 	public void eraseTodayTime()
 	{
-		setButtonToStart();
+		stopTimer();
 		currentTime.set(0);
 		todayTime.set(0);
-		controller.updateTimeFields(Arrays.asList(currentTime, todayTime, null));
+		notifyTimeObserversAboutTime();
 	}
 
 	@Override
 	public void eraseTotalTime()
 	{
-		setButtonToStart();
+		stopTimer();
 		dateTimeMap.clear();
 		assignTime();
 	}
@@ -86,22 +89,10 @@ public class TimeCounter implements ITimeCounter
 	@Override
 	public void loadData()
 	{
-		window.setButtonTextToStart();
-		loadDataFromFile();
-		if (file != null)
-		{
-			window.setApplicationLabel(file.getName());
-		}
-		assignTime();
 		timer.restart();
-		timer.stop();
-	}
-
-	@Run
-	private void initLoadData()
-	{
-		window.createView();
-		loadData();
+		stopTimer();
+		loadDataFromFile();
+		assignTime();
 	}
 
 	@Override
@@ -119,33 +110,9 @@ public class TimeCounter implements ITimeCounter
 	}
 
 	@Override
-	public void chooseApplication()
+	public boolean closeTimeCounter(boolean saveData, boolean closeApp)
 	{
-		File chosenFile = window.chooseApplication();
-		if (chosenFile != null)
-		{
-			file = chosenFile;
-			window.setApplicationLabel(file.getName());
-		}
-	}
-
-	@Override
-	public void startStopTimer()
-	{
-		if (timer.isRunning())
-		{
-			setButtonToStart();
-		}
-		else
-		{
-			setButtonToStop();
-		}
-	}
-
-	@Override
-	public boolean closeTimeCounter(boolean close)
-	{
-		setButtonToStart();
+		stopTimer();
 		boolean result = false;
 		if ((!dateTimeMap.isEmpty() && ((dateTimeMap.containsKey(todayDate) && dateTimeMap.get(todayDate).get()
 				!= todayTime.get()) || (!dateTimeMap.containsKey(todayDate) && todayTime.get() != 0))) ||
@@ -154,46 +121,39 @@ public class TimeCounter implements ITimeCounter
 			result = true;
 		}
 
-		if (close)
+		if (saveData)
 		{
 			saveData();
 		}
 
-		if (process != null && process.isAlive())
+		if (closeApp && process != null && process.isAlive())
 		{
 			process.destroy();
 		}
 		return result;
 	}
 
-	@Override
-	public void eraseApplication()
-	{
-		file = null;
-		window.setApplicationLabel(null);
-	}
-
 	private void checkRelaxTime()
 	{
-		if (currentTime.get() % SEC_TO_RELAX == 0 && window.isRelaxReminder())
+		if (currentTime.get() % SEC_TO_RELAX == 0 && relaxReminder)
 		{
-			setButtonToStart();
-			if (!window.isChosenRelax())
+			stopTimer();
+			if (!view.isChosenRelax())
 			{
-				setButtonToStop();
+				startTimer();
 			}
 		}
 	}
 
-	private void setButtonToStop()
+	private void startTimer()
 	{
 		if ((process == null || !process.isAlive()) && file != null)
 		{
 			if (isRunningProcess(file.getName()))
 			{
-				if (window.runningApplicationNotice())
+				if (view.runningApplicationNotice())
 				{
-					setButtonToStart();
+					stopTimer();
 					return;
 				}
 			}
@@ -212,7 +172,13 @@ public class TimeCounter implements ITimeCounter
 
 		correctTimeCounter();
 		timer.start();
-		window.setButtonTextToStop();
+		notifyTimeObserversAboutTiming();
+	}
+
+	private void stopTimer()
+	{
+		timer.stop();
+		notifyTimeObserversAboutTiming();
 	}
 
 	private boolean isRunningProcess(String name)
@@ -244,18 +210,12 @@ public class TimeCounter implements ITimeCounter
 		return false;
 	}
 
-	private void setButtonToStart()
-	{
-		window.setButtonTextToStart();
-		timer.stop();
-	}
-
 	private void checkChangeDate()
 	{
 		currentDate = LocalDate.now();
 		if (!todayDate.equals(currentDate))
 		{
-			if (window.isAutoChangeDate())
+			if (autoChangeDate)
 			{
 				if (dateTimeMap.containsKey(todayDate))
 				{
@@ -268,7 +228,7 @@ public class TimeCounter implements ITimeCounter
 				saveDataToFile();
 				currentTime.set(0);
 				todayTime.set(0);
-				controller.updateTimeFields(Arrays.asList(currentTime, todayTime, null));
+				notifyTimeObserversAboutTime();
 			}
 			todayDate = currentDate;
 		}
@@ -281,8 +241,7 @@ public class TimeCounter implements ITimeCounter
 				new AtomicLong(0);
 		totalTime.set(0);
 		dateTimeMap.forEach((date, time) -> totalTime.getAndAdd(time.get()));
-
-		controller.updateTimeFields(Arrays.asList(currentTime, todayTime, totalTime));
+		notifyTimeObserversAboutTime();
 	}
 
 	private void incrementTime()
@@ -290,7 +249,7 @@ public class TimeCounter implements ITimeCounter
 		currentTime.incrementAndGet();
 		todayTime.incrementAndGet();
 		totalTime.incrementAndGet();
-		controller.updateTimeFields(Arrays.asList(currentTime, todayTime, totalTime));
+		notifyTimeObserversAboutTime();
 	}
 
 	private void correctTimeCounter()
@@ -312,7 +271,7 @@ public class TimeCounter implements ITimeCounter
 	{
 		if (process != null && !process.isAlive())
 		{
-			setButtonToStart();
+			stopTimer();
 		}
 		else
 		{
@@ -326,7 +285,7 @@ public class TimeCounter implements ITimeCounter
 	{
 		List<String> dataToSave = new ArrayList<>();
 		String fileName = file != null ? file.getAbsolutePath() : "";
-		dataToSave.add(fileName + DELIMITER + window.isRelaxReminder() + DELIMITER + window.isAutoChangeDate());
+		dataToSave.add(fileName + DELIMITER + autoChangeDate + DELIMITER + relaxReminder);
 		for (Map.Entry<LocalDate, AtomicLong> tmp : dateTimeMap.entrySet())
 		{
 			dataToSave.add(tmp.getKey().getDayOfMonth() + DELIMITER + tmp.getKey().getMonthValue() + DELIMITER +
@@ -353,9 +312,61 @@ public class TimeCounter implements ITimeCounter
 				{
 					file = new File(stringTmp[0]);
 				}
-				window.setRelaxReminder(Boolean.parseBoolean(stringTmp[1]));
-				window.setAutoChangeDate(Boolean.parseBoolean(stringTmp[2]));
+				autoChangeDate = Boolean.parseBoolean(stringTmp[1]);
+				relaxReminder = Boolean.parseBoolean(stringTmp[2]);
 			}
+		}
+		notifyTimeObserversAboutSettings();
+	}
+
+	@Override
+	public void addTimeObserver(ITimeObserver observer)
+	{
+		observers.add(observer);
+	}
+
+	@Override
+	public void notifyTimeObserversAboutTime()
+	{
+		observers.forEach(obs -> obs.updateTime(Arrays.asList(currentTime, todayTime, totalTime)));
+	}
+
+	@Override
+	public void notifyTimeObserversAboutSettings()
+	{
+		observers.forEach(obs -> obs.updateSettings(autoChangeDate, relaxReminder, file));
+	}
+
+	@Override
+	public void notifyTimeObserversAboutTiming()
+	{
+		observers.forEach(obs -> obs.updateTiming(timer.isRunning()));
+	}
+
+	@Override
+	public void updateTime(List<AtomicLong> timeList)
+	{
+		MainLogger.getLogger().severe("Operation is not supported");
+	}
+
+	@Override
+	public void updateSettings(boolean autoChangeDate, boolean relaxReminder, File file)
+	{
+		this.autoChangeDate = autoChangeDate;
+		this.relaxReminder = relaxReminder;
+		this.file = file;
+	}
+
+	@Override
+	public void updateTiming(boolean isStart)
+	{
+		if (isStart)
+		{
+			startTimer();
+		}
+		else
+		{
+			stopTimer();
 		}
 	}
 }

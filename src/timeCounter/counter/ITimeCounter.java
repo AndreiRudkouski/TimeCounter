@@ -1,11 +1,12 @@
 package timeCounter.counter;
 
-import java.io.File;
+import timeCounter.observer.ITimeObservable;
+import timeCounter.observer.ITimeObserver;
 
 /**
  * This interface identifies methods for working with {@link ITimeCounter}' implementation.
  */
-public interface ITimeCounter
+public interface ITimeCounter extends ITimeObserver, ITimeObservable
 {
 	/**
 	 * Erases the current time by zero and passes a new value to GUI.
@@ -33,25 +34,11 @@ public interface ITimeCounter
 	void saveData();
 
 	/**
-	 * Chooses {@link File} file which is controlled.
-	 */
-	void chooseApplication();
-
-	/**
-	 * Erases {@link File} file which is controlled.
-	 */
-	void eraseApplication();
-
-	/**
-	 * Runs or stops the timer.
-	 */
-	void startStopTimer();
-
-	/**
 	 * Closes the application which is chosen for controlling.
 	 *
-	 * @param close user choice for saving data
+	 * @param saveData user choice for saving data
+	 * @param closeApp close or not the connected application
 	 * @return true if these is data for saving otherwise false
 	 */
-	boolean closeTimeCounter(boolean close);
+	boolean closeTimeCounter(boolean saveData, boolean closeApp);
 }

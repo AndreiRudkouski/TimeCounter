@@ -13,7 +13,6 @@ import java.util.stream.Collectors;
 import timeCounter.init.IInitializer;
 import timeCounter.init.annotation.Config;
 import timeCounter.init.annotation.Instance;
-import timeCounter.init.annotation.Run;
 import timeCounter.init.annotation.Setter;
 import timeCounter.logger.MainLogger;
 
@@ -25,7 +24,6 @@ public class Initializer implements IInitializer
 	{
 		createInstances(configs);
 		initFields();
-		runMethod();
 	}
 
 	/**
@@ -137,28 +135,9 @@ public class Initializer implements IInitializer
 		}
 	}
 
-	/**
-	 * Runs the first found method which is marked by {@link Run} annotation.
-	 */
-	private void runMethod()
+	@Override
+	public Object getClassInstanceByName(String name)
 	{
-		try
-		{
-			for (Map.Entry<String, Object> classInstance : classInstances.entrySet())
-			{
-				Method method = Arrays.stream(classInstance.getValue().getClass().getDeclaredMethods())
-						.filter(m -> m.isAnnotationPresent(Run.class)).findFirst().orElse(null);
-				if (method != null)
-				{
-					method.setAccessible(true);
-					method.invoke(classInstance.getValue());
-					return;
-				}
-			}
-		}
-		catch (IllegalAccessException | InvocationTargetException e)
-		{
-			MainLogger.getLogger().severe(e.toString());
-		}
+		return classInstances.get(name);
 	}
 }
