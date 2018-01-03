@@ -4,7 +4,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Locale;
 
-import timeCounter.command.CommandType;
+import timeCounter.command.CommandName;
 import timeCounter.command.ICommand;
 import timeCounter.counter.ITimeCounter;
 import timeCounter.init.annotation.Setter;
@@ -19,41 +19,38 @@ public class Command implements ICommand
 	private IView view;
 
 	@Override
-	public void executeCommand(String commandName)
+	public boolean executeCommand(String commandName)
 	{
-		executeBooleanCommandWithParameters(commandName, null, null);
+		return executeCommand(commandName, null, null);
 	}
 
 	@Override
-	public boolean executeBooleanCommand(String commandName)
-	{
-		return executeBooleanCommandWithParameters(commandName, null, null);
-	}
-
-	@Override
-	public boolean executeBooleanCommandWithParameters(String commandName, Boolean saveData, Boolean closeApp)
+	public boolean executeCommand(String commandName, Boolean param1, Boolean param2)
 	{
 		boolean result = false;
 		try
 		{
-			CommandType currentType = CommandType.valueOf(commandName.toUpperCase(Locale.ENGLISH));
+			CommandName currentType = CommandName.valueOf(commandName.toUpperCase(Locale.ENGLISH));
+			Object executor = currentType.getExecutorName().equalsIgnoreCase(timeCounter.getClass().getSimpleName()) ?
+					timeCounter :
+					view;
 			if (!currentType.isBooleanReturn())
 			{
-				Method method = timeCounter.getClass().getMethod(currentType.getMethodName());
-				method.invoke(timeCounter);
+				Method method = executor.getClass().getMethod(currentType.getMethodName());
+				method.invoke(executor);
 			}
 			else
 			{
 				if (currentType.withParameters())
 				{
-					Method method = timeCounter.getClass().getMethod(currentType.getMethodName(), Boolean.class,
+					Method method = executor.getClass().getMethod(currentType.getMethodName(), Boolean.class,
 							Boolean.class);
-					result = (boolean) method.invoke(timeCounter, saveData, closeApp);
+					result = (boolean) method.invoke(executor, param1, param2);
 				}
 				else
 				{
-					Method method = view.getClass().getMethod(currentType.getMethodName());
-					result = (boolean) method.invoke(view);
+					Method method = executor.getClass().getMethod(currentType.getMethodName());
+					result = (boolean) method.invoke(executor);
 				}
 			}
 		}

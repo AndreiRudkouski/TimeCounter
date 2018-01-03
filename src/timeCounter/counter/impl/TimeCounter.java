@@ -15,7 +15,7 @@ import java.util.stream.Stream;
 
 import javax.swing.*;
 
-import timeCounter.command.CommandType;
+import timeCounter.command.CommandName;
 import timeCounter.command.ICommand;
 import timeCounter.counter.ITimeCounter;
 import timeCounter.init.annotation.Setter;
@@ -139,7 +139,7 @@ public class TimeCounter implements ITimeCounter
 		if (currentTime.get() % SEC_TO_RELAX == 0 && relaxReminder)
 		{
 			stopTimer();
-			if (!command.executeBooleanCommand(CommandType.CHOSEN_RELAX.name()))
+			if (!command.executeCommand(CommandName.VIEW_CHOSEN_RELAX.name()))
 			{
 				startTimer();
 			}
@@ -152,7 +152,7 @@ public class TimeCounter implements ITimeCounter
 		{
 			if (isRunningProcess(file.getName()))
 			{
-				if (command.executeBooleanCommand(CommandType.RUNNING_APPLICATION_NOTICE.name()))
+				if (command.executeCommand(CommandName.VIEW_RUNNING_APPLICATION_NOTICE.name()))
 				{
 					stopTimer();
 					return;

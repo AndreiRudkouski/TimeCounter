@@ -17,7 +17,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
-import timeCounter.command.CommandType;
+import timeCounter.command.CommandName;
 import timeCounter.command.ICommand;
 import timeCounter.init.annotation.Setter;
 import timeCounter.logger.MainLogger;
@@ -129,23 +129,23 @@ public class View implements IView, ActionListener
 		menuCounter = new JMenu();
 		menuCounterLoad = new JMenuItem();
 		menuCounterLoad.addActionListener(this);
-		menuCounterLoad.setActionCommand(CommandType.LOAD_DATA.name());
+		menuCounterLoad.setActionCommand(CommandName.TIME_COUNTER_LOAD_DATA.name());
 		menuCounterSave = new JMenuItem();
 		menuCounterSave.addActionListener(this);
-		menuCounterSave.setActionCommand(CommandType.SAVE_DATA.name());
+		menuCounterSave.setActionCommand(CommandName.TIME_COUNTER_SAVE_DATA.name());
 		menuCounter.add(menuCounterLoad);
 		menuCounter.add(menuCounterSave);
 		// Create erase item of the menu
 		menuErase = new JMenu();
 		menuEraseCurrent = new JMenuItem();
 		menuEraseCurrent.addActionListener(this);
-		menuEraseCurrent.setActionCommand(CommandType.ERASE_CURRENT_DATE.name());
+		menuEraseCurrent.setActionCommand(CommandName.TIME_COUNTER_ERASE_CURRENT_DATE.name());
 		menuEraseToday = new JMenuItem();
 		menuEraseToday.addActionListener(this);
-		menuEraseToday.setActionCommand(CommandType.ERASE_TODAY_DATE.name());
+		menuEraseToday.setActionCommand(CommandName.TIME_COUNTER_ERASE_TODAY_DATE.name());
 		menuEraseTotal = new JMenuItem();
 		menuEraseTotal.addActionListener(this);
-		menuEraseTotal.setActionCommand(CommandType.ERASE_TOTAL_DATE.name());
+		menuEraseTotal.setActionCommand(CommandName.TIME_COUNTER_ERASE_TOTAL_DATE.name());
 		menuEraseApplication = new JMenuItem();
 		menuEraseApplication.addActionListener(e -> {
 			changeApplicationLabel(null);
@@ -208,7 +208,7 @@ public class View implements IView, ActionListener
 			@Override
 			public void windowClosing(WindowEvent we)
 			{
-				if (command.executeBooleanCommandWithParameters(CommandType.CLOSE.name(), false, false))
+				if (command.executeCommand(CommandName.TIME_COUNTER_CLOSE.name(), false, false))
 				{
 					int select = JOptionPane.showConfirmDialog(frame, bundle.getString("message_save"),
 							bundle.getString("title_save"),
@@ -217,7 +217,7 @@ public class View implements IView, ActionListener
 					{
 						return;
 					}
-					command.executeBooleanCommandWithParameters(CommandType.CLOSE.name(),
+					command.executeCommand(CommandName.TIME_COUNTER_CLOSE.name(),
 							select == JOptionPane.YES_OPTION, true);
 				}
 				System.exit(0);
