@@ -40,5 +40,5 @@ public interface ITimeCounter extends ITimeObserver, ITimeObservable
 	 * @param closeApp close or not the connected application
 	 * @return true if these is data for saving otherwise false
 	 */
-	boolean closeTimeCounter(boolean saveData, boolean closeApp);
+	boolean closeTimeCounter(Boolean saveData, Boolean closeApp);
 }

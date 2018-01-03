@@ -15,19 +15,20 @@ import java.util.stream.Stream;
 
 import javax.swing.*;
 
+import timeCounter.command.CommandType;
+import timeCounter.command.ICommand;
 import timeCounter.counter.ITimeCounter;
 import timeCounter.init.annotation.Setter;
 import timeCounter.load.ILoadSaveToFile;
 import timeCounter.logger.MainLogger;
 import timeCounter.observer.ITimeObserver;
-import timeCounter.view.IView;
 
 public class TimeCounter implements ITimeCounter
 {
 	private final static int SEC_TO_RELAX = 3000;
 
 	@Setter
-	private IView view;
+	private ICommand command;
 	@Setter
 	private ILoadSaveToFile saver;
 	private Timer timer;
@@ -110,7 +111,7 @@ public class TimeCounter implements ITimeCounter
 	}
 
 	@Override
-	public boolean closeTimeCounter(boolean saveData, boolean closeApp)
+	public boolean closeTimeCounter(Boolean saveData, Boolean closeApp)
 	{
 		stopTimer();
 		boolean result = false;
@@ -138,7 +139,7 @@ public class TimeCounter implements ITimeCounter
 		if (currentTime.get() % SEC_TO_RELAX == 0 && relaxReminder)
 		{
 			stopTimer();
-			if (!view.isChosenRelax())
+			if (!command.executeBooleanCommand(CommandType.CHOSEN_RELAX.name()))
 			{
 				startTimer();
 			}
@@ -151,7 +152,7 @@ public class TimeCounter implements ITimeCounter
 		{
 			if (isRunningProcess(file.getName()))
 			{
-				if (view.runningApplicationNotice())
+				if (command.executeBooleanCommand(CommandType.RUNNING_APPLICATION_NOTICE.name()))
 				{
 					stopTimer();
 					return;

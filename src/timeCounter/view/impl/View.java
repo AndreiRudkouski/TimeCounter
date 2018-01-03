@@ -8,8 +8,6 @@ import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -19,7 +17,8 @@ import java.util.concurrent.atomic.AtomicLong;
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
-import timeCounter.counter.ITimeCounter;
+import timeCounter.command.CommandType;
+import timeCounter.command.ICommand;
 import timeCounter.init.annotation.Setter;
 import timeCounter.logger.MainLogger;
 import timeCounter.observer.ITimeObserver;
@@ -39,12 +38,6 @@ public class View implements IView, ActionListener
 	private static final String ICON_NAME = "timeCounter/resources/image/icon.png";
 	private static final String EXE_EXTENSION = "exe";
 	private static final String DOT = ".";
-
-	private static final String COMMAND_ERASE_CURRENT_DATE = "eraseCurrentTime";
-	private static final String COMMAND_LOAD_DATA = "loadData";
-	private static final String COMMAND_SAVE_DATA = "saveData";
-	private static final String COMMAND_ERASE_TODAY_DATE = "eraseTodayTime";
-	private static final String COMMAND_ERASE_TOTAL_DATE = "eraseTotalTime";
 
 	private JFrame frame;
 	private JLabel labelApplication;
@@ -71,7 +64,7 @@ public class View implements IView, ActionListener
 	private JFileChooser fileChooser;
 
 	@Setter
-	private ITimeCounter timeCounter;
+	private ICommand command;
 
 	private List<ITimeObserver> observers = new ArrayList<>();
 
@@ -136,23 +129,23 @@ public class View implements IView, ActionListener
 		menuCounter = new JMenu();
 		menuCounterLoad = new JMenuItem();
 		menuCounterLoad.addActionListener(this);
-		menuCounterLoad.setActionCommand(COMMAND_LOAD_DATA);
+		menuCounterLoad.setActionCommand(CommandType.LOAD_DATA.name());
 		menuCounterSave = new JMenuItem();
 		menuCounterSave.addActionListener(this);
-		menuCounterSave.setActionCommand(COMMAND_SAVE_DATA);
+		menuCounterSave.setActionCommand(CommandType.SAVE_DATA.name());
 		menuCounter.add(menuCounterLoad);
 		menuCounter.add(menuCounterSave);
 		// Create erase item of the menu
 		menuErase = new JMenu();
 		menuEraseCurrent = new JMenuItem();
 		menuEraseCurrent.addActionListener(this);
-		menuEraseCurrent.setActionCommand(COMMAND_ERASE_CURRENT_DATE);
+		menuEraseCurrent.setActionCommand(CommandType.ERASE_CURRENT_DATE.name());
 		menuEraseToday = new JMenuItem();
 		menuEraseToday.addActionListener(this);
-		menuEraseToday.setActionCommand(COMMAND_ERASE_TODAY_DATE);
+		menuEraseToday.setActionCommand(CommandType.ERASE_TODAY_DATE.name());
 		menuEraseTotal = new JMenuItem();
 		menuEraseTotal.addActionListener(this);
-		menuEraseTotal.setActionCommand(COMMAND_ERASE_TOTAL_DATE);
+		menuEraseTotal.setActionCommand(CommandType.ERASE_TOTAL_DATE.name());
 		menuEraseApplication = new JMenuItem();
 		menuEraseApplication.addActionListener(e -> {
 			changeApplicationLabel(null);
@@ -215,7 +208,7 @@ public class View implements IView, ActionListener
 			@Override
 			public void windowClosing(WindowEvent we)
 			{
-				if (timeCounter.closeTimeCounter(false, false))
+				if (command.executeBooleanCommandWithParameters(CommandType.CLOSE.name(), false, false))
 				{
 					int select = JOptionPane.showConfirmDialog(frame, bundle.getString("message_save"),
 							bundle.getString("title_save"),
@@ -224,7 +217,8 @@ public class View implements IView, ActionListener
 					{
 						return;
 					}
-					timeCounter.closeTimeCounter(select == JOptionPane.YES_OPTION, true);
+					command.executeBooleanCommandWithParameters(CommandType.CLOSE.name(),
+							select == JOptionPane.YES_OPTION, true);
 				}
 				System.exit(0);
 			}
@@ -375,15 +369,7 @@ public class View implements IView, ActionListener
 	@Override
 	public void actionPerformed(ActionEvent event)
 	{
-		try
-		{
-			Method method = timeCounter.getClass().getMethod(event.getActionCommand());
-			method.invoke(timeCounter);
-		}
-		catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e)
-		{
-			MainLogger.getLogger().severe(e.toString());
-		}
+		command.executeCommand(event.getActionCommand());
 	}
 
 	@Override

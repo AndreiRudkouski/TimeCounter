@@ -2,6 +2,8 @@ package timeCounter.init.config;
 
 import java.io.File;
 
+import timeCounter.command.ICommand;
+import timeCounter.command.impl.Command;
 import timeCounter.counter.ITimeCounter;
 import timeCounter.counter.impl.TimeCounter;
 import timeCounter.init.annotation.Config;
@@ -27,6 +29,12 @@ public class AppConfig
 	public IView guiWindow()
 	{
 		return new View();
+	}
+
+	@Instance
+	public ICommand command()
+	{
+		return new Command();
 	}
 
 	@Instance
