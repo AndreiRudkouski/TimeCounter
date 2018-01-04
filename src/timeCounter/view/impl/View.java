@@ -13,7 +13,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
-import java.util.stream.Collectors;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -324,15 +323,14 @@ public class View implements IView, ActionListener
 
 	private long viewToTimeConverter(String timeStr)
 	{
-		List<Long> tmp = Arrays.stream(timeStr.split(TIME_DELIMITER)).mapToLong(Long::parseLong).boxed()
-				.collect(Collectors.toList());
-		if (tmp.size() == 3)
+		long[] tmp = Arrays.stream(timeStr.split(TIME_DELIMITER)).mapToLong(Long::parseLong).toArray();
+		if (tmp.length == 3)
 		{
-			return tmp.get(0) * 60 * 60 + tmp.get(1) * 60 + tmp.get(2);
+			return tmp[0] * 60 * 60 + tmp[1] * 60 + tmp[2];
 		}
 		else
 		{
-			return tmp.get(0) * 24 * 60 * 60 + tmp.get(1) * 60 * 60 + tmp.get(2) * 60 + tmp.get(3);
+			return tmp[0] * 24 * 60 * 60 + tmp[0] * 60 * 60 + tmp[1] * 60 + tmp[2];
 		}
 	}
 
