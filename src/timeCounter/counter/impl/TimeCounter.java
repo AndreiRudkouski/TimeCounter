@@ -33,10 +33,9 @@ public class TimeCounter implements ITimeCounter
 	private ILoadSaveToFile saver;
 	private Timer timer;
 
-	private AtomicLong currentTime = new AtomicLong(); //The current session time
+	private AtomicLong currentTime = new AtomicLong();
 	private AtomicLong todayTime = new AtomicLong();
 	private AtomicLong totalTime = new AtomicLong();
-	private LocalDate currentDate;
 	private LocalDate todayDate = LocalDate.now();
 	private Map<LocalDate, AtomicLong> dateTimeMap = new TreeMap<>();
 	private boolean autoChangeDate;
@@ -48,7 +47,6 @@ public class TimeCounter implements ITimeCounter
 
 	// Settings for time counter
 	private int timerPause = 1000;
-	private int oneSecond = 1000;
 	private long countTime = 0;
 
 	private static final String DELIMITER = "/";
@@ -89,13 +87,6 @@ public class TimeCounter implements ITimeCounter
 	public boolean closeTimeCounter(Boolean saveData, Boolean closeApp)
 	{
 		stopTimer();
-		boolean result = false;
-		if ((!dateTimeMap.isEmpty() && ((dateTimeMap.containsKey(todayDate) && dateTimeMap.get(todayDate).get()
-				!= todayTime.get()) || (!dateTimeMap.containsKey(todayDate) && todayTime.get() != 0))) ||
-				(dateTimeMap.isEmpty() && todayTime.get() != 0))
-		{
-			result = true;
-		}
 
 		if (saveData)
 		{
@@ -106,7 +97,9 @@ public class TimeCounter implements ITimeCounter
 		{
 			process.destroy();
 		}
-		return result;
+
+		return (dateTimeMap.containsKey(todayDate) && dateTimeMap.get(todayDate).get() != todayTime.get()) ||
+				(dateTimeMap.values().stream().mapToLong(AtomicLong::get).sum() != totalTime.get());
 	}
 
 	private void checkRelaxTime()
@@ -188,7 +181,7 @@ public class TimeCounter implements ITimeCounter
 
 	private void checkChangeDate()
 	{
-		currentDate = LocalDate.now();
+		LocalDate currentDate = LocalDate.now();
 		if (!todayDate.equals(currentDate))
 		{
 			if (autoChangeDate)
@@ -233,7 +226,7 @@ public class TimeCounter implements ITimeCounter
 		// Correct the delay of time counter
 		if (countTime != 0 && timer.isRunning())
 		{
-			timerPause = timerPause - (int) Math.round((System.nanoTime() - countTime) / 1000000d - oneSecond);
+			timerPause = timerPause - (int) Math.round((System.nanoTime() - countTime) / 1000000d - 1000);
 			countTime = System.nanoTime();
 			timer.setDelay(timerPause);
 		}
@@ -357,8 +350,10 @@ public class TimeCounter implements ITimeCounter
 	private void eraseTotalTime()
 	{
 		stopTimer();
-		dateTimeMap.clear();
-		assignTime();
+		currentTime.set(0);
+		todayTime.set(0);
+		totalTime.set(0);
+		notifyTimeObserversAboutTime();
 	}
 
 	@Override
