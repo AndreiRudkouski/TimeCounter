@@ -2,7 +2,6 @@ package timeCounter.observer;
 
 import java.io.File;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicLong;
 
 public interface ITimeObserver
 {
@@ -11,7 +10,7 @@ public interface ITimeObserver
 	 *
 	 * @param timeList list of time values (index 0 - the current time, 2 - the today time and 3 - the total time)
 	 */
-	void updateTime(List<AtomicLong> timeList);
+	void updateTime(List<Long> timeList);
 
 	/**
 	 * Updates settings of observer.

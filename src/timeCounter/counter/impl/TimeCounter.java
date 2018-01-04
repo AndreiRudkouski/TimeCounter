@@ -63,31 +63,6 @@ public class TimeCounter implements ITimeCounter
 	}
 
 	@Override
-	public void eraseCurrentTime()
-	{
-		stopTimer();
-		currentTime.set(0);
-		notifyTimeObserversAboutTime();
-	}
-
-	@Override
-	public void eraseTodayTime()
-	{
-		stopTimer();
-		currentTime.set(0);
-		todayTime.set(0);
-		notifyTimeObserversAboutTime();
-	}
-
-	@Override
-	public void eraseTotalTime()
-	{
-		stopTimer();
-		dateTimeMap.clear();
-		assignTime();
-	}
-
-	@Override
 	public void loadData()
 	{
 		timer.restart();
@@ -329,7 +304,7 @@ public class TimeCounter implements ITimeCounter
 	@Override
 	public void notifyTimeObserversAboutTime()
 	{
-		observers.forEach(obs -> obs.updateTime(Arrays.asList(currentTime, todayTime, totalTime)));
+		observers.forEach(obs -> obs.updateTime(Arrays.asList(currentTime.get(), todayTime.get(), totalTime.get())));
 	}
 
 	@Override
@@ -345,9 +320,45 @@ public class TimeCounter implements ITimeCounter
 	}
 
 	@Override
-	public void updateTime(List<AtomicLong> timeList)
+	public void updateTime(List<Long> timeList)
 	{
-		MainLogger.getLogger().severe("Operation is not supported");
+		if (timeList != null && timeList.size() == 3)
+		{
+			if (timeList.get(0) != null && timeList.get(0) == 0)
+			{
+				eraseCurrentTime();
+			}
+			if (timeList.get(1) != null && timeList.get(1) == 0)
+			{
+				eraseTodayTime();
+			}
+			if (timeList.get(2) != null && timeList.get(2) == 0)
+			{
+				eraseTotalTime();
+			}
+		}
+	}
+
+	private void eraseCurrentTime()
+	{
+		stopTimer();
+		currentTime.set(0);
+		notifyTimeObserversAboutTime();
+	}
+
+	private void eraseTodayTime()
+	{
+		stopTimer();
+		currentTime.set(0);
+		todayTime.set(0);
+		notifyTimeObserversAboutTime();
+	}
+
+	private void eraseTotalTime()
+	{
+		stopTimer();
+		dateTimeMap.clear();
+		assignTime();
 	}
 
 	@Override

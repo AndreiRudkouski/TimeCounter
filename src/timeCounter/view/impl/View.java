@@ -9,10 +9,11 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
-import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -38,6 +39,7 @@ public class View implements IView, ActionListener
 	private static final String ICON_NAME = "timeCounter/resources/image/icon.png";
 	private static final String EXE_EXTENSION = "exe";
 	private static final String DOT = ".";
+	private static final String TIME_DELIMITER = ":";
 
 	private JFrame frame;
 	private JLabel labelApplication;
@@ -138,14 +140,20 @@ public class View implements IView, ActionListener
 		// Create erase item of the menu
 		menuErase = new JMenu();
 		menuEraseCurrent = new JMenuItem();
-		menuEraseCurrent.addActionListener(this);
-		menuEraseCurrent.setActionCommand(CommandName.TIME_COUNTER_ERASE_CURRENT_DATE.name());
+		menuEraseCurrent.addActionListener(e -> {
+			currentTimeField.setText(timeToViewConverter(0));
+			notifyTimeObserversAboutTime();
+		});
 		menuEraseToday = new JMenuItem();
-		menuEraseToday.addActionListener(this);
-		menuEraseToday.setActionCommand(CommandName.TIME_COUNTER_ERASE_TODAY_DATE.name());
+		menuEraseToday.addActionListener(e -> {
+			todayTimeField.setText(timeToViewConverter(0));
+			notifyTimeObserversAboutTime();
+		});
 		menuEraseTotal = new JMenuItem();
-		menuEraseTotal.addActionListener(this);
-		menuEraseTotal.setActionCommand(CommandName.TIME_COUNTER_ERASE_TOTAL_DATE.name());
+		menuEraseTotal.addActionListener(e -> {
+			totalTimeField.setText(timeToViewConverter(0));
+			notifyTimeObserversAboutTime();
+		});
 		menuEraseApplication = new JMenuItem();
 		menuEraseApplication.addActionListener(e -> {
 			changeApplicationLabel(null);
@@ -298,9 +306,8 @@ public class View implements IView, ActionListener
 		initText();
 	}
 
-	private String viewTimeFormatter(AtomicLong second)
+	private String timeToViewConverter(long sec)
 	{
-		long sec = second.get();
 		long hour = sec / (60 * 60);
 		long day = hour / 24;
 		long min = (sec - hour * 60 * 60) / 60;
@@ -308,9 +315,25 @@ public class View implements IView, ActionListener
 		hour = hour - day * 24;
 		if (day != 0)
 		{
-			return String.format("%1$02d-%2$02d:%3$02d:%4$02d", day, hour, min, sec);
+			return String.format(
+					"%1$02d" + TIME_DELIMITER + "%2$02d" + TIME_DELIMITER + "%3$02d" + TIME_DELIMITER + "%4$02d", day,
+					hour, min, sec);
 		}
-		return String.format("%1$02d:%2$02d:%3$02d", hour, min, sec);
+		return String.format("%1$02d" + TIME_DELIMITER + "%2$02d" + TIME_DELIMITER + "%3$02d", hour, min, sec);
+	}
+
+	private long viewToTimeConverter(String timeStr)
+	{
+		List<Long> tmp = Arrays.stream(timeStr.split(TIME_DELIMITER)).mapToLong(Long::parseLong).boxed()
+				.collect(Collectors.toList());
+		if (tmp.size() == 3)
+		{
+			return tmp.get(0) * 60 * 60 + tmp.get(1) * 60 + tmp.get(2);
+		}
+		else
+		{
+			return tmp.get(0) * 24 * 60 * 60 + tmp.get(1) * 60 * 60 + tmp.get(2) * 60 + tmp.get(3);
+		}
 	}
 
 	@Override
@@ -373,21 +396,21 @@ public class View implements IView, ActionListener
 	}
 
 	@Override
-	public void updateTime(List<AtomicLong> timeList)
+	public void updateTime(List<Long> timeList)
 	{
 		if (timeList != null && timeList.size() == 3)
 		{
 			if (timeList.get(0) != null)
 			{
-				currentTimeField.setText(viewTimeFormatter(timeList.get(0)));
+				currentTimeField.setText(timeToViewConverter(timeList.get(0)));
 			}
 			if (timeList.get(1) != null)
 			{
-				todayTimeField.setText(viewTimeFormatter(timeList.get(1)));
+				todayTimeField.setText(timeToViewConverter(timeList.get(1)));
 			}
 			if (timeList.get(2) != null)
 			{
-				totalTimeField.setText(viewTimeFormatter(timeList.get(2)));
+				totalTimeField.setText(timeToViewConverter(timeList.get(2)));
 			}
 		}
 	}
@@ -415,7 +438,8 @@ public class View implements IView, ActionListener
 	@Override
 	public void notifyTimeObserversAboutTime()
 	{
-		MainLogger.getLogger().severe("Operation is not supported");
+		observers.forEach(obs -> obs.updateTime(Arrays.asList(viewToTimeConverter(currentTimeField.getText()),
+				viewToTimeConverter(todayTimeField.getText()), viewToTimeConverter(totalTimeField.getText()))));
 	}
 
 	@Override

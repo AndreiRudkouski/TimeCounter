@@ -9,21 +9,6 @@ import timeCounter.observer.ITimeObserver;
 public interface ITimeCounter extends ITimeObserver, ITimeObservable
 {
 	/**
-	 * Erases the current time by zero and passes a new value to GUI.
-	 */
-	void eraseCurrentTime();
-
-	/**
-	 * Erases the today time by zero and passes a new value to GUI.
-	 */
-	void eraseTodayTime();
-
-	/**
-	 * Erases the total time by zero and passes a new value to GUI.
-	 */
-	void eraseTotalTime();
-
-	/**
 	 * Loads data to the time counter.
 	 */
 	void loadData();
