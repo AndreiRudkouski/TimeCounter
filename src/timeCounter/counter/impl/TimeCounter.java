@@ -26,6 +26,8 @@ import timeCounter.observer.ITimeObserver;
 public class TimeCounter implements ITimeCounter
 {
 	private final static int SEC_TO_RELAX = 3000;
+	private final static boolean DEFAULT_AUTO_CHANGE_DATE = true;
+	private final static boolean DEFAULT_RELAX_REMINDER = true;
 
 	@Setter
 	private ICommand command;
@@ -58,6 +60,8 @@ public class TimeCounter implements ITimeCounter
 			correctTimeCounter();
 			checkApplication();
 		});
+		autoChangeDate = DEFAULT_AUTO_CHANGE_DATE;
+		relaxReminder = DEFAULT_RELAX_REMINDER;
 	}
 
 	@Override
@@ -291,25 +295,27 @@ public class TimeCounter implements ITimeCounter
 
 	private boolean isChangedSettings()
 	{
-		boolean result = true;
+		File savedFile = null;
+		boolean savedAutoChangeDate = DEFAULT_AUTO_CHANGE_DATE;
+		boolean savedRelaxReminder = DEFAULT_RELAX_REMINDER;
 		List<String> loadData = saver.loadData();
 		for (String tmp : loadData)
 		{
 			String[] stringTmp = tmp.split(DELIMITER);
 			if (stringTmp.length == 3)
 			{
-				File savedFile = null;
+
 				if (stringTmp[0] != null && !stringTmp[0].isEmpty())
 				{
 					savedFile = new File(stringTmp[0]);
 				}
-				result = ((file != null && !file.equals(savedFile)) || (file == null && savedFile != null))
-						|| autoChangeDate != Boolean.parseBoolean(stringTmp[1])
-						|| relaxReminder != Boolean.parseBoolean(stringTmp[2]);
+				savedAutoChangeDate = Boolean.parseBoolean(stringTmp[1]);
+				savedRelaxReminder = Boolean.parseBoolean(stringTmp[2]);
 				break;
 			}
 		}
-		return result;
+		return (file != null && !file.equals(savedFile)) || (file == null && savedFile != null)
+				|| autoChangeDate != savedAutoChangeDate || relaxReminder != savedRelaxReminder;
 	}
 
 	@Override

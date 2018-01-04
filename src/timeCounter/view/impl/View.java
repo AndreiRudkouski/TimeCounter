@@ -171,10 +171,8 @@ public class View implements IView, ActionListener
 		// Checkboxes
 		checkBreak = new JCheckBox();
 		checkBreak.addActionListener(e -> notifyTimeObserversAboutSettings());
-		checkBreak.setSelected(true);
 		checkDate = new JCheckBox();
 		checkDate.addActionListener(e -> notifyTimeObserversAboutSettings());
-		checkDate.setSelected(true);
 		menuSetting.add(menuSettingApplication);
 		menuSetting.add(menuSettingLocale);
 		menuSetting.add(checkBreak);
