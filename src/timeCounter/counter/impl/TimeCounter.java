@@ -139,7 +139,7 @@ public class TimeCounter implements ITimeCounter
 				}
 				catch (IOException e)
 				{
-					MainLogger.getLogger().severe(e.toString());
+					MainLogger.getLogger().severe(MainLogger.getStackTrace(e));
 				}
 			}
 		}
@@ -179,7 +179,7 @@ public class TimeCounter implements ITimeCounter
 		}
 		catch (IOException e)
 		{
-			MainLogger.getLogger().severe(e.toString());
+			MainLogger.getLogger().severe(MainLogger.getStackTrace(e));
 		}
 		return false;
 	}

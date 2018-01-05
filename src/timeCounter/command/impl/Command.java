@@ -56,11 +56,11 @@ public class Command implements ICommand
 		}
 		catch (IllegalArgumentException e)
 		{
-			MainLogger.getLogger().severe("Error command name");
+			MainLogger.getLogger().severe("Error command name: " + commandName);
 		}
 		catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e)
 		{
-			MainLogger.getLogger().severe(e.toString());
+			MainLogger.getLogger().severe(MainLogger.getStackTrace(e));
 		}
 		return result;
 	}

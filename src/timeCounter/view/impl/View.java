@@ -241,7 +241,7 @@ public class View implements IView, ActionListener
 				}
 				catch (AWTException e)
 				{
-					MainLogger.getLogger().severe(e.toString());
+					MainLogger.getLogger().severe(MainLogger.getStackTrace(e));
 				}
 				trayIcon.addMouseListener(new MouseAdapter()
 				{

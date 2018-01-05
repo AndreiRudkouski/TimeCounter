@@ -30,7 +30,7 @@ public class LoadSaveToFile implements ILoadSaveToFile
 			}
 			catch (IOException e)
 			{
-				MainLogger.getLogger().severe(e.toString());
+				MainLogger.getLogger().severe(MainLogger.getStackTrace(e));
 			}
 		}
 		return result;
@@ -45,7 +45,7 @@ public class LoadSaveToFile implements ILoadSaveToFile
 		}
 		catch (IOException e)
 		{
-			MainLogger.getLogger().severe(e.toString());
+			MainLogger.getLogger().severe(MainLogger.getStackTrace(e));
 		}
 	}
 

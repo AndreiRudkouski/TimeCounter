@@ -2,6 +2,7 @@ package timeCounter.logger;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.logging.FileHandler;
 import java.util.logging.Handler;
 import java.util.logging.Logger;
@@ -25,7 +26,7 @@ public class MainLogger
 		}
 		catch (IOException e)
 		{
-			/*NOP*/
+			Logger.getLogger("MainLogger").severe("Logger initialization error");
 		}
 	}
 
@@ -36,5 +37,16 @@ public class MainLogger
 	public static Logger getLogger()
 	{
 		return logger;
+	}
+
+	public static String getStackTrace(Exception e)
+	{
+		if (e != null)
+		{
+			return Arrays.stream(e.getStackTrace()).map(StackTraceElement::toString)
+					.reduce((s1, s2) -> s1 + "\n        " + s2).map(s -> e.toString() + "\n  Cause:" + s)
+					.orElseGet(e::toString);
+		}
+		return "No exceptions were found";
 	}
 }

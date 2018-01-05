@@ -68,7 +68,7 @@ public class Initializer implements IInitializer
 		}
 		catch (InstantiationException | IllegalAccessException | InvocationTargetException | ClassNotFoundException e)
 		{
-			MainLogger.getLogger().severe(e.toString());
+			MainLogger.getLogger().severe(MainLogger.getStackTrace(e));
 		}
 	}
 
@@ -131,7 +131,7 @@ public class Initializer implements IInitializer
 		}
 		catch (IllegalAccessException | InvocationTargetException e)
 		{
-			MainLogger.getLogger().severe(e.toString());
+			MainLogger.getLogger().severe(MainLogger.getStackTrace(e));
 		}
 	}
 
