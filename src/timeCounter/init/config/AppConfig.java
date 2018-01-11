@@ -10,8 +10,8 @@ import timeCounter.init.annotation.Config;
 import timeCounter.init.annotation.Instance;
 import timeCounter.load.LoadSaveToFile;
 import timeCounter.load.impl.LoadSaveToFileImpl;
-import timeCounter.timer.SecondTimer;
-import timeCounter.timer.impl.SecondTimerImpl;
+import timeCounter.timer.Timer;
+import timeCounter.timer.impl.SecondTimer;
 import timeCounter.view.View;
 import timeCounter.view.impl.ViewImpl;
 
@@ -52,8 +52,8 @@ public class AppConfig
 	}
 
 	@Instance
-	public SecondTimer secondTimer()
+	public Timer secondTimer()
 	{
-		return new SecondTimerImpl();
+		return new SecondTimer();
 	}
 }

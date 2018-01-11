@@ -3,7 +3,7 @@ package timeCounter.timer;
 /**
  * This interface identifies methods for executing any {@link Runnable} command every second.
  */
-public interface SecondTimer
+public interface Timer
 {
 	/**
 	 * Starts or resumes the execution.

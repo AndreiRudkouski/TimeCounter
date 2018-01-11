@@ -19,7 +19,7 @@ import timeCounter.init.annotation.Setter;
 import timeCounter.load.LoadSaveToFile;
 import timeCounter.logger.MainLogger;
 import timeCounter.observer.TimeObserver;
-import timeCounter.timer.SecondTimer;
+import timeCounter.timer.Timer;
 
 public class TimeCounterImpl implements timeCounter.counter.TimeCounter
 {
@@ -33,7 +33,7 @@ public class TimeCounterImpl implements timeCounter.counter.TimeCounter
 	@Setter
 	private LoadSaveToFile saver;
 	@Setter
-	private SecondTimer timer;
+	private Timer timer;
 
 	private AtomicLong currentTime = new AtomicLong();
 	private AtomicLong todayTime = new AtomicLong();

@@ -4,11 +4,13 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class SecondTimerImpl extends ScheduledThreadPoolExecutor implements timeCounter.timer.SecondTimer
+import timeCounter.timer.Timer;
+
+public class SecondTimer extends ScheduledThreadPoolExecutor implements Timer
 {
 	private LocalThread executingThread;
 
-	public SecondTimerImpl()
+	public SecondTimer()
 	{
 		super(1);
 	}
