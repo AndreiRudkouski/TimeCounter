@@ -51,15 +51,15 @@ public class Initializer implements IInitializer
 					{
 						if (method.isAnnotationPresent(Instance.class))
 						{
-							Instance instance = method.getAnnotation(Instance.class);
-							if (instance.name().equals(""))
+							Instance instanceAnnotation = method.getAnnotation(Instance.class);
+							if (instanceAnnotation.name().equals(""))
 							{
 								classInstances.put(method.getReturnType().getSimpleName(),
 										method.invoke(classInstance.getValue()));
 							}
 							else
 							{
-								classInstances.put(instance.name(), method.invoke(classInstance.getValue()));
+								classInstances.put(instanceAnnotation.name(), method.invoke(classInstance.getValue()));
 							}
 						}
 					}
@@ -77,54 +77,53 @@ public class Initializer implements IInitializer
 	 */
 	private void initFields()
 	{
-
 		try
 		{
 			for (Map.Entry<String, Object> classInstance : classInstances.entrySet())
 			{
-				Object obj = classInstance.getValue();
+				Object classObject = classInstance.getValue();
 				// Collect all setter methods and fields of class which are marked by Setter annotation
-				List<Method> setterMethods = Arrays.stream(obj.getClass().getDeclaredMethods()).filter(
+				List<Method> setterAnnotatedMethods = Arrays.stream(classObject.getClass().getDeclaredMethods()).filter(
 						m -> m.isAnnotationPresent(Setter.class) && m.getName().startsWith("set")).collect(
 						Collectors.toList());
-				List<Field> setterFields = Arrays.stream(obj.getClass().getDeclaredFields()).filter(
+				List<Field> setterAnnotatedFields = Arrays.stream(classObject.getClass().getDeclaredFields()).filter(
 						f -> f.isAnnotationPresent(Setter.class)).collect(Collectors.toList());
 				// If class has superclass and the superclass is abstract and not Object, add superclass methods
-				Class clazz = obj.getClass();
+				Class clazz = classObject.getClass();
 				while (!clazz.getSuperclass().getSimpleName().equals("Object") && Modifier.isAbstract(
 						clazz.getSuperclass().getModifiers()))
 				{
-					setterMethods.addAll(Arrays.stream(obj.getClass().getSuperclass().getDeclaredMethods())
+					setterAnnotatedMethods.addAll(Arrays.stream(classObject.getClass().getSuperclass().getDeclaredMethods())
 							.filter(m -> m.isAnnotationPresent(Setter.class) && m.getName().startsWith("set"))
 							.collect(Collectors.toList()));
-					setterFields.addAll(Arrays.stream(obj.getClass().getSuperclass().getDeclaredFields())
+					setterAnnotatedFields.addAll(Arrays.stream(classObject.getClass().getSuperclass().getDeclaredFields())
 							.filter(f -> f.isAnnotationPresent(Setter.class)).collect(Collectors.toList()));
 					clazz = clazz.getSuperclass();
 				}
 
-				for (Method method : setterMethods)
+				for (Method method : setterAnnotatedMethods)
 				{
-					Setter setter = method.getAnnotation(Setter.class);
-					if (setter.name().equals(""))
+					Setter setterMethodAnnotation = method.getAnnotation(Setter.class);
+					if (setterMethodAnnotation.name().equals(""))
 					{
-						method.invoke(obj, classInstances.get(method.getParameterTypes()[0].getSimpleName()));
+						method.invoke(classObject, classInstances.get(method.getParameterTypes()[0].getSimpleName()));
 					}
 					else
 					{
-						method.invoke(obj, classInstances.get(setter.name()));
+						method.invoke(classObject, classInstances.get(setterMethodAnnotation.name()));
 					}
 				}
-				for (Field field : setterFields)
+				for (Field field : setterAnnotatedFields)
 				{
-					Setter setter = field.getAnnotation(Setter.class);
+					Setter setterFieldAnnotation = field.getAnnotation(Setter.class);
 					field.setAccessible(true);
-					if (setter.name().equals(""))
+					if (setterFieldAnnotation.name().equals(""))
 					{
-						field.set(obj, classInstances.get(field.getType().getSimpleName()));
+						field.set(classObject, classInstances.get(field.getType().getSimpleName()));
 					}
 					else
 					{
-						field.set(obj, classInstances.get(setter.name()));
+						field.set(classObject, classInstances.get(setterFieldAnnotation.name()));
 					}
 				}
 			}

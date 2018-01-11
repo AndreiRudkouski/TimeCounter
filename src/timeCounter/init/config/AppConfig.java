@@ -10,6 +10,8 @@ import timeCounter.init.annotation.Config;
 import timeCounter.init.annotation.Instance;
 import timeCounter.load.ILoadSaveToFile;
 import timeCounter.load.impl.LoadSaveToFile;
+import timeCounter.timer.ISecondTimer;
+import timeCounter.timer.impl.SecondTimer;
 import timeCounter.view.IView;
 import timeCounter.view.impl.View;
 
@@ -47,5 +49,11 @@ public class AppConfig
 	public File file()
 	{
 		return new File("set.txt");
+	}
+
+	@Instance
+	public ISecondTimer secondTimer()
+	{
+		return new SecondTimer();
 	}
 }

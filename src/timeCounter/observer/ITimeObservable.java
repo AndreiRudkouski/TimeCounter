@@ -1,5 +1,8 @@
 package timeCounter.observer;
 
+/**
+ * This interface can be implemented by class if it wants to inform of changes to all observe objects.
+ */
 public interface ITimeObservable
 {
 	/**

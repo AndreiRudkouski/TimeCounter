@@ -64,6 +64,8 @@ public class View implements IView, ActionListener
 	private JCheckBox checkDate;
 	private JFileChooser fileChooser;
 
+	private Image image;
+
 	@Setter
 	private ICommand command;
 
@@ -203,57 +205,60 @@ public class View implements IView, ActionListener
 		Point newLocation = new Point(middle.x - (frame.getWidth() / 2),
 				middle.y - (frame.getHeight() / 2));
 		frame.setLocation(newLocation);
-		Image image = Toolkit.getDefaultToolkit().getImage(getClass().getClassLoader().getResource(ICON_NAME));
+		image = Toolkit.getDefaultToolkit().getImage(getClass().getClassLoader().getResource(ICON_NAME));
 		frame.setIconImage(image.getScaledInstance(32, 32, Image.SCALE_AREA_AVERAGING));
+		frame.addWindowListener(new ButtonWindowListener());
 		initText();
+	}
 
-		// Hide frame to tray and close the controlling application when the frame is closing
-		frame.addWindowListener(new WindowAdapter()
+	/**
+	 * Class for hiding frame to tray and closing the controlling application when the frame is closing.
+	 */
+	private class ButtonWindowListener extends WindowAdapter
+	{
+		@Override
+		public void windowClosing(WindowEvent we)
 		{
-			@Override
-			public void windowClosing(WindowEvent we)
+			if (command.executeCommand(CommandName.TIME_COUNTER_CLOSE.name(), false, false))
 			{
-				if (command.executeCommand(CommandName.TIME_COUNTER_CLOSE.name(), false, false))
+				int select = JOptionPane.showConfirmDialog(frame, bundle.getString("message_save"),
+						bundle.getString("title_save"),
+						JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE);
+				if (select != JOptionPane.YES_OPTION && select != JOptionPane.NO_OPTION)
 				{
-					int select = JOptionPane.showConfirmDialog(frame, bundle.getString("message_save"),
-							bundle.getString("title_save"),
-							JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE);
-					if (select != JOptionPane.YES_OPTION && select != JOptionPane.NO_OPTION)
-					{
-						return;
-					}
-					command.executeCommand(CommandName.TIME_COUNTER_CLOSE.name(),
-							select == JOptionPane.YES_OPTION, true);
+					return;
 				}
-				System.exit(0);
+				command.executeCommand(CommandName.TIME_COUNTER_CLOSE.name(),
+						select == JOptionPane.YES_OPTION, true);
 			}
+			System.exit(0);
+		}
 
-			@Override
-			public void windowIconified(WindowEvent we)
+		@Override
+		public void windowIconified(WindowEvent we)
+		{
+			// Hide window to tray
+			frame.setVisible(false);
+			TrayIcon trayIcon = new TrayIcon(image.getScaledInstance(16, 16, Image.SCALE_AREA_AVERAGING));
+			trayIcon.setToolTip(bundle.getString("title"));
+			try
 			{
-				// Hide window to tray
-				frame.setVisible(false);
-				TrayIcon trayIcon = new TrayIcon(image.getScaledInstance(16, 16, Image.SCALE_AREA_AVERAGING));
-				trayIcon.setToolTip(bundle.getString("title"));
-				try
-				{
-					SystemTray.getSystemTray().add(trayIcon);
-				}
-				catch (AWTException e)
-				{
-					MainLogger.getLogger().severe(MainLogger.getStackTrace(e));
-				}
-				trayIcon.addMouseListener(new MouseAdapter()
-				{
-					public void mouseClicked(MouseEvent e)
-					{
-						frame.setState(JFrame.NORMAL);
-						SystemTray.getSystemTray().remove(trayIcon);
-						frame.setVisible(true);
-					}
-				});
+				SystemTray.getSystemTray().add(trayIcon);
 			}
-		});
+			catch (AWTException e)
+			{
+				MainLogger.getLogger().severe(MainLogger.getStackTrace(e));
+			}
+			trayIcon.addMouseListener(new MouseAdapter()
+			{
+				public void mouseClicked(MouseEvent e)
+				{
+					frame.setState(JFrame.NORMAL);
+					SystemTray.getSystemTray().remove(trayIcon);
+					frame.setVisible(true);
+				}
+			});
+		}
 	}
 
 	private void initText()

@@ -3,6 +3,9 @@ package timeCounter.observer;
 import java.io.File;
 import java.util.List;
 
+/**
+ * This interface can be implemented by class if it wants to be informed of changes in observable objects.
+ */
 public interface ITimeObserver
 {
 	/**

@@ -13,8 +13,6 @@ import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
 
-import javax.swing.*;
-
 import timeCounter.command.CommandName;
 import timeCounter.command.ICommand;
 import timeCounter.counter.ITimeCounter;
@@ -22,6 +20,7 @@ import timeCounter.init.annotation.Setter;
 import timeCounter.load.ILoadSaveToFile;
 import timeCounter.logger.MainLogger;
 import timeCounter.observer.ITimeObserver;
+import timeCounter.timer.ISecondTimer;
 
 public class TimeCounter implements ITimeCounter
 {
@@ -33,7 +32,8 @@ public class TimeCounter implements ITimeCounter
 	private ICommand command;
 	@Setter
 	private ILoadSaveToFile saver;
-	private Timer timer;
+	@Setter
+	private ISecondTimer timer;
 
 	private AtomicLong currentTime = new AtomicLong();
 	private AtomicLong todayTime = new AtomicLong();
@@ -47,19 +47,10 @@ public class TimeCounter implements ITimeCounter
 
 	private List<ITimeObserver> observers = new ArrayList<>();
 
-	// Settings for time counter
-	private int timerPause = 1000;
-	private long countTime = 0;
-
 	private static final String DELIMITER = "/";
 
 	public TimeCounter()
 	{
-		timer = new Timer(timerPause, (e) ->
-		{
-			correctTimeCounter();
-			checkApplication();
-		});
 		autoChangeDate = DEFAULT_AUTO_CHANGE_DATE;
 		relaxReminder = DEFAULT_RELAX_REMINDER;
 	}
@@ -67,7 +58,7 @@ public class TimeCounter implements ITimeCounter
 	@Override
 	public void loadData()
 	{
-		timer.restart();
+		timer.setCommand(this::checkApplication);
 		stopTimer();
 		loadDataFromFile();
 		assignTime();
@@ -144,7 +135,6 @@ public class TimeCounter implements ITimeCounter
 			}
 		}
 
-		correctTimeCounter();
 		timer.start();
 		notifyTimeObserversAboutTiming();
 	}
@@ -224,21 +214,6 @@ public class TimeCounter implements ITimeCounter
 		todayTime.incrementAndGet();
 		totalTime.incrementAndGet();
 		notifyTimeObserversAboutTime();
-	}
-
-	private void correctTimeCounter()
-	{
-		// Correct the delay of time counter
-		if (countTime != 0 && timer.isRunning())
-		{
-			timerPause = timerPause - (int) Math.round((System.nanoTime() - countTime) / 1000000d - 1000);
-			countTime = System.nanoTime();
-			timer.setDelay(timerPause);
-		}
-		else
-		{
-			countTime = System.nanoTime();
-		}
 	}
 
 	private void checkApplication()
