@@ -23,7 +23,7 @@ public class CommandImpl implements timeCounter.command.Command
 		try
 		{
 			CommandName currentType = CommandName.valueOf(commandName.toUpperCase(Locale.ENGLISH));
-			Object executor = Initializer.getClassInstanceByName(currentType.getExecutorClass().getSimpleName());
+			Object executor = Initializer.getClassInstanceByName(currentType.getExecutorClassName());
 			if (!currentType.isBooleanReturn())
 			{
 				Method method = executor.getClass().getMethod(currentType.getMethodName());

@@ -39,8 +39,8 @@ public enum CommandName
 		return withParameters;
 	}
 
-	public Class getExecutorClass()
+	public String getExecutorClassName()
 	{
-		return executorClass;
+		return executorClass.getSimpleName();
 	}
 }
