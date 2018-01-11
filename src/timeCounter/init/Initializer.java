@@ -13,16 +13,17 @@ import java.util.stream.Collectors;
 import timeCounter.init.annotation.Config;
 import timeCounter.init.annotation.Instance;
 import timeCounter.init.annotation.Setter;
+import timeCounter.init.config.AppConfig;
 import timeCounter.logger.MainLogger;
 
 public class Initializer
 {
 	private static final Map<String, Object> CLASS_INSTANCES = new HashMap<>();
-	private static final Initializer INSTANCE = new Initializer("timeCounter.init.config.AppConfig");
+	private static final Initializer INSTANCE = new Initializer(AppConfig.class);
 
-	private Initializer(String... configs)
+	private Initializer(Class... configClasses)
 	{
-		createInstances(configs);
+		createInstances(configClasses);
 		initFields();
 	}
 
@@ -30,17 +31,15 @@ public class Initializer
 	 * Creates instances of classes which have appropriate method with {@link Instance} annotation and the method is
 	 * situated in class with {@link Config} annotation.
 	 *
-	 * @param configs names of config files with {@link Config} annotation
+	 * @param configClasses config files with {@link Config} annotation
 	 */
-	private static void createInstances(String... configs)
+	private static void createInstances(Class... configClasses)
 	{
 		try
 		{
-			ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-			for (String config : configs)
+			for (Class configClass : configClasses)
 			{
-				Class cl = classLoader.loadClass(config);
-				CLASS_INSTANCES.put(cl.getSimpleName(), cl.newInstance());
+				CLASS_INSTANCES.put(configClass.getSimpleName(), configClass.newInstance());
 			}
 			for (Map.Entry<String, Object> classInstance : CLASS_INSTANCES.entrySet())
 			{
@@ -66,7 +65,7 @@ public class Initializer
 				}
 			}
 		}
-		catch (InstantiationException | IllegalAccessException | InvocationTargetException | ClassNotFoundException e)
+		catch (InstantiationException | IllegalAccessException | InvocationTargetException e)
 		{
 			MainLogger.getLogger().severe(MainLogger.getStackTrace(e));
 		}
@@ -93,10 +92,12 @@ public class Initializer
 				while (!clazz.getSuperclass().getSimpleName().equals("Object") && Modifier.isAbstract(
 						clazz.getSuperclass().getModifiers()))
 				{
-					setterAnnotatedMethods.addAll(Arrays.stream(classObject.getClass().getSuperclass().getDeclaredMethods())
+					setterAnnotatedMethods.addAll(Arrays.stream(
+							classObject.getClass().getSuperclass().getDeclaredMethods())
 							.filter(m -> m.isAnnotationPresent(Setter.class) && m.getName().startsWith("set"))
 							.collect(Collectors.toList()));
-					setterAnnotatedFields.addAll(Arrays.stream(classObject.getClass().getSuperclass().getDeclaredFields())
+					setterAnnotatedFields.addAll(Arrays.stream(
+							classObject.getClass().getSuperclass().getDeclaredFields())
 							.filter(f -> f.isAnnotationPresent(Setter.class)).collect(Collectors.toList()));
 					clazz = clazz.getSuperclass();
 				}
