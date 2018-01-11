@@ -5,7 +5,7 @@ import java.util.List;
 /**
  * This interface identified methods for working with data.
  */
-public interface ILoadSaveToFile
+public interface LoadSaveToFile
 {
 	/**
 	 * Loads and decodes data from file.

@@ -4,13 +4,11 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import timeCounter.timer.ISecondTimer;
-
-public class SecondTimer extends ScheduledThreadPoolExecutor implements ISecondTimer
+public class SecondTimerImpl extends ScheduledThreadPoolExecutor implements timeCounter.timer.SecondTimer
 {
 	private LocalThread executingThread;
 
-	public SecondTimer()
+	public SecondTimerImpl()
 	{
 		super(1);
 	}
@@ -38,6 +36,12 @@ public class SecondTimer extends ScheduledThreadPoolExecutor implements ISecondT
 	{
 		executingThread = new LocalThread(command);
 		super.scheduleAtFixedRate(executingThread, 1, 1, TimeUnit.SECONDS);
+	}
+
+	@Override
+	public boolean hasCommand()
+	{
+		return executingThread != null;
 	}
 
 	/**

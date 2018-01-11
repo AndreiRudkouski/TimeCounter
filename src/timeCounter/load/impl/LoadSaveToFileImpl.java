@@ -11,10 +11,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import timeCounter.init.annotation.Setter;
-import timeCounter.load.ILoadSaveToFile;
 import timeCounter.logger.MainLogger;
 
-public class LoadSaveToFile implements ILoadSaveToFile
+public class LoadSaveToFileImpl implements timeCounter.load.LoadSaveToFile
 {
 	private File file;
 

@@ -3,7 +3,7 @@ package timeCounter.command;
 /**
  * This interface identifies methods for commands execution
  */
-public interface ICommand
+public interface Command
 {
 	/**
 	 * Executes command with name witch contains in {@link CommandName}

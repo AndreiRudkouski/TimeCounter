@@ -2,18 +2,18 @@ package timeCounter.init.config;
 
 import java.io.File;
 
-import timeCounter.command.ICommand;
-import timeCounter.command.impl.Command;
-import timeCounter.counter.ITimeCounter;
-import timeCounter.counter.impl.TimeCounter;
+import timeCounter.command.Command;
+import timeCounter.command.impl.CommandImpl;
+import timeCounter.counter.TimeCounter;
+import timeCounter.counter.impl.TimeCounterImpl;
 import timeCounter.init.annotation.Config;
 import timeCounter.init.annotation.Instance;
-import timeCounter.load.ILoadSaveToFile;
-import timeCounter.load.impl.LoadSaveToFile;
-import timeCounter.timer.ISecondTimer;
-import timeCounter.timer.impl.SecondTimer;
-import timeCounter.view.IView;
-import timeCounter.view.impl.View;
+import timeCounter.load.LoadSaveToFile;
+import timeCounter.load.impl.LoadSaveToFileImpl;
+import timeCounter.timer.SecondTimer;
+import timeCounter.timer.impl.SecondTimerImpl;
+import timeCounter.view.View;
+import timeCounter.view.impl.ViewImpl;
 
 /**
  * This class contains methods to get instances of all needed classes
@@ -22,27 +22,27 @@ import timeCounter.view.impl.View;
 public class AppConfig
 {
 	@Instance
-	public ITimeCounter timeCounter()
+	public TimeCounter timeCounter()
 	{
-		return new TimeCounter();
+		return new TimeCounterImpl();
 	}
 
 	@Instance
-	public IView guiWindow()
+	public View guiWindow()
 	{
-		return new View();
+		return new ViewImpl();
 	}
 
 	@Instance
-	public ICommand command()
+	public Command command()
 	{
-		return new Command();
+		return new CommandImpl();
 	}
 
 	@Instance
-	public ILoadSaveToFile loadSaveToFile()
+	public LoadSaveToFile loadSaveToFile()
 	{
-		return new LoadSaveToFile();
+		return new LoadSaveToFileImpl();
 	}
 
 	@Instance
@@ -52,8 +52,8 @@ public class AppConfig
 	}
 
 	@Instance
-	public ISecondTimer secondTimer()
+	public SecondTimer secondTimer()
 	{
-		return new SecondTimer();
+		return new SecondTimerImpl();
 	}
 }

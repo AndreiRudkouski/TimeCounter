@@ -1,23 +1,26 @@
 package timeCounter.command;
 
+import timeCounter.counter.TimeCounter;
+import timeCounter.view.View;
+
 public enum CommandName
 {
-	TIME_COUNTER_LOAD_DATA("timeCounter", "loadData", false, false),
-	TIME_COUNTER_SAVE_DATA("timeCounter", "saveData", false, false),
-	VIEW_CHOSEN_RELAX("view", "isChosenRelax", true, false),
-	VIEW_RUNNING_APPLICATION_NOTICE("view", "runningApplicationNotice", true, false),
-	TIME_COUNTER_CLOSE("timeCounter", "closeTimeCounter", true, true);
+	TIME_COUNTER_LOAD_DATA(TimeCounter.class, "loadData", false, false),
+	TIME_COUNTER_SAVE_DATA(TimeCounter.class, "saveData", false, false),
+	VIEW_CHOSEN_RELAX(View.class, "isChosenRelax", true, false),
+	VIEW_RUNNING_APPLICATION_NOTICE(View.class, "runningApplicationNotice", true, false),
+	TIME_COUNTER_CLOSE(TimeCounter.class, "closeTimeCounter", true, true);
 
-	private String executorName;
+	private Class executorClass;
 	private String methodName;
 	private boolean isBooleanReturn;
 	private boolean withParameters;
 
-	CommandName(String executorName, String methodName, boolean isBooleanReturn, boolean withParameters)
+	CommandName(Class executorClass, String methodName, boolean canBooleanReturn, boolean withParameters)
 	{
-		this.executorName = executorName;
+		this.executorClass = executorClass;
 		this.methodName = methodName;
-		this.isBooleanReturn = isBooleanReturn;
+		this.isBooleanReturn = canBooleanReturn;
 		this.withParameters = withParameters;
 	}
 
@@ -36,8 +39,8 @@ public enum CommandName
 		return withParameters;
 	}
 
-	public String getExecutorName()
+	public Class getExecutorClass()
 	{
-		return executorName;
+		return executorClass;
 	}
 }

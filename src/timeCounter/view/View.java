@@ -1,12 +1,12 @@
 package timeCounter.view;
 
-import timeCounter.observer.ITimeObservable;
-import timeCounter.observer.ITimeObserver;
+import timeCounter.observer.TimeObservable;
+import timeCounter.observer.TimeObserver;
 
 /**
  * This interface identifies methods for working with GUI.
  */
-public interface IView extends ITimeObserver, ITimeObservable
+public interface View extends TimeObserver, TimeObservable
 {
 	/**
 	 * Checks if the user has selected relaxation.

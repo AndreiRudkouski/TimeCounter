@@ -1,12 +1,12 @@
 package timeCounter.counter;
 
-import timeCounter.observer.ITimeObservable;
-import timeCounter.observer.ITimeObserver;
+import timeCounter.observer.TimeObservable;
+import timeCounter.observer.TimeObserver;
 
 /**
- * This interface identifies methods for working with {@link ITimeCounter}' implementation.
+ * This interface identifies methods for working with {@link TimeCounter}' implementation.
  */
-public interface ITimeCounter extends ITimeObserver, ITimeObservable
+public interface TimeCounter extends TimeObserver, TimeObservable
 {
 	/**
 	 * Loads data to the time counter.

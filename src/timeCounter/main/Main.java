@@ -1,18 +1,17 @@
 package timeCounter.main;
 
-import timeCounter.counter.ITimeCounter;
-import timeCounter.init.IInitializer;
-import timeCounter.init.impl.Initializer;
-import timeCounter.view.IView;
+import timeCounter.counter.TimeCounter;
+import timeCounter.init.Initializer;
+import timeCounter.view.View;
 
 public class Main
 {
 	public static void main(String[] args)
 	{
-		IInitializer initializer = new Initializer("timeCounter.init.config.AppConfig");
+		Initializer initializer = new Initializer("timeCounter.init.config.AppConfig");
 
-		ITimeCounter timeCounter = (ITimeCounter) initializer.getClassInstanceByName("ITimeCounter");
-		IView view = (IView) initializer.getClassInstanceByName("IView");
+		TimeCounter timeCounter = (TimeCounter) Initializer.getClassInstanceByName(TimeCounter.class.getSimpleName());
+		View view = (View) Initializer.getClassInstanceByName(View.class.getSimpleName());
 		timeCounter.addTimeObserver(view);
 		view.addTimeObserver(timeCounter);
 		view.createView();

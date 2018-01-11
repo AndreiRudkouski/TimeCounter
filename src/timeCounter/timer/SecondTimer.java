@@ -3,7 +3,7 @@ package timeCounter.timer;
 /**
  * This interface identifies methods for executing any {@link Runnable} command every second.
  */
-public interface ISecondTimer
+public interface SecondTimer
 {
 	/**
 	 * Starts or resumes the execution.
@@ -28,4 +28,11 @@ public interface ISecondTimer
 	 * @param command the task to execute
 	 */
 	void setCommand(Runnable command);
+
+	/**
+	 * Checks if the executor has command.
+	 *
+	 * @return true if the executor has command otherwise false
+	 */
+	boolean hasCommand();
 }

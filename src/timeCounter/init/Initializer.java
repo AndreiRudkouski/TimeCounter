@@ -1,4 +1,4 @@
-package timeCounter.init.impl;
+package timeCounter.init;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -10,15 +10,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import timeCounter.init.IInitializer;
 import timeCounter.init.annotation.Config;
 import timeCounter.init.annotation.Instance;
 import timeCounter.init.annotation.Setter;
 import timeCounter.logger.MainLogger;
 
-public class Initializer implements IInitializer
+public class Initializer
 {
-	private final Map<String, Object> classInstances = new HashMap<>();
+	private static final Map<String, Object> classInstances = new HashMap<>();
 
 	public Initializer(String... configs)
 	{
@@ -134,8 +133,7 @@ public class Initializer implements IInitializer
 		}
 	}
 
-	@Override
-	public Object getClassInstanceByName(String name)
+	public static Object getClassInstanceByName(String name)
 	{
 		return classInstances.get(name);
 	}

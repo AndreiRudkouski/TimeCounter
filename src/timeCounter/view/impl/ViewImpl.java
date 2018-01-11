@@ -17,14 +17,13 @@ import java.util.ResourceBundle;
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
+import timeCounter.command.Command;
 import timeCounter.command.CommandName;
-import timeCounter.command.ICommand;
 import timeCounter.init.annotation.Setter;
 import timeCounter.logger.MainLogger;
-import timeCounter.observer.ITimeObserver;
-import timeCounter.view.IView;
+import timeCounter.observer.TimeObserver;
 
-public class View implements IView, ActionListener
+public class ViewImpl implements timeCounter.view.View, ActionListener
 {
 	private static final Font FONT_TOP_PANEL = new Font("sanserif", Font.BOLD, 12);
 	private static final Font FONT_LEFT_PANEL = new Font("sanserif", Font.BOLD, 15);
@@ -67,9 +66,9 @@ public class View implements IView, ActionListener
 	private Image image;
 
 	@Setter
-	private ICommand command;
+	private Command command;
 
-	private List<ITimeObserver> observers = new ArrayList<>();
+	private List<TimeObserver> observers = new ArrayList<>();
 
 	@Override
 	public void createView()
@@ -431,7 +430,7 @@ public class View implements IView, ActionListener
 	}
 
 	@Override
-	public void addTimeObserver(ITimeObserver observer)
+	public void addTimeObserver(TimeObserver observer)
 	{
 		observers.add(observer);
 	}

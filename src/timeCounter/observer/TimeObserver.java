@@ -6,7 +6,7 @@ import java.util.List;
 /**
  * This interface can be implemented by class if it wants to be informed of changes in observable objects.
  */
-public interface ITimeObserver
+public interface TimeObserver
 {
 	/**
 	 * Updates time of observer.

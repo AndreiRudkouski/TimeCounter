@@ -5,19 +5,11 @@ import java.lang.reflect.Method;
 import java.util.Locale;
 
 import timeCounter.command.CommandName;
-import timeCounter.command.ICommand;
-import timeCounter.counter.ITimeCounter;
-import timeCounter.init.annotation.Setter;
+import timeCounter.init.Initializer;
 import timeCounter.logger.MainLogger;
-import timeCounter.view.IView;
 
-public class Command implements ICommand
+public class CommandImpl implements timeCounter.command.Command
 {
-	@Setter
-	private ITimeCounter timeCounter;
-	@Setter
-	private IView view;
-
 	@Override
 	public boolean executeCommand(String commandName)
 	{
@@ -31,9 +23,7 @@ public class Command implements ICommand
 		try
 		{
 			CommandName currentType = CommandName.valueOf(commandName.toUpperCase(Locale.ENGLISH));
-			Object executor = currentType.getExecutorName().equalsIgnoreCase(timeCounter.getClass().getSimpleName()) ?
-					timeCounter :
-					view;
+			Object executor = Initializer.getClassInstanceByName(currentType.getExecutorClass().getSimpleName());
 			if (!currentType.isBooleanReturn())
 			{
 				Method method = executor.getClass().getMethod(currentType.getMethodName());

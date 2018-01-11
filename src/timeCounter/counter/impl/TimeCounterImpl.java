@@ -13,27 +13,27 @@ import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
 
+import timeCounter.command.Command;
 import timeCounter.command.CommandName;
-import timeCounter.command.ICommand;
-import timeCounter.counter.ITimeCounter;
 import timeCounter.init.annotation.Setter;
-import timeCounter.load.ILoadSaveToFile;
+import timeCounter.load.LoadSaveToFile;
 import timeCounter.logger.MainLogger;
-import timeCounter.observer.ITimeObserver;
-import timeCounter.timer.ISecondTimer;
+import timeCounter.observer.TimeObserver;
+import timeCounter.timer.SecondTimer;
 
-public class TimeCounter implements ITimeCounter
+public class TimeCounterImpl implements timeCounter.counter.TimeCounter
 {
-	private final static int SEC_TO_RELAX = 3000;
-	private final static boolean DEFAULT_AUTO_CHANGE_DATE = true;
-	private final static boolean DEFAULT_RELAX_REMINDER = true;
+	private static final int SEC_TO_RELAX = 3000;
+	private static final int QTY_OF_SETTING_PARAMETERS_IN_LINE = 3;
+	private static final boolean DEFAULT_AUTO_CHANGE_DATE = true;
+	private static final boolean DEFAULT_RELAX_REMINDER = true;
 
 	@Setter
-	private ICommand command;
+	private Command command;
 	@Setter
-	private ILoadSaveToFile saver;
+	private LoadSaveToFile saver;
 	@Setter
-	private ISecondTimer timer;
+	private SecondTimer timer;
 
 	private AtomicLong currentTime = new AtomicLong();
 	private AtomicLong todayTime = new AtomicLong();
@@ -45,11 +45,11 @@ public class TimeCounter implements ITimeCounter
 	private File file;
 	private Process process;
 
-	private List<ITimeObserver> observers = new ArrayList<>();
+	private List<TimeObserver> observers = new ArrayList<>();
 
 	private static final String DELIMITER = "/";
 
-	public TimeCounter()
+	public TimeCounterImpl()
 	{
 		autoChangeDate = DEFAULT_AUTO_CHANGE_DATE;
 		relaxReminder = DEFAULT_RELAX_REMINDER;
@@ -58,7 +58,10 @@ public class TimeCounter implements ITimeCounter
 	@Override
 	public void loadData()
 	{
-		timer.setCommand(this::checkApplication);
+		if (!timer.hasCommand())
+		{
+			timer.setCommand(this::checkApplication);
+		}
 		stopTimer();
 		loadDataFromFile();
 		assignTime();
@@ -249,7 +252,7 @@ public class TimeCounter implements ITimeCounter
 		for (String tmp : loadData)
 		{
 			String[] stringTmp = tmp.split(DELIMITER);
-			if (stringTmp.length != 3)
+			if (stringTmp.length != QTY_OF_SETTING_PARAMETERS_IN_LINE)
 			{
 				dateTimeMap.put(LocalDate.of(Integer.parseInt(stringTmp[2]),
 						Integer.parseInt(stringTmp[1]), Integer.parseInt(stringTmp[0])),
@@ -277,9 +280,8 @@ public class TimeCounter implements ITimeCounter
 		for (String tmp : loadData)
 		{
 			String[] stringTmp = tmp.split(DELIMITER);
-			if (stringTmp.length == 3)
+			if (stringTmp.length == QTY_OF_SETTING_PARAMETERS_IN_LINE)
 			{
-
 				if (stringTmp[0] != null && !stringTmp[0].isEmpty())
 				{
 					savedFile = new File(stringTmp[0]);
@@ -294,7 +296,7 @@ public class TimeCounter implements ITimeCounter
 	}
 
 	@Override
-	public void addTimeObserver(ITimeObserver observer)
+	public void addTimeObserver(TimeObserver observer)
 	{
 		observers.add(observer);
 	}
