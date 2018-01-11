@@ -17,9 +17,10 @@ import timeCounter.logger.MainLogger;
 
 public class Initializer
 {
-	private static final Map<String, Object> classInstances = new HashMap<>();
+	private static final Map<String, Object> CLASS_INSTANCES = new HashMap<>();
+	private static final Initializer INSTANCE = new Initializer("timeCounter.init.config.AppConfig");
 
-	public Initializer(String... configs)
+	private Initializer(String... configs)
 	{
 		createInstances(configs);
 		initFields();
@@ -31,7 +32,7 @@ public class Initializer
 	 *
 	 * @param configs names of config files with {@link Config} annotation
 	 */
-	private void createInstances(String... configs)
+	private static void createInstances(String... configs)
 	{
 		try
 		{
@@ -39,9 +40,9 @@ public class Initializer
 			for (String config : configs)
 			{
 				Class cl = classLoader.loadClass(config);
-				classInstances.put(cl.getSimpleName(), cl.newInstance());
+				CLASS_INSTANCES.put(cl.getSimpleName(), cl.newInstance());
 			}
-			for (Map.Entry<String, Object> classInstance : classInstances.entrySet())
+			for (Map.Entry<String, Object> classInstance : CLASS_INSTANCES.entrySet())
 			{
 				Class clazz = classInstance.getValue().getClass();
 				if (clazz.isAnnotationPresent(Config.class))
@@ -53,12 +54,12 @@ public class Initializer
 							Instance instanceAnnotation = method.getAnnotation(Instance.class);
 							if (instanceAnnotation.name().equals(""))
 							{
-								classInstances.put(method.getReturnType().getSimpleName(),
+								CLASS_INSTANCES.put(method.getReturnType().getSimpleName(),
 										method.invoke(classInstance.getValue()));
 							}
 							else
 							{
-								classInstances.put(instanceAnnotation.name(), method.invoke(classInstance.getValue()));
+								CLASS_INSTANCES.put(instanceAnnotation.name(), method.invoke(classInstance.getValue()));
 							}
 						}
 					}
@@ -74,11 +75,11 @@ public class Initializer
 	/**
 	 * Initializes all fields which are marked by {@link Setter} annotation or have setter methods with the annotation.
 	 */
-	private void initFields()
+	private static void initFields()
 	{
 		try
 		{
-			for (Map.Entry<String, Object> classInstance : classInstances.entrySet())
+			for (Map.Entry<String, Object> classInstance : CLASS_INSTANCES.entrySet())
 			{
 				Object classObject = classInstance.getValue();
 				// Collect all setter methods and fields of class which are marked by Setter annotation
@@ -105,11 +106,11 @@ public class Initializer
 					Setter setterMethodAnnotation = method.getAnnotation(Setter.class);
 					if (setterMethodAnnotation.name().equals(""))
 					{
-						method.invoke(classObject, classInstances.get(method.getParameterTypes()[0].getSimpleName()));
+						method.invoke(classObject, CLASS_INSTANCES.get(method.getParameterTypes()[0].getSimpleName()));
 					}
 					else
 					{
-						method.invoke(classObject, classInstances.get(setterMethodAnnotation.name()));
+						method.invoke(classObject, CLASS_INSTANCES.get(setterMethodAnnotation.name()));
 					}
 				}
 				for (Field field : setterAnnotatedFields)
@@ -118,11 +119,11 @@ public class Initializer
 					field.setAccessible(true);
 					if (setterFieldAnnotation.name().equals(""))
 					{
-						field.set(classObject, classInstances.get(field.getType().getSimpleName()));
+						field.set(classObject, CLASS_INSTANCES.get(field.getType().getSimpleName()));
 					}
 					else
 					{
-						field.set(classObject, classInstances.get(setterFieldAnnotation.name()));
+						field.set(classObject, CLASS_INSTANCES.get(setterFieldAnnotation.name()));
 					}
 				}
 			}
@@ -135,6 +136,6 @@ public class Initializer
 
 	public static Object getClassInstanceByName(String name)
 	{
-		return classInstances.get(name);
+		return CLASS_INSTANCES.get(name);
 	}
 }

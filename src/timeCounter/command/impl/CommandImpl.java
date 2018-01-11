@@ -5,7 +5,6 @@ import java.lang.reflect.Method;
 import java.util.Locale;
 
 import timeCounter.command.CommandName;
-import timeCounter.init.Initializer;
 import timeCounter.logger.MainLogger;
 
 public class CommandImpl implements timeCounter.command.Command
@@ -23,32 +22,23 @@ public class CommandImpl implements timeCounter.command.Command
 		try
 		{
 			CommandName currentType = CommandName.valueOf(commandName.toUpperCase(Locale.ENGLISH));
-			Object executor = Initializer.getClassInstanceByName(currentType.getExecutorClassName());
-			if (!currentType.isBooleanReturn())
+			Object executor = currentType.getExecutor();
+			Method method = currentType.getMethod();
+			if (currentType.isBooleanReturn())
 			{
-				Method method = executor.getClass().getMethod(currentType.getMethodName());
-				method.invoke(executor);
+				result = (boolean) (currentType.withParameters() ? method.invoke(executor, param1, param2) :
+						method.invoke(executor));
 			}
 			else
 			{
-				if (currentType.withParameters())
-				{
-					Method method = executor.getClass().getMethod(currentType.getMethodName(), Boolean.class,
-							Boolean.class);
-					result = (boolean) method.invoke(executor, param1, param2);
-				}
-				else
-				{
-					Method method = executor.getClass().getMethod(currentType.getMethodName());
-					result = (boolean) method.invoke(executor);
-				}
+				method.invoke(executor);
 			}
 		}
 		catch (IllegalArgumentException e)
 		{
 			MainLogger.getLogger().severe("Error command name: " + commandName);
 		}
-		catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e)
+		catch (IllegalAccessException | InvocationTargetException e)
 		{
 			MainLogger.getLogger().severe(MainLogger.getStackTrace(e));
 		}

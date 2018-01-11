@@ -8,8 +8,6 @@ public class Main
 {
 	public static void main(String[] args)
 	{
-		Initializer initializer = new Initializer("timeCounter.init.config.AppConfig");
-
 		TimeCounter timeCounter = (TimeCounter) Initializer.getClassInstanceByName(TimeCounter.class.getSimpleName());
 		View view = (View) Initializer.getClassInstanceByName(View.class.getSimpleName());
 		timeCounter.addTimeObserver(view);
