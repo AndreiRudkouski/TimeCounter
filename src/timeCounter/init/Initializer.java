@@ -43,7 +43,7 @@ public final class Initializer
 			{
 				if (isAnnotatedAsConfig(classInstance))
 				{
-					createInstancesOfAnnotadedMethods(classInstance);
+					createInstancesOfAnnotatedMethods(classInstance);
 				}
 			}
 		}
@@ -68,7 +68,7 @@ public final class Initializer
 		return clazz.isAnnotationPresent(Config.class);
 	}
 
-	private static void createInstancesOfAnnotadedMethods(Map.Entry<String, Object> classInstance)
+	private static void createInstancesOfAnnotatedMethods(Map.Entry<String, Object> classInstance)
 			throws InvocationTargetException, IllegalAccessException
 	{
 		Class clazz = classInstance.getValue().getClass();
@@ -147,15 +147,15 @@ public final class Initializer
 	{
 		for (Field field : annotatedFields)
 		{
-			Setter setterFieldAnnotation = field.getAnnotation(Setter.class);
+			Setter setterAnnotation = field.getAnnotation(Setter.class);
 			field.setAccessible(true);
-			if (setterFieldAnnotation.name().equals(""))
+			if (setterAnnotation.name().equals(""))
 			{
 				field.set(instance, CLASS_INSTANCES.get(field.getType().getSimpleName()));
 			}
 			else
 			{
-				field.set(instance, CLASS_INSTANCES.get(setterFieldAnnotation.name()));
+				field.set(instance, CLASS_INSTANCES.get(setterAnnotation.name()));
 			}
 		}
 	}
@@ -165,14 +165,14 @@ public final class Initializer
 	{
 		for (Method method : annotatedMethods)
 		{
-			Setter setterMethodAnnotation = method.getAnnotation(Setter.class);
-			if (setterMethodAnnotation.name().equals(""))
+			Setter setterAnnotation = method.getAnnotation(Setter.class);
+			if (setterAnnotation.name().equals(""))
 			{
 				method.invoke(instance, CLASS_INSTANCES.get(method.getParameterTypes()[0].getSimpleName()));
 			}
 			else
 			{
-				method.invoke(instance, CLASS_INSTANCES.get(setterMethodAnnotation.name()));
+				method.invoke(instance, CLASS_INSTANCES.get(setterAnnotation.name()));
 			}
 		}
 	}
