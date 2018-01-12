@@ -25,8 +25,17 @@ public class TimeCounterImpl implements timeCounter.counter.TimeCounter
 {
 	private static final int SEC_TO_RELAX = 3000;
 	private static final int QTY_OF_SETTING_PARAMETERS_IN_LINE = 3;
+
 	private static final boolean DEFAULT_AUTO_CHANGE_DATE = true;
 	private static final boolean DEFAULT_RELAX_REMINDER = true;
+
+	private static final String DELIMITER_SLASH = "/";
+	private static final String DELIMITER_SPACE = " ";
+	private static final String ENV_VARIABLE_FOR_WINDOWS = "windir";
+	private static final String COMMAND_FOR_LINUX = "ps -e";
+	private static final String COMMAND_FOR_WINDOWS = "\\system32\\tasklist.exe";
+	private static final String PROPERTY_OS_NAME = "os.name";
+	private static final String WINDOWS_OS_NAME = "Windows";
 
 	@Setter
 	private Command command;
@@ -42,12 +51,11 @@ public class TimeCounterImpl implements timeCounter.counter.TimeCounter
 	private Map<LocalDate, AtomicLong> dateTimeMap = new TreeMap<>();
 	private boolean autoChangeDate;
 	private boolean relaxReminder;
+	private boolean checkApplication = true;
 	private File file;
 	private Process process;
 
 	private List<TimeObserver> observers = new ArrayList<>();
-
-	private static final String DELIMITER = "/";
 
 	public TimeCounterImpl()
 	{
@@ -116,7 +124,8 @@ public class TimeCounterImpl implements timeCounter.counter.TimeCounter
 		{
 			if (isRunningProcess(file.getName()))
 			{
-				if (command.executeCommand(CommandName.VIEW_RUNNING_APPLICATION_NOTICE.name()))
+				checkApplication = command.executeCommand(CommandName.VIEW_RUNNING_APPLICATION_NOTICE.name());
+				if (checkApplication)
 				{
 					stopTimer();
 					return;
@@ -147,20 +156,14 @@ public class TimeCounterImpl implements timeCounter.counter.TimeCounter
 
 	private boolean isRunningProcess(String name)
 	{
-		// Determine OS type (Windows or Linux)
-		String delimiter = " ";
-		String env = Stream.of(System.getProperties().getProperty("os.name").split(delimiter)).anyMatch(
-				s -> s.equalsIgnoreCase("Windows")) ?
-				System.getenv("windir") + "\\system32\\" + "tasklist.exe" : "ps -e";
-
 		try
 		{
 			String line;
-			Process p = Runtime.getRuntime().exec(env);
+			Process p = Runtime.getRuntime().exec(getEnvironmentCommand());
 			BufferedReader input = new BufferedReader(new InputStreamReader(p.getInputStream()));
 			while ((line = input.readLine()) != null)
 			{
-				if (Stream.of(line.split(delimiter)).anyMatch(n -> n.equalsIgnoreCase(name)))
+				if (Stream.of(line.split(DELIMITER_SPACE)).anyMatch(n -> n.equalsIgnoreCase(name)))
 				{
 					return true;
 				}
@@ -172,6 +175,14 @@ public class TimeCounterImpl implements timeCounter.counter.TimeCounter
 			MainLogger.getLogger().severe(MainLogger.getStackTrace(e));
 		}
 		return false;
+	}
+
+	private String getEnvironmentCommand()
+	{
+		// Determine OS type (Windows or Linux)
+		return Stream.of(System.getProperties().getProperty(PROPERTY_OS_NAME).split(DELIMITER_SPACE)).anyMatch(
+				s -> s.equalsIgnoreCase(WINDOWS_OS_NAME)) ?
+				System.getenv(ENV_VARIABLE_FOR_WINDOWS) + COMMAND_FOR_WINDOWS : COMMAND_FOR_LINUX;
 	}
 
 	private void checkChangingDate()
@@ -218,7 +229,7 @@ public class TimeCounterImpl implements timeCounter.counter.TimeCounter
 
 	private void checkApplication()
 	{
-		if (!isProcessAlive() && file != null)
+		if (!isProcessAlive() && file != null && checkApplication)
 		{
 			stopTimer();
 		}
@@ -234,11 +245,12 @@ public class TimeCounterImpl implements timeCounter.counter.TimeCounter
 	{
 		List<String> dataToSave = new ArrayList<>();
 		String fileName = file != null ? file.getAbsolutePath() : "";
-		dataToSave.add(fileName + DELIMITER + autoChangeDate + DELIMITER + relaxReminder);
+		dataToSave.add(fileName + DELIMITER_SLASH + autoChangeDate + DELIMITER_SLASH + relaxReminder);
 		for (Map.Entry<LocalDate, AtomicLong> tmp : dateTimeMap.entrySet())
 		{
-			dataToSave.add(tmp.getKey().getDayOfMonth() + DELIMITER + tmp.getKey().getMonthValue() + DELIMITER +
-					tmp.getKey().getYear() + DELIMITER + tmp.getValue());
+			dataToSave.add(tmp.getKey().getDayOfMonth() + DELIMITER_SLASH
+					+ tmp.getKey().getMonthValue() + DELIMITER_SLASH +
+					tmp.getKey().getYear() + DELIMITER_SLASH + tmp.getValue());
 		}
 		saver.saveData(dataToSave);
 	}
@@ -248,7 +260,7 @@ public class TimeCounterImpl implements timeCounter.counter.TimeCounter
 		List<String> loadData = saver.loadData();
 		for (String tmp : loadData)
 		{
-			String[] stringTmp = tmp.split(DELIMITER);
+			String[] stringTmp = tmp.split(DELIMITER_SLASH);
 			if (stringTmp.length != QTY_OF_SETTING_PARAMETERS_IN_LINE)
 			{
 				dateTimeMap.put(LocalDate.of(Integer.parseInt(stringTmp[2]),
@@ -282,7 +294,7 @@ public class TimeCounterImpl implements timeCounter.counter.TimeCounter
 		List<String> loadData = saver.loadData();
 		for (String tmp : loadData)
 		{
-			String[] stringTmp = tmp.split(DELIMITER);
+			String[] stringTmp = tmp.split(DELIMITER_SLASH);
 			if (stringTmp.length == QTY_OF_SETTING_PARAMETERS_IN_LINE)
 			{
 				if (stringTmp[0] != null && !stringTmp[0].isEmpty())
