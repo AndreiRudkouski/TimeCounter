@@ -4,6 +4,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -16,7 +17,7 @@ import timeCounter.init.annotation.Setter;
 import timeCounter.init.config.AppConfig;
 import timeCounter.logger.MainLogger;
 
-public class Initializer
+public final class Initializer
 {
 	private static final Map<String, Object> CLASS_INSTANCES = new HashMap<>();
 	private static final Initializer INSTANCE = new Initializer(AppConfig.class);
@@ -37,37 +38,55 @@ public class Initializer
 	{
 		try
 		{
-			for (Class configClass : configClasses)
-			{
-				CLASS_INSTANCES.put(configClass.getSimpleName(), configClass.newInstance());
-			}
+			createConfigClassInstances(configClasses);
 			for (Map.Entry<String, Object> classInstance : CLASS_INSTANCES.entrySet())
 			{
-				Class clazz = classInstance.getValue().getClass();
-				if (clazz.isAnnotationPresent(Config.class))
+				if (isAnnotatedAsConfig(classInstance))
 				{
-					for (Method method : clazz.getDeclaredMethods())
-					{
-						if (method.isAnnotationPresent(Instance.class))
-						{
-							Instance instanceAnnotation = method.getAnnotation(Instance.class);
-							if (instanceAnnotation.name().equals(""))
-							{
-								CLASS_INSTANCES.put(method.getReturnType().getSimpleName(),
-										method.invoke(classInstance.getValue()));
-							}
-							else
-							{
-								CLASS_INSTANCES.put(instanceAnnotation.name(), method.invoke(classInstance.getValue()));
-							}
-						}
-					}
+					createInstancesOfAnnotadedMethods(classInstance);
 				}
 			}
 		}
 		catch (InstantiationException | IllegalAccessException | InvocationTargetException e)
 		{
 			MainLogger.getLogger().severe(MainLogger.getStackTrace(e));
+		}
+	}
+
+	private static void createConfigClassInstances(Class... configClasses)
+			throws IllegalAccessException, InstantiationException
+	{
+		for (Class configClass : configClasses)
+		{
+			CLASS_INSTANCES.put(configClass.getSimpleName(), configClass.newInstance());
+		}
+	}
+
+	private static boolean isAnnotatedAsConfig(Map.Entry<String, Object> classInstance)
+	{
+		Class clazz = classInstance.getValue().getClass();
+		return clazz.isAnnotationPresent(Config.class);
+	}
+
+	private static void createInstancesOfAnnotadedMethods(Map.Entry<String, Object> classInstance)
+			throws InvocationTargetException, IllegalAccessException
+	{
+		Class clazz = classInstance.getValue().getClass();
+		for (Method method : clazz.getDeclaredMethods())
+		{
+			if (method.isAnnotationPresent(Instance.class))
+			{
+				Instance instanceAnnotation = method.getAnnotation(Instance.class);
+				if (instanceAnnotation.name().equals(""))
+				{
+					CLASS_INSTANCES.put(method.getReturnType().getSimpleName(),
+							method.invoke(classInstance.getValue()));
+				}
+				else
+				{
+					CLASS_INSTANCES.put(instanceAnnotation.name(), method.invoke(classInstance.getValue()));
+				}
+			}
 		}
 	}
 
@@ -80,58 +99,81 @@ public class Initializer
 		{
 			for (Map.Entry<String, Object> classInstance : CLASS_INSTANCES.entrySet())
 			{
-				Object classObject = classInstance.getValue();
-				// Collect all setter methods and fields of class which are marked by Setter annotation
-				List<Method> setterAnnotatedMethods = Arrays.stream(classObject.getClass().getDeclaredMethods()).filter(
-						m -> m.isAnnotationPresent(Setter.class) && m.getName().startsWith("set")).collect(
-						Collectors.toList());
-				List<Field> setterAnnotatedFields = Arrays.stream(classObject.getClass().getDeclaredFields()).filter(
-						f -> f.isAnnotationPresent(Setter.class)).collect(Collectors.toList());
-				// If class has superclass and the superclass is abstract and not Object, add superclass methods
-				Class clazz = classObject.getClass();
-				while (!clazz.getSuperclass().getSimpleName().equals("Object") && Modifier.isAbstract(
-						clazz.getSuperclass().getModifiers()))
-				{
-					setterAnnotatedMethods.addAll(Arrays.stream(
-							classObject.getClass().getSuperclass().getDeclaredMethods())
-							.filter(m -> m.isAnnotationPresent(Setter.class) && m.getName().startsWith("set"))
-							.collect(Collectors.toList()));
-					setterAnnotatedFields.addAll(Arrays.stream(
-							classObject.getClass().getSuperclass().getDeclaredFields())
-							.filter(f -> f.isAnnotationPresent(Setter.class)).collect(Collectors.toList()));
-					clazz = clazz.getSuperclass();
-				}
+				List<Field> annotatedFields = new ArrayList<>();
+				List<Method> annotatedMethods = new ArrayList<>();
+				Object instance = classInstance.getValue();
+				Class clazz = instance.getClass();
 
-				for (Method method : setterAnnotatedMethods)
-				{
-					Setter setterMethodAnnotation = method.getAnnotation(Setter.class);
-					if (setterMethodAnnotation.name().equals(""))
-					{
-						method.invoke(classObject, CLASS_INSTANCES.get(method.getParameterTypes()[0].getSimpleName()));
-					}
-					else
-					{
-						method.invoke(classObject, CLASS_INSTANCES.get(setterMethodAnnotation.name()));
-					}
-				}
-				for (Field field : setterAnnotatedFields)
-				{
-					Setter setterFieldAnnotation = field.getAnnotation(Setter.class);
-					field.setAccessible(true);
-					if (setterFieldAnnotation.name().equals(""))
-					{
-						field.set(classObject, CLASS_INSTANCES.get(field.getType().getSimpleName()));
-					}
-					else
-					{
-						field.set(classObject, CLASS_INSTANCES.get(setterFieldAnnotation.name()));
-					}
-				}
+				addSetterAnnotatedFields(annotatedFields, clazz);
+				addSetterAnnotatedMethods(annotatedMethods, clazz);
+				addSetterAnnotatedFieldsAndMethodsFromAbstractSuperClasses(annotatedFields, annotatedMethods, clazz);
+
+				initAnnotatedFields(annotatedFields, instance);
+				initFieldsByAnnotatedMethods(annotatedMethods, instance);
 			}
 		}
 		catch (IllegalAccessException | InvocationTargetException e)
 		{
 			MainLogger.getLogger().severe(MainLogger.getStackTrace(e));
+		}
+	}
+
+	private static void addSetterAnnotatedFields(List<Field> annotatedFields, Class clazz)
+	{
+		annotatedFields.addAll(Arrays.stream(clazz.getDeclaredFields()).filter(f -> f.isAnnotationPresent(Setter.class))
+				.collect(Collectors.toList()));
+	}
+
+	private static void addSetterAnnotatedMethods(List<Method> annotatedMethods, Class clazz)
+	{
+		annotatedMethods.addAll(Arrays.stream(clazz.getDeclaredMethods())
+				.filter(m -> m.isAnnotationPresent(Setter.class) && m.getName().startsWith("set"))
+				.collect(Collectors.toList()));
+	}
+
+	private static void addSetterAnnotatedFieldsAndMethodsFromAbstractSuperClasses(List<Field> annotatedFields,
+			List<Method> annotatedMethods, Class clazz)
+	{
+		while (!clazz.getSuperclass().getSimpleName().equals("Object") && Modifier.isAbstract(
+				clazz.getSuperclass().getModifiers()))
+		{
+			clazz = clazz.getSuperclass();
+			addSetterAnnotatedFields(annotatedFields, clazz);
+			addSetterAnnotatedMethods(annotatedMethods, clazz);
+		}
+	}
+
+	private static void initAnnotatedFields(List<Field> annotatedFields, Object instance) throws IllegalAccessException
+	{
+		for (Field field : annotatedFields)
+		{
+			Setter setterFieldAnnotation = field.getAnnotation(Setter.class);
+			field.setAccessible(true);
+			if (setterFieldAnnotation.name().equals(""))
+			{
+				field.set(instance, CLASS_INSTANCES.get(field.getType().getSimpleName()));
+			}
+			else
+			{
+				field.set(instance, CLASS_INSTANCES.get(setterFieldAnnotation.name()));
+			}
+		}
+	}
+
+	private static void initFieldsByAnnotatedMethods(List<Method> annotatedMethods, Object instance)
+			throws InvocationTargetException, IllegalAccessException
+	{
+		for (Method method : annotatedMethods)
+		{
+			Setter setterMethodAnnotation = method.getAnnotation(Setter.class);
+			if (setterMethodAnnotation.name().equals(""))
+			{
+				method.invoke(instance, CLASS_INSTANCES.get(method.getParameterTypes()[0].getSimpleName()));
+			}
+			else
+			{
+				method.invoke(instance, CLASS_INSTANCES.get(setterMethodAnnotation.name()));
+			}
 		}
 	}
 

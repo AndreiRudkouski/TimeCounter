@@ -62,7 +62,6 @@ public class TimeCounterImpl implements timeCounter.counter.TimeCounter
 		{
 			timer.setCommand(this::checkApplication);
 		}
-		stopTimer();
 		loadDataFromFile();
 		assignTime();
 	}
@@ -91,14 +90,12 @@ public class TimeCounterImpl implements timeCounter.counter.TimeCounter
 			saveData();
 		}
 
-		if (closeApp && process != null && process.isAlive())
+		if (closeApp && isProcessAlive())
 		{
 			process.destroy();
 		}
 
-		return (dateTimeMap.containsKey(todayDate) && dateTimeMap.get(todayDate).get() != todayTime.get())
-				|| (dateTimeMap.values().stream().mapToLong(AtomicLong::get).sum() != totalTime.get())
-				|| isChangedSettings();
+		return isChangedTime() || isChangedSettings();
 	}
 
 	private void checkRelaxTime()
@@ -115,7 +112,7 @@ public class TimeCounterImpl implements timeCounter.counter.TimeCounter
 
 	private void startTimer()
 	{
-		if ((process == null || !process.isAlive()) && file != null)
+		if (!isProcessAlive() && file != null)
 		{
 			if (isRunningProcess(file.getName()))
 			{
@@ -177,7 +174,7 @@ public class TimeCounterImpl implements timeCounter.counter.TimeCounter
 		return false;
 	}
 
-	private void checkChangeDate()
+	private void checkChangingDate()
 	{
 		LocalDate currentDate = LocalDate.now();
 		if (!todayDate.equals(currentDate))
@@ -221,7 +218,7 @@ public class TimeCounterImpl implements timeCounter.counter.TimeCounter
 
 	private void checkApplication()
 	{
-		if (process != null && !process.isAlive())
+		if (isProcessAlive())
 		{
 			stopTimer();
 		}
@@ -229,7 +226,7 @@ public class TimeCounterImpl implements timeCounter.counter.TimeCounter
 		{
 			incrementTime();
 			checkRelaxTime();
-			checkChangeDate();
+			checkChangingDate();
 		}
 	}
 
@@ -271,6 +268,12 @@ public class TimeCounterImpl implements timeCounter.counter.TimeCounter
 		notifyTimeObserversAboutSettings();
 	}
 
+	private boolean isChangedTime()
+	{
+		return (dateTimeMap.containsKey(todayDate) && dateTimeMap.get(todayDate).get() != todayTime.get())
+				|| (dateTimeMap.values().stream().mapToLong(AtomicLong::get).sum() != totalTime.get());
+	}
+
 	private boolean isChangedSettings()
 	{
 		File savedFile = null;
@@ -293,6 +296,11 @@ public class TimeCounterImpl implements timeCounter.counter.TimeCounter
 		}
 		return (file != null && !file.equals(savedFile)) || (file == null && savedFile != null)
 				|| autoChangeDate != savedAutoChangeDate || relaxReminder != savedRelaxReminder;
+	}
+
+	private boolean isProcessAlive()
+	{
+		return process != null && process.isAlive();
 	}
 
 	@Override

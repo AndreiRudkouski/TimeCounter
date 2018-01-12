@@ -2,7 +2,6 @@ package timeCounter.timer.impl;
 
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import timeCounter.timer.Timer;
 
@@ -18,25 +17,26 @@ public class SecondTimer extends ScheduledThreadPoolExecutor implements Timer
 	@Override
 	public void stop()
 	{
-		executingThread.isPause.set(true);
+		executingThread.isPause = true;
 	}
 
 	@Override
 	public void start()
 	{
-		executingThread.isPause.set(false);
+		executingThread.isPause = false;
 	}
 
 	@Override
 	public boolean isRunning()
 	{
-		return !executingThread.isPause.get();
+		return !executingThread.isPause;
 	}
 
 	@Override
 	public void setCommand(Runnable command)
 	{
 		executingThread = new LocalThread(command);
+		executingThread.isPause = true;
 		super.scheduleAtFixedRate(executingThread, 1, 1, TimeUnit.SECONDS);
 	}
 
@@ -52,7 +52,7 @@ public class SecondTimer extends ScheduledThreadPoolExecutor implements Timer
 	private class LocalThread implements Runnable
 	{
 		Runnable executingCommand;
-		AtomicBoolean isPause = new AtomicBoolean(true);
+		volatile boolean isPause;
 
 		LocalThread(Runnable command)
 		{
@@ -62,7 +62,7 @@ public class SecondTimer extends ScheduledThreadPoolExecutor implements Timer
 		@Override
 		public void run()
 		{
-			if (!isPause.get())
+			if (isRunning())
 			{
 				executingCommand.run();
 			}

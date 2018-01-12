@@ -40,64 +40,187 @@ public class ViewImpl implements timeCounter.view.View, ActionListener
 	private static final String TIME_DELIMITER = ":";
 
 	private JFrame frame;
-	private JLabel labelApplication;
-	private JLabel labelCurrentTime;
-	private JLabel labelTodayTime;
-	private JLabel labelTotalTime;
+	private JLabel applicationLabel;
+	private JLabel currentTimeLabel;
+	private JLabel todayTimeLabel;
+	private JLabel totalTimeLabel;
 	private JTextField currentTimeField;
 	private JTextField todayTimeField;
 	private JTextField totalTimeField;
-	private JMenu menuCounter;
-	private JMenuItem menuCounterLoad;
-	private JMenuItem menuCounterSave;
-	private JMenu menuErase;
-	private JMenuItem menuEraseApplication;
-	private JMenuItem menuEraseCurrent;
-	private JMenuItem menuEraseToday;
-	private JMenuItem menuEraseTotal;
-	private JMenu menuSetting;
-	private JMenuItem menuSettingApplication;
-	private JMenuItem menuSettingLocale;
-	private JButton buttonStartStop;
+	private JMenu countingMenu;
+	private JMenuItem loadDataCountingMenu;
+	private JMenuItem saveDataCountingMenu;
+	private JMenu eraseMenu;
+	private JMenuItem applicationEraseMenu;
+	private JMenuItem currentTimeEraseMenu;
+	private JMenuItem todayTimeEraseMenu;
+	private JMenuItem totalTimeEraseMenu;
+	private JMenu settingMenu;
+	private JMenuItem applicationSettingMenu;
+	private JMenuItem localeSettingMenu;
+	private JButton startStopButton;
 	private JCheckBox checkBreak;
 	private JCheckBox checkDate;
 	private JFileChooser fileChooser;
-
-	private Image image;
+	private Image iconImage;
 
 	@Setter
 	private Command command;
 
 	private List<TimeObserver> observers = new ArrayList<>();
 
+
 	@Override
 	public void createView()
 	{
-		JPanel panelTop = new JPanel();
-		labelApplication = new JLabel();
-		labelApplication.setFont(FONT_TOP_PANEL);
-		panelTop.add(labelApplication);
-		panelTop.setPreferredSize(new Dimension(370, 30));
-		panelTop.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, Color.LIGHT_GRAY));
+		frame = new JFrame();
+		frame.setAlwaysOnTop(true);
+		frame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
+		frame.setResizable(false);
+		frame.setJMenuBar(createMenu());
+		frame.getContentPane().add(BorderLayout.NORTH, createTopPanel());
+		frame.getContentPane().add(BorderLayout.WEST, createLeftPanel());
+		frame.getContentPane().add(BorderLayout.CENTER, createCenterPanel());
+		frame.getContentPane().add(BorderLayout.EAST, createRightPanel());
+		frame.setPreferredSize(new Dimension(380, 185));
+		frame.pack();
+		frame.setVisible(true);
+		// Centering of frame
+		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+		Point middle = new Point(screenSize.width / 2, screenSize.height / 2);
+		Point newLocation = new Point(middle.x - (frame.getWidth() / 2),
+				middle.y - (frame.getHeight() / 2));
+		frame.setLocation(newLocation);
+		iconImage = Toolkit.getDefaultToolkit().getImage(getClass().getClassLoader().getResource(ICON_NAME));
+		frame.setIconImage(iconImage.getScaledInstance(32, 32, Image.SCALE_AREA_AVERAGING));
+		frame.addWindowListener(new HideAndCloseWindowButtonsListener());
 
-		JPanel panelLeft = new JPanel();
-		panelLeft.setPreferredSize(new Dimension(165, 100));
-		panelLeft.setLayout(new BoxLayout(panelLeft, BoxLayout.Y_AXIS));
-		panelLeft.setBorder(BorderFactory.createEmptyBorder(10, 15, 10, 0));
-		labelCurrentTime = new JLabel();
-		labelCurrentTime.setFont(FONT_LEFT_PANEL);
-		labelTodayTime = new JLabel();
-		labelTodayTime.setFont(FONT_LEFT_PANEL);
-		labelTotalTime = new JLabel();
-		labelTotalTime.setFont(FONT_LEFT_PANEL);
-		panelLeft.add(labelCurrentTime);
-		panelLeft.add(Box.createVerticalStrut(12));
-		panelLeft.add(labelTodayTime);
-		panelLeft.add(Box.createVerticalStrut(12));
-		panelLeft.add(labelTotalTime);
+		initText();
+	}
 
-		JPanel panelCenter = new JPanel();
-		panelCenter.setBorder(BorderFactory.createEmptyBorder(5, 0, 5, 0));
+	private JMenuBar createMenu()
+	{
+		JMenuBar menu = new JMenuBar();
+		menu.setBackground(Color.LIGHT_GRAY);
+		menu.setBorder(BorderFactory.createEmptyBorder());
+		menu.add(createCountingMenu());
+		menu.add(createEraseMenu());
+		menu.add(createSettingMenu());
+		return menu;
+	}
+
+	private JMenu createCountingMenu()
+	{
+		countingMenu = new JMenu();
+		loadDataCountingMenu = new JMenuItem();
+		loadDataCountingMenu.addActionListener(this);
+		loadDataCountingMenu.setActionCommand(CommandName.TIME_COUNTER_LOAD_DATA.name());
+		saveDataCountingMenu = new JMenuItem();
+		saveDataCountingMenu.addActionListener(this);
+		saveDataCountingMenu.setActionCommand(CommandName.TIME_COUNTER_SAVE_DATA.name());
+		countingMenu.add(loadDataCountingMenu);
+		countingMenu.add(saveDataCountingMenu);
+		return countingMenu;
+	}
+
+	private JMenu createEraseMenu()
+	{
+		eraseMenu = new JMenu();
+		currentTimeEraseMenu = new JMenuItem();
+		currentTimeEraseMenu.addActionListener(e -> {
+			currentTimeField.setText(timeToViewFormatConverter(0));
+			notifyTimeObserversAboutTime();
+		});
+		todayTimeEraseMenu = new JMenuItem();
+		todayTimeEraseMenu.addActionListener(e -> {
+			todayTimeField.setText(timeToViewFormatConverter(0));
+			notifyTimeObserversAboutTime();
+		});
+		totalTimeEraseMenu = new JMenuItem();
+		totalTimeEraseMenu.addActionListener(e -> {
+			totalTimeField.setText(timeToViewFormatConverter(0));
+			notifyTimeObserversAboutTime();
+		});
+		applicationEraseMenu = new JMenuItem();
+		applicationEraseMenu.addActionListener(e -> {
+			changeApplicationLabel(null);
+			notifyTimeObserversAboutSettings();
+		});
+		eraseMenu.add(currentTimeEraseMenu);
+		eraseMenu.add(todayTimeEraseMenu);
+		eraseMenu.add(totalTimeEraseMenu);
+		eraseMenu.add(applicationEraseMenu);
+		return eraseMenu;
+	}
+
+	private JMenu createSettingMenu()
+	{
+		settingMenu = new JMenu();
+		applicationSettingMenu = new JMenuItem();
+		localeSettingMenu = new JMenuItem();
+		applicationSettingMenu.addActionListener(e -> chooseApplication());
+		localeSettingMenu.addActionListener(e -> changeLocale());
+		// Checkboxes
+		checkBreak = new JCheckBox();
+		checkBreak.addActionListener(e -> notifyTimeObserversAboutSettings());
+		checkDate = new JCheckBox();
+		checkDate.addActionListener(e -> notifyTimeObserversAboutSettings());
+		settingMenu.add(applicationSettingMenu);
+		settingMenu.add(localeSettingMenu);
+		settingMenu.add(checkBreak);
+		settingMenu.add(checkDate);
+		return settingMenu;
+	}
+
+	private JPanel createTopPanel()
+	{
+		JPanel topPanel = new JPanel();
+		applicationLabel = new JLabel();
+		applicationLabel.setFont(FONT_TOP_PANEL);
+		topPanel.add(applicationLabel);
+		topPanel.setPreferredSize(new Dimension(370, 30));
+		topPanel.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, Color.LIGHT_GRAY));
+		return topPanel;
+	}
+
+	private JPanel createLeftPanel()
+	{
+		JPanel leftPanel = new JPanel();
+		leftPanel.setPreferredSize(new Dimension(165, 100));
+		leftPanel.setLayout(new BoxLayout(leftPanel, BoxLayout.Y_AXIS));
+		leftPanel.setBorder(BorderFactory.createEmptyBorder(10, 15, 10, 0));
+		currentTimeLabel = new JLabel();
+		currentTimeLabel.setFont(FONT_LEFT_PANEL);
+		todayTimeLabel = new JLabel();
+		todayTimeLabel.setFont(FONT_LEFT_PANEL);
+		totalTimeLabel = new JLabel();
+		totalTimeLabel.setFont(FONT_LEFT_PANEL);
+		leftPanel.add(currentTimeLabel);
+		leftPanel.add(Box.createVerticalStrut(12));
+		leftPanel.add(todayTimeLabel);
+		leftPanel.add(Box.createVerticalStrut(12));
+		leftPanel.add(totalTimeLabel);
+		return leftPanel;
+	}
+
+	private JPanel createRightPanel()
+	{
+		JPanel rightPanel = new JPanel();
+		rightPanel.setBorder(BorderFactory.createEmptyBorder(5, 0, 5, 10));
+		startStopButton = new JButton();
+		startStopButton.setPreferredSize(new Dimension(70, 25));
+		startStopButton.addActionListener(e -> {
+			updateTiming(!startStopButton.getText().equalsIgnoreCase(bundle.getString("text_button_stop")));
+			notifyTimeObserversAboutTiming();
+		});
+		rightPanel.add(startStopButton);
+		return rightPanel;
+	}
+
+	private JPanel createCenterPanel()
+	{
+		JPanel centerPanel = new JPanel();
+		centerPanel.setBorder(BorderFactory.createEmptyBorder(5, 0, 5, 0));
 		currentTimeField = new JTextField(8);
 		currentTimeField.setHorizontalAlignment(JTextField.CENTER);
 		currentTimeField.setFont(FONT_CENTER_PANEL);
@@ -113,107 +236,16 @@ public class ViewImpl implements timeCounter.view.View, ActionListener
 		totalTimeField.setFont(FONT_CENTER_PANEL);
 		totalTimeField.setEditable(false);
 		totalTimeField.setBackground(Color.white);
-		panelCenter.add(currentTimeField);
-		panelCenter.add(todayTimeField);
-		panelCenter.add(totalTimeField);
-
-		JPanel panelRight = new JPanel();
-		panelRight.setBorder(BorderFactory.createEmptyBorder(5, 0, 5, 10));
-		buttonStartStop = new JButton();
-		buttonStartStop.setPreferredSize(new Dimension(70, 25));
-		buttonStartStop.addActionListener(e -> {
-			updateTiming(!buttonStartStop.getText().equalsIgnoreCase(bundle.getString("text_button_stop")));
-			notifyTimeObserversAboutTiming();
-		});
-		panelRight.add(buttonStartStop);
-
-		// Create counter item of the menu
-		menuCounter = new JMenu();
-		menuCounterLoad = new JMenuItem();
-		menuCounterLoad.addActionListener(this);
-		menuCounterLoad.setActionCommand(CommandName.TIME_COUNTER_LOAD_DATA.name());
-		menuCounterSave = new JMenuItem();
-		menuCounterSave.addActionListener(this);
-		menuCounterSave.setActionCommand(CommandName.TIME_COUNTER_SAVE_DATA.name());
-		menuCounter.add(menuCounterLoad);
-		menuCounter.add(menuCounterSave);
-		// Create erase item of the menu
-		menuErase = new JMenu();
-		menuEraseCurrent = new JMenuItem();
-		menuEraseCurrent.addActionListener(e -> {
-			currentTimeField.setText(timeToViewConverter(0));
-			notifyTimeObserversAboutTime();
-		});
-		menuEraseToday = new JMenuItem();
-		menuEraseToday.addActionListener(e -> {
-			todayTimeField.setText(timeToViewConverter(0));
-			notifyTimeObserversAboutTime();
-		});
-		menuEraseTotal = new JMenuItem();
-		menuEraseTotal.addActionListener(e -> {
-			totalTimeField.setText(timeToViewConverter(0));
-			notifyTimeObserversAboutTime();
-		});
-		menuEraseApplication = new JMenuItem();
-		menuEraseApplication.addActionListener(e -> {
-			changeApplicationLabel(null);
-			notifyTimeObserversAboutSettings();
-		});
-		menuErase.add(menuEraseCurrent);
-		menuErase.add(menuEraseToday);
-		menuErase.add(menuEraseTotal);
-		menuErase.add(menuEraseApplication);
-		// Create setting item of the menu
-		menuSetting = new JMenu();
-		menuSettingApplication = new JMenuItem();
-		menuSettingLocale = new JMenuItem();
-		menuSettingApplication.addActionListener(e -> chooseApplication());
-		menuSettingLocale.addActionListener(e -> changeLocale());
-		// Checkboxes
-		checkBreak = new JCheckBox();
-		checkBreak.addActionListener(e -> notifyTimeObserversAboutSettings());
-		checkDate = new JCheckBox();
-		checkDate.addActionListener(e -> notifyTimeObserversAboutSettings());
-		menuSetting.add(menuSettingApplication);
-		menuSetting.add(menuSettingLocale);
-		menuSetting.add(checkBreak);
-		menuSetting.add(checkDate);
-
-		JMenuBar menu = new JMenuBar();
-		menu.setBackground(Color.LIGHT_GRAY);
-		menu.setBorder(BorderFactory.createEmptyBorder());
-		menu.add(menuCounter);
-		menu.add(menuErase);
-		menu.add(menuSetting);
-
-		frame = new JFrame();
-		frame.setAlwaysOnTop(true);
-		frame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
-		frame.setResizable(false);
-		frame.setJMenuBar(menu);
-		frame.getContentPane().add(BorderLayout.NORTH, panelTop);
-		frame.getContentPane().add(BorderLayout.WEST, panelLeft);
-		frame.getContentPane().add(BorderLayout.CENTER, panelCenter);
-		frame.getContentPane().add(BorderLayout.EAST, panelRight);
-		frame.setPreferredSize(new Dimension(380, 185));
-		frame.pack();
-		frame.setVisible(true);
-		// Centering of frame
-		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-		Point middle = new Point(screenSize.width / 2, screenSize.height / 2);
-		Point newLocation = new Point(middle.x - (frame.getWidth() / 2),
-				middle.y - (frame.getHeight() / 2));
-		frame.setLocation(newLocation);
-		image = Toolkit.getDefaultToolkit().getImage(getClass().getClassLoader().getResource(ICON_NAME));
-		frame.setIconImage(image.getScaledInstance(32, 32, Image.SCALE_AREA_AVERAGING));
-		frame.addWindowListener(new ButtonWindowListener());
-		initText();
+		centerPanel.add(currentTimeField);
+		centerPanel.add(todayTimeField);
+		centerPanel.add(totalTimeField);
+		return centerPanel;
 	}
 
 	/**
 	 * Class for hiding frame to tray and closing the controlling application when the frame is closing.
 	 */
-	private class ButtonWindowListener extends WindowAdapter
+	private class HideAndCloseWindowButtonsListener extends WindowAdapter
 	{
 		@Override
 		public void windowClosing(WindowEvent we)
@@ -238,7 +270,7 @@ public class ViewImpl implements timeCounter.view.View, ActionListener
 		{
 			// Hide window to tray
 			frame.setVisible(false);
-			TrayIcon trayIcon = new TrayIcon(image.getScaledInstance(16, 16, Image.SCALE_AREA_AVERAGING));
+			TrayIcon trayIcon = new TrayIcon(iconImage.getScaledInstance(16, 16, Image.SCALE_AREA_AVERAGING));
 			trayIcon.setToolTip(bundle.getString("title"));
 			try
 			{
@@ -263,34 +295,34 @@ public class ViewImpl implements timeCounter.view.View, ActionListener
 	private void initText()
 	{
 		frame.setTitle(bundle.getString("title"));
-		if (labelApplication.isEnabled())
+		if (applicationLabel.isEnabled())
 		{
-			labelApplication.setText(bundle.getString("label_application"));
-			labelApplication.setForeground(Color.RED);
+			applicationLabel.setText(bundle.getString("label_application"));
+			applicationLabel.setForeground(Color.RED);
 		}
-		labelCurrentTime.setText(bundle.getString("label_current_time"));
-		labelTodayTime.setText(bundle.getString("label_today_time"));
-		labelTotalTime.setText(bundle.getString("label_total_time"));
-		menuCounter.setText(bundle.getString("menu_item_count"));
-		menuCounterLoad.setText(bundle.getString("menu_item_count_load"));
-		menuCounterSave.setText(bundle.getString("menu_item_count_save"));
-		menuErase.setText(bundle.getString("menu_item_erase"));
-		menuEraseApplication.setText(bundle.getString("menu_item_erase_application"));
-		menuEraseCurrent.setText(bundle.getString("menu_item_erase_current"));
-		menuEraseToday.setText(bundle.getString("menu_item_erase_today"));
-		menuEraseTotal.setText(bundle.getString("menu_item_erase_total"));
-		menuSetting.setText(bundle.getString("menu_item_setting"));
-		menuSettingApplication.setText(bundle.getString("menu_item_setting_application"));
-		menuSettingLocale.setText(bundle.getString("menu_item_setting_locale"));
+		currentTimeLabel.setText(bundle.getString("label_current_time"));
+		todayTimeLabel.setText(bundle.getString("label_today_time"));
+		totalTimeLabel.setText(bundle.getString("label_total_time"));
+		countingMenu.setText(bundle.getString("menu_item_count"));
+		loadDataCountingMenu.setText(bundle.getString("menu_item_count_load"));
+		saveDataCountingMenu.setText(bundle.getString("menu_item_count_save"));
+		eraseMenu.setText(bundle.getString("menu_item_erase"));
+		applicationEraseMenu.setText(bundle.getString("menu_item_erase_application"));
+		currentTimeEraseMenu.setText(bundle.getString("menu_item_erase_current"));
+		todayTimeEraseMenu.setText(bundle.getString("menu_item_erase_today"));
+		totalTimeEraseMenu.setText(bundle.getString("menu_item_erase_total"));
+		settingMenu.setText(bundle.getString("menu_item_setting"));
+		applicationSettingMenu.setText(bundle.getString("menu_item_setting_application"));
+		localeSettingMenu.setText(bundle.getString("menu_item_setting_locale"));
 		checkBreak.setText(bundle.getString("label_break"));
 		checkDate.setText(bundle.getString("label_date"));
-		if (buttonStartStop.getText().equalsIgnoreCase(bundle.getString("text_button_stop")))
+		if (startStopButton.getText().equalsIgnoreCase(bundle.getString("text_button_start")))
 		{
-			buttonStartStop.setText(bundle.getString("text_button_start"));
+			startStopButton.setText(bundle.getString("text_button_stop"));
 		}
 		else
 		{
-			buttonStartStop.setText(bundle.getString("text_button_stop"));
+			startStopButton.setText(bundle.getString("text_button_start"));
 		}
 	}
 
@@ -307,7 +339,7 @@ public class ViewImpl implements timeCounter.view.View, ActionListener
 		initText();
 	}
 
-	private String timeToViewConverter(long sec)
+	private String timeToViewFormatConverter(long sec)
 	{
 		long hour = sec / (60 * 60);
 		long day = hour / 24;
@@ -323,7 +355,7 @@ public class ViewImpl implements timeCounter.view.View, ActionListener
 		return String.format("%1$02d" + TIME_DELIMITER + "%2$02d" + TIME_DELIMITER + "%3$02d", hour, min, sec);
 	}
 
-	private long viewToTimeConverter(String timeStr)
+	private long viewFormatToTimeConverter(String timeStr)
 	{
 		long[] tmp = Arrays.stream(timeStr.split(TIME_DELIMITER)).mapToLong(Long::parseLong).toArray();
 		if (tmp.length == 3)
@@ -369,14 +401,14 @@ public class ViewImpl implements timeCounter.view.View, ActionListener
 		String name = file != null ? file.getName() : null;
 		if (name != null)
 		{
-			labelApplication.setText(name);
-			labelApplication.setEnabled(false);
+			applicationLabel.setText(name);
+			applicationLabel.setEnabled(false);
 		}
 		else
 		{
-			labelApplication.setText(bundle.getString("label_application"));
-			labelApplication.setForeground(Color.RED);
-			labelApplication.setEnabled(true);
+			applicationLabel.setText(bundle.getString("label_application"));
+			applicationLabel.setForeground(Color.RED);
+			applicationLabel.setEnabled(true);
 		}
 	}
 
@@ -402,15 +434,15 @@ public class ViewImpl implements timeCounter.view.View, ActionListener
 		{
 			if (timeList.get(0) != null)
 			{
-				currentTimeField.setText(timeToViewConverter(timeList.get(0)));
+				currentTimeField.setText(timeToViewFormatConverter(timeList.get(0)));
 			}
 			if (timeList.get(1) != null)
 			{
-				todayTimeField.setText(timeToViewConverter(timeList.get(1)));
+				todayTimeField.setText(timeToViewFormatConverter(timeList.get(1)));
 			}
 			if (timeList.get(2) != null)
 			{
-				totalTimeField.setText(timeToViewConverter(timeList.get(2)));
+				totalTimeField.setText(timeToViewFormatConverter(timeList.get(2)));
 			}
 		}
 	}
@@ -426,7 +458,7 @@ public class ViewImpl implements timeCounter.view.View, ActionListener
 	@Override
 	public void updateTiming(boolean isStart)
 	{
-		buttonStartStop.setText(isStart ? bundle.getString("text_button_stop") : bundle.getString("text_button_start"));
+		startStopButton.setText(isStart ? bundle.getString("text_button_stop") : bundle.getString("text_button_start"));
 	}
 
 	@Override
@@ -438,8 +470,8 @@ public class ViewImpl implements timeCounter.view.View, ActionListener
 	@Override
 	public void notifyTimeObserversAboutTime()
 	{
-		observers.forEach(obs -> obs.updateTime(Arrays.asList(viewToTimeConverter(currentTimeField.getText()),
-				viewToTimeConverter(todayTimeField.getText()), viewToTimeConverter(totalTimeField.getText()))));
+		observers.forEach(obs -> obs.updateTime(Arrays.asList(viewFormatToTimeConverter(currentTimeField.getText()),
+				viewFormatToTimeConverter(todayTimeField.getText()), viewFormatToTimeConverter(totalTimeField.getText()))));
 	}
 
 	@Override
@@ -453,6 +485,6 @@ public class ViewImpl implements timeCounter.view.View, ActionListener
 	public void notifyTimeObserversAboutTiming()
 	{
 		observers.forEach(obs -> obs
-				.updateTiming(buttonStartStop.getText().equalsIgnoreCase(bundle.getString("text_button_stop"))));
+				.updateTiming(startStopButton.getText().equalsIgnoreCase(bundle.getString("text_button_stop"))));
 	}
 }
