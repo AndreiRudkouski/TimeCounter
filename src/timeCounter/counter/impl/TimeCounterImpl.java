@@ -218,7 +218,7 @@ public class TimeCounterImpl implements timeCounter.counter.TimeCounter
 
 	private void checkApplication()
 	{
-		if (!isProcessAlive())
+		if (!isProcessAlive() && file != null)
 		{
 			stopTimer();
 		}
