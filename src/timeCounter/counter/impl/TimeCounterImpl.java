@@ -49,8 +49,8 @@ public class TimeCounterImpl implements timeCounter.counter.TimeCounter
 	private AtomicLong totalTime = new AtomicLong();
 	private LocalDate todayDate = LocalDate.now();
 	private Map<LocalDate, AtomicLong> dateTimeMap = new TreeMap<>();
-	private Boolean autoChangeDate;
-	private Boolean relaxReminder;
+	private boolean autoChangeDate;
+	private boolean relaxReminder;
 	private boolean checkApplication = true;
 	private File file;
 	private Process process;
@@ -295,13 +295,13 @@ public class TimeCounterImpl implements timeCounter.counter.TimeCounter
 	}
 
 	/**
-	 * Converts gotten array to settings.
+	 * Converts gotten array to the counter settings.
 	 *
 	 * @return true if existing settings equals loaded ones otherwise false
 	 */
 	private boolean convertDataToSettings(String[] strings)
 	{
-		boolean isEquals;
+
 		File loadedFile = null;
 		if (strings[0] != null && !strings[0].isEmpty())
 		{
@@ -309,8 +309,8 @@ public class TimeCounterImpl implements timeCounter.counter.TimeCounter
 		}
 		boolean loadedAutoChangeDate = Boolean.parseBoolean(strings[1]);
 		boolean loadedRelaxReminder = Boolean.parseBoolean(strings[2]);
-		isEquals = (file != null && !file.equals(loadedFile)) || (file == null && loadedFile == null)
-				|| autoChangeDate != loadedAutoChangeDate || relaxReminder != loadedRelaxReminder;
+
+        boolean isEquals = isEqualsExistedAndLoadedSettings(loadedFile, loadedAutoChangeDate, loadedRelaxReminder);
 
 		file = loadedFile;
 		autoChangeDate = Boolean.parseBoolean(strings[1]);
@@ -318,6 +318,12 @@ public class TimeCounterImpl implements timeCounter.counter.TimeCounter
 
 		return isEquals;
 	}
+
+	private boolean isEqualsExistedAndLoadedSettings(File loadedFile, boolean loadedAutoChangeDate, boolean loadedRelaxReminder)
+    {
+        return ((file != null && file.equals(loadedFile)) || (file == null && loadedFile == null))
+                && autoChangeDate == loadedAutoChangeDate && relaxReminder == loadedRelaxReminder;
+    }
 
 	private boolean isChangedTime()
 	{
@@ -333,7 +339,7 @@ public class TimeCounterImpl implements timeCounter.counter.TimeCounter
 			String[] stringTmp = tmp.split(DELIMITER_SLASH);
 			if (stringTmp.length == QTY_OF_SETTING_PARAMETERS_IN_LINE)
 			{
-				return convertDataToSettings(stringTmp);
+				return !convertDataToSettings(stringTmp);
 			}
 		}
 		return file != null || autoChangeDate != DEFAULT_AUTO_CHANGE_DATE || relaxReminder != DEFAULT_RELAX_REMINDER;
