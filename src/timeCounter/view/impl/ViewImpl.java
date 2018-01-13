@@ -128,17 +128,17 @@ public class ViewImpl implements timeCounter.view.View, ActionListener
 		eraseMenu = new JMenu();
 		currentTimeEraseMenu = new JMenuItem();
 		currentTimeEraseMenu.addActionListener(e -> {
-			currentTimeField.setText(timeToViewFormatConverter(0));
+			currentTimeField.setText(convertTimeToViewFormat(0));
 			notifyTimeObserversAboutTime();
 		});
 		todayTimeEraseMenu = new JMenuItem();
 		todayTimeEraseMenu.addActionListener(e -> {
-			todayTimeField.setText(timeToViewFormatConverter(0));
+			todayTimeField.setText(convertTimeToViewFormat(0));
 			notifyTimeObserversAboutTime();
 		});
 		totalTimeEraseMenu = new JMenuItem();
 		totalTimeEraseMenu.addActionListener(e -> {
-			totalTimeField.setText(timeToViewFormatConverter(0));
+			totalTimeField.setText(convertTimeToViewFormat(0));
 			notifyTimeObserversAboutTime();
 		});
 		applicationEraseMenu = new JMenuItem();
@@ -339,7 +339,7 @@ public class ViewImpl implements timeCounter.view.View, ActionListener
 		initText();
 	}
 
-	private String timeToViewFormatConverter(long sec)
+	private String convertTimeToViewFormat(long sec)
 	{
 		long hour = sec / (60 * 60);
 		long day = hour / 24;
@@ -355,7 +355,7 @@ public class ViewImpl implements timeCounter.view.View, ActionListener
 		return String.format("%1$02d" + TIME_DELIMITER + "%2$02d" + TIME_DELIMITER + "%3$02d", hour, min, sec);
 	}
 
-	private long viewFormatToTimeConverter(String timeStr)
+	private long convertViewFormatToTime(String timeStr)
 	{
 		long[] tmp = Arrays.stream(timeStr.split(TIME_DELIMITER)).mapToLong(Long::parseLong).toArray();
 		if (tmp.length == 3)
@@ -434,15 +434,15 @@ public class ViewImpl implements timeCounter.view.View, ActionListener
 		{
 			if (timeList.get(0) != null)
 			{
-				currentTimeField.setText(timeToViewFormatConverter(timeList.get(0)));
+				currentTimeField.setText(convertTimeToViewFormat(timeList.get(0)));
 			}
 			if (timeList.get(1) != null)
 			{
-				todayTimeField.setText(timeToViewFormatConverter(timeList.get(1)));
+				todayTimeField.setText(convertTimeToViewFormat(timeList.get(1)));
 			}
 			if (timeList.get(2) != null)
 			{
-				totalTimeField.setText(timeToViewFormatConverter(timeList.get(2)));
+				totalTimeField.setText(convertTimeToViewFormat(timeList.get(2)));
 			}
 		}
 	}
@@ -470,8 +470,8 @@ public class ViewImpl implements timeCounter.view.View, ActionListener
 	@Override
 	public void notifyTimeObserversAboutTime()
 	{
-		observers.forEach(obs -> obs.updateTime(Arrays.asList(viewFormatToTimeConverter(currentTimeField.getText()),
-				viewFormatToTimeConverter(todayTimeField.getText()), viewFormatToTimeConverter(totalTimeField.getText()))));
+		observers.forEach(obs -> obs.updateTime(Arrays.asList(convertViewFormatToTime(currentTimeField.getText()),
+				convertViewFormatToTime(todayTimeField.getText()), convertViewFormatToTime(totalTimeField.getText()))));
 	}
 
 	@Override

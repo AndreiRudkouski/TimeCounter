@@ -49,8 +49,8 @@ public class TimeCounterImpl implements timeCounter.counter.TimeCounter
 	private AtomicLong totalTime = new AtomicLong();
 	private LocalDate todayDate = LocalDate.now();
 	private Map<LocalDate, AtomicLong> dateTimeMap = new TreeMap<>();
-	private boolean autoChangeDate;
-	private boolean relaxReminder;
+	private Boolean autoChangeDate;
+	private Boolean relaxReminder;
 	private boolean checkApplication = true;
 	private File file;
 	private Process process;
@@ -244,40 +244,79 @@ public class TimeCounterImpl implements timeCounter.counter.TimeCounter
 	private void saveDataToFile()
 	{
 		List<String> dataToSave = new ArrayList<>();
+		convertSettingsAndAddToList(dataToSave);
+		convertTimeAndAddToList(dataToSave);
+		saver.saveData(dataToSave);
+	}
+
+	private void convertSettingsAndAddToList(List<String> dataToSave)
+	{
 		String fileName = file != null ? file.getAbsolutePath() : "";
 		dataToSave.add(fileName + DELIMITER_SLASH + autoChangeDate + DELIMITER_SLASH + relaxReminder);
+	}
+
+	private void convertTimeAndAddToList(List<String> dataToSave)
+	{
 		for (Map.Entry<LocalDate, AtomicLong> tmp : dateTimeMap.entrySet())
 		{
 			dataToSave.add(tmp.getKey().getDayOfMonth() + DELIMITER_SLASH
 					+ tmp.getKey().getMonthValue() + DELIMITER_SLASH +
 					tmp.getKey().getYear() + DELIMITER_SLASH + tmp.getValue());
 		}
-		saver.saveData(dataToSave);
 	}
 
 	private void loadDataFromFile()
 	{
 		List<String> loadData = saver.loadData();
+		convertDataFromList(loadData);
+		notifyTimeObserversAboutSettings();
+	}
+
+	private void convertDataFromList(List<String> loadData)
+	{
 		for (String tmp : loadData)
 		{
-			String[] stringTmp = tmp.split(DELIMITER_SLASH);
-			if (stringTmp.length != QTY_OF_SETTING_PARAMETERS_IN_LINE)
+			String[] strings = tmp.split(DELIMITER_SLASH);
+			if (strings.length != QTY_OF_SETTING_PARAMETERS_IN_LINE)
 			{
-				dateTimeMap.put(LocalDate.of(Integer.parseInt(stringTmp[2]),
-						Integer.parseInt(stringTmp[1]), Integer.parseInt(stringTmp[0])),
-						new AtomicLong(Long.parseLong(stringTmp[3])));
+				convertDataToTime(strings);
 			}
 			else
 			{
-				if (stringTmp[0] != null && !stringTmp[0].isEmpty())
-				{
-					file = new File(stringTmp[0]);
-				}
-				autoChangeDate = Boolean.parseBoolean(stringTmp[1]);
-				relaxReminder = Boolean.parseBoolean(stringTmp[2]);
+				convertDataToSettings(strings);
 			}
 		}
-		notifyTimeObserversAboutSettings();
+	}
+	private void convertDataToTime(String[] strings)
+	{
+		dateTimeMap.put(LocalDate.of(Integer.parseInt(strings[2]),
+				Integer.parseInt(strings[1]), Integer.parseInt(strings[0])),
+				new AtomicLong(Long.parseLong(strings[3])));
+	}
+
+	/**
+	 * Converts gotten array to settings.
+	 *
+	 * @return true if existing settings equals loaded ones otherwise false
+	 */
+	private boolean convertDataToSettings(String[] strings)
+	{
+		boolean isEquals;
+		File loadedFile = null;
+		if (strings[0] != null && !strings[0].isEmpty())
+		{
+			loadedFile = new File(strings[0]);
+		}
+		boolean loadedAutoChangeDate = Boolean.parseBoolean(strings[1]);
+		boolean loadedRelaxReminder = Boolean.parseBoolean(strings[2]);
+		isEquals = (file != null && !file.equals(loadedFile)) || (file == null && loadedFile == null)
+				|| autoChangeDate != loadedAutoChangeDate || relaxReminder != loadedRelaxReminder;
+
+		file = loadedFile;
+		autoChangeDate = Boolean.parseBoolean(strings[1]);
+		relaxReminder = Boolean.parseBoolean(strings[2]);
+
+		return isEquals;
 	}
 
 	private boolean isChangedTime()
@@ -288,26 +327,16 @@ public class TimeCounterImpl implements timeCounter.counter.TimeCounter
 
 	private boolean isChangedSettings()
 	{
-		File savedFile = null;
-		boolean savedAutoChangeDate = DEFAULT_AUTO_CHANGE_DATE;
-		boolean savedRelaxReminder = DEFAULT_RELAX_REMINDER;
 		List<String> loadData = saver.loadData();
 		for (String tmp : loadData)
 		{
 			String[] stringTmp = tmp.split(DELIMITER_SLASH);
 			if (stringTmp.length == QTY_OF_SETTING_PARAMETERS_IN_LINE)
 			{
-				if (stringTmp[0] != null && !stringTmp[0].isEmpty())
-				{
-					savedFile = new File(stringTmp[0]);
-				}
-				savedAutoChangeDate = Boolean.parseBoolean(stringTmp[1]);
-				savedRelaxReminder = Boolean.parseBoolean(stringTmp[2]);
-				break;
+				return convertDataToSettings(stringTmp);
 			}
 		}
-		return (file != null && !file.equals(savedFile)) || (file == null && savedFile != null)
-				|| autoChangeDate != savedAutoChangeDate || relaxReminder != savedRelaxReminder;
+		return file != null || autoChangeDate != DEFAULT_AUTO_CHANGE_DATE || relaxReminder != DEFAULT_RELAX_REMINDER;
 	}
 
 	private boolean isProcessAlive()
