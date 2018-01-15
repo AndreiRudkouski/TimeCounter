@@ -287,6 +287,7 @@ public class TimeCounterImpl implements timeCounter.counter.TimeCounter
 			}
 		}
 	}
+
 	private void convertDataToTime(String[] strings)
 	{
 		dateTimeMap.put(LocalDate.of(Integer.parseInt(strings[2]),
@@ -310,7 +311,7 @@ public class TimeCounterImpl implements timeCounter.counter.TimeCounter
 		boolean loadedAutoChangeDate = Boolean.parseBoolean(strings[1]);
 		boolean loadedRelaxReminder = Boolean.parseBoolean(strings[2]);
 
-        boolean isEquals = isEqualsExistedAndLoadedSettings(loadedFile, loadedAutoChangeDate, loadedRelaxReminder);
+		boolean isEquals = isEqualsExistedAndLoadedSettings(loadedFile, loadedAutoChangeDate, loadedRelaxReminder);
 
 		file = loadedFile;
 		autoChangeDate = Boolean.parseBoolean(strings[1]);
@@ -319,11 +320,12 @@ public class TimeCounterImpl implements timeCounter.counter.TimeCounter
 		return isEquals;
 	}
 
-	private boolean isEqualsExistedAndLoadedSettings(File loadedFile, boolean loadedAutoChangeDate, boolean loadedRelaxReminder)
-    {
-        return ((file != null && file.equals(loadedFile)) || (file == null && loadedFile == null))
-                && autoChangeDate == loadedAutoChangeDate && relaxReminder == loadedRelaxReminder;
-    }
+	private boolean isEqualsExistedAndLoadedSettings(File loadedFile, boolean loadedAutoChangeDate,
+			boolean loadedRelaxReminder)
+	{
+		return ((file != null && file.equals(loadedFile)) || (file == null && loadedFile == null))
+				&& autoChangeDate == loadedAutoChangeDate && relaxReminder == loadedRelaxReminder;
+	}
 
 	private boolean isChangedTime()
 	{
@@ -342,6 +344,11 @@ public class TimeCounterImpl implements timeCounter.counter.TimeCounter
 				return !convertDataToSettings(stringTmp);
 			}
 		}
+		return isEqualsExistedAndDefaultSettings();
+	}
+
+	private boolean isEqualsExistedAndDefaultSettings()
+	{
 		return file != null || autoChangeDate != DEFAULT_AUTO_CHANGE_DATE || relaxReminder != DEFAULT_RELAX_REMINDER;
 	}
 
