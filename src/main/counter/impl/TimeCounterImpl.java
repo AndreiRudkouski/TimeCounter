@@ -51,7 +51,7 @@ public class TimeCounterImpl implements TimeCounter
 	private boolean relaxReminder;
 	private boolean checkIsRunningApplication = true;
 	private File application;
-	private Process processApplication;
+	private Process applicationProcess;
 
 	private List<TimeObserver> observers = new ArrayList<>();
 
@@ -92,7 +92,7 @@ public class TimeCounterImpl implements TimeCounter
 		stopTimer();
 		if (isProcessAlive())
 		{
-			processApplication.destroy();
+			applicationProcess.destroy();
 		}
 	}
 
@@ -164,7 +164,7 @@ public class TimeCounterImpl implements TimeCounter
 	{
 		try
 		{
-			processApplication = Runtime.getRuntime().exec(application.getAbsolutePath());
+			applicationProcess = Runtime.getRuntime().exec(application.getAbsolutePath());
 		}
 		catch (IOException e)
 		{
@@ -374,7 +374,7 @@ public class TimeCounterImpl implements TimeCounter
 
 	private boolean isProcessAlive()
 	{
-		return processApplication != null && processApplication.isAlive();
+		return applicationProcess != null && applicationProcess.isAlive();
 	}
 
 	@Override
