@@ -11,7 +11,7 @@ public enum CommandName
 {
 	TIME_COUNTER_LOAD_DATA(TimeCounter.class, "loadDataAndInitTimer"),
 	TIME_COUNTER_SAVE_DATA(TimeCounter.class, "saveData"),
-	VIEW_CHOSEN_RELAX(View.class, "isChosenRelax"),
+	VIEW_IS_CHOSEN_RELAX(View.class, "isChosenRelax"),
 	VIEW_IS_USER_AGREE_TO_CONNECT_SELECTED_APP(View.class, "isUserAgreeToConnectSelectedApplication"),
 	TIME_COUNTER_CLOSE_APP(TimeCounter.class, "closeApplication"),
 	TIME_COUNTER_IS_CHANGED_TIME_OR_SETTINGS(TimeCounter.class, "isChangedTimeOrSettings");

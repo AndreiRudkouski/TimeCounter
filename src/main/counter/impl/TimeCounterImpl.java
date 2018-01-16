@@ -32,12 +32,8 @@ public class TimeCounterImpl implements TimeCounter
 
 	private static final String DELIMITER_SLASH = "/";
 	private static final String DELIMITER_SPACE = " ";
-	private static final String ENV_VARIABLE_FOR_WINDOWS = "windir";
-	private static final String COMMAND_FOR_LINUX = "ps -e";
-	private static final String COMMAND_FOR_WINDOWS = "\\system32\\tasklist.exe";
-	private static final String PROPERTY_OS_NAME = "os.name";
-	private static final String WINDOWS_OS_NAME = "Windows";
-	private static final String TASK_KILL_COMMAND_FORMAT = "taskkill /IM %s /F";
+	private static final String TASK_LIST_COMMAND = "tasklist";
+	private static final String TASK_KILL_COMMAND = "taskkill /IM ";
 
 	@Setter
 	private Command command;
@@ -53,9 +49,9 @@ public class TimeCounterImpl implements TimeCounter
 	private Map<LocalDate, AtomicLong> dateTimeMap = new TreeMap<>();
 	private boolean autoChangeDate;
 	private boolean relaxReminder;
-	private boolean checkRunningApplication = true;
-	private File file;
-	private Process process;
+	private boolean checkIsRunningApplication = true;
+	private File application;
+	private Process processApplication;
 
 	private List<TimeObserver> observers = new ArrayList<>();
 
@@ -96,7 +92,7 @@ public class TimeCounterImpl implements TimeCounter
 		stopTimer();
 		if (isProcessAlive())
 		{
-			process.destroy();
+			processApplication.destroy();
 		}
 	}
 
@@ -112,7 +108,7 @@ public class TimeCounterImpl implements TimeCounter
 		if (currentTime.get() % SEC_TO_RELAX == 0 && relaxReminder)
 		{
 			stopTimer();
-			if (!command.executeCommand(CommandName.VIEW_CHOSEN_RELAX.name()))
+			if (!command.executeCommand(CommandName.VIEW_IS_CHOSEN_RELAX.name()))
 			{
 				startTimer();
 			}
@@ -128,51 +124,47 @@ public class TimeCounterImpl implements TimeCounter
 
 	private void startApplicationProcess()
 	{
-		if (!isProcessAlive() && file != null)
+		if (!isProcessAlive() && application != null)
 		{
-			if (isProcessAlreadyRun(file.getName()))
+			String applicationName = application.getName();
+			if (isProcessWithSameNameAlreadyRun(applicationName))
 			{
-				checkRunningApplication = command.executeCommand(
+				checkIsRunningApplication = command.executeCommand(
 						CommandName.VIEW_IS_USER_AGREE_TO_CONNECT_SELECTED_APP.name());
-				if (checkRunningApplication)
+				if (checkIsRunningApplication)
 				{
-					closeProcessesWithNamesEqualsApplication();
-					startProcessForChosenApplication();
+					closeAllProcessesWithSameNames(applicationName);
+					startProcessForCurrentApplication();
 				}
 			}
 			else
 			{
-				startProcessForChosenApplication();
+				startProcessForCurrentApplication();
 			}
 		}
 	}
 
-	private void closeProcessesWithNamesEqualsApplication()
+	private void closeAllProcessesWithSameNames(String name)
 	{
 		try
 		{
-			while (isProcessAlreadyRun(file.getName()))
+			while (isProcessWithSameNameAlreadyRun(name))
 			{
-				Process process = Runtime.getRuntime().exec(String.format(TASK_KILL_COMMAND_FORMAT, file.getName()));
-				while (process.isAlive())
-				{
-				}
+				Process process = Runtime.getRuntime().exec(TASK_KILL_COMMAND + name);
+				process.waitFor();
 			}
 		}
-		catch (IOException e)
+		catch (InterruptedException | IOException e)
 		{
 			MainLogger.getLogger().severe(MainLogger.getStackTrace(e));
 		}
 	}
 
-	private void startProcessForChosenApplication()
+	private void startProcessForCurrentApplication()
 	{
 		try
 		{
-			process = Runtime.getRuntime().exec(file.getAbsolutePath());
-			while (!process.isAlive())
-			{
-			}
+			processApplication = Runtime.getRuntime().exec(application.getAbsolutePath());
 		}
 		catch (IOException e)
 		{
@@ -186,10 +178,10 @@ public class TimeCounterImpl implements TimeCounter
 		notifyTimeObserversAboutTiming();
 	}
 
-	private boolean isProcessAlreadyRun(String name)
+	private boolean isProcessWithSameNameAlreadyRun(String name)
 	{
 		try (BufferedReader input = new BufferedReader(
-				new InputStreamReader(Runtime.getRuntime().exec(getEnvironmentCommand()).getInputStream())))
+				new InputStreamReader(Runtime.getRuntime().exec(TASK_LIST_COMMAND).getInputStream())))
 		{
 			String line;
 			while ((line = input.readLine()) != null)
@@ -205,14 +197,6 @@ public class TimeCounterImpl implements TimeCounter
 			MainLogger.getLogger().severe(MainLogger.getStackTrace(e));
 		}
 		return false;
-	}
-
-	private String getEnvironmentCommand()
-	{
-		// Determine OS type (Windows or Linux)
-		return Stream.of(System.getProperties().getProperty(PROPERTY_OS_NAME).split(DELIMITER_SPACE)).anyMatch(
-				s -> s.equalsIgnoreCase(WINDOWS_OS_NAME)) ?
-				System.getenv(ENV_VARIABLE_FOR_WINDOWS) + COMMAND_FOR_WINDOWS : COMMAND_FOR_LINUX;
 	}
 
 	private void checkChangingDate()
@@ -264,7 +248,7 @@ public class TimeCounterImpl implements TimeCounter
 
 	private void checkIfApplicationProcessIsRunning()
 	{
-		if (!isProcessAlive() && file != null && checkRunningApplication)
+		if (!isProcessAlive() && application != null && checkIsRunningApplication)
 		{
 			stopTimer();
 		}
@@ -286,7 +270,7 @@ public class TimeCounterImpl implements TimeCounter
 
 	private void convertSettingsAndAddToList(List<String> dataToSave)
 	{
-		String fileName = file != null ? file.getAbsolutePath() : "";
+		String fileName = application != null ? application.getAbsolutePath() : "";
 		dataToSave.add(fileName + DELIMITER_SLASH + autoChangeDate + DELIMITER_SLASH + relaxReminder);
 	}
 
@@ -318,7 +302,7 @@ public class TimeCounterImpl implements TimeCounter
 			}
 			else
 			{
-				file = convertDataToFile(strings);
+				application = convertDataToFile(strings);
 				autoChangeDate = convertDataToAutoChangeDateSetting(strings);
 				relaxReminder = convertDataToRelaxReminderSetting(strings);
 			}
@@ -378,18 +362,19 @@ public class TimeCounterImpl implements TimeCounter
 	private boolean isEqualsCurrentAndLoadedSettings(File loadedFile, boolean loadedAutoChangeDate,
 			boolean loadedRelaxReminder)
 	{
-		return ((file != null && file.equals(loadedFile)) || (file == null && loadedFile == null))
+		return ((application != null && application.equals(loadedFile)) || (application == null && loadedFile == null))
 				&& autoChangeDate == loadedAutoChangeDate && relaxReminder == loadedRelaxReminder;
 	}
 
 	private boolean isEqualsCurrentAndDefaultSettings()
 	{
-		return file != null || autoChangeDate != DEFAULT_AUTO_CHANGE_DATE || relaxReminder != DEFAULT_RELAX_REMINDER;
+		return application != null || autoChangeDate != DEFAULT_AUTO_CHANGE_DATE
+				|| relaxReminder != DEFAULT_RELAX_REMINDER;
 	}
 
 	private boolean isProcessAlive()
 	{
-		return process != null && process.isAlive();
+		return processApplication != null && processApplication.isAlive();
 	}
 
 	@Override
@@ -407,7 +392,7 @@ public class TimeCounterImpl implements TimeCounter
 	@Override
 	public void notifyTimeObserversAboutSettings()
 	{
-		observers.forEach(obs -> obs.updateSettings(autoChangeDate, relaxReminder, file));
+		observers.forEach(obs -> obs.updateSettings(autoChangeDate, relaxReminder, application));
 	}
 
 	@Override
@@ -465,7 +450,7 @@ public class TimeCounterImpl implements TimeCounter
 	{
 		this.autoChangeDate = autoChangeDate;
 		this.relaxReminder = relaxReminder;
-		this.file = file;
+		this.application = file;
 	}
 
 	@Override
