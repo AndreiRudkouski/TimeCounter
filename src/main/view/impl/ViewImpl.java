@@ -148,6 +148,22 @@ public class ViewImpl implements View, ActionListener
 		return eraseMenu;
 	}
 
+	private void changeApplicationLabel(File file)
+	{
+		String name = file != null ? file.getName() : null;
+		if (name != null)
+		{
+			applicationLabel.setText(name);
+			applicationLabel.setEnabled(false);
+		}
+		else
+		{
+			applicationLabel.setText(bundle.getString("label_application"));
+			applicationLabel.setForeground(Color.RED);
+			applicationLabel.setEnabled(true);
+		}
+	}
+
 	private JMenu createSettingMenu()
 	{
 		settingMenu = new JMenu();
@@ -165,6 +181,38 @@ public class ViewImpl implements View, ActionListener
 		settingMenu.add(checkBreak);
 		settingMenu.add(checkDate);
 		return settingMenu;
+	}
+
+	private void chooseApplication()
+	{
+		fileChooser = new JFileChooser();
+		fileChooser.setAcceptAllFileFilterUsed(false);
+		fileChooser.setFileFilter(new FileNameExtensionFilter(DOT + EXE_EXTENSION, EXE_EXTENSION));
+		int result = fileChooser.showOpenDialog(frame);
+		if (result == JFileChooser.APPROVE_OPTION)
+		{
+			String fileName = fileChooser.getSelectedFile().getName();
+			int index = fileName.lastIndexOf(DOT);
+			if (index > 0 && index < fileName.length() - 1 && fileName.substring(index + 1).equalsIgnoreCase(
+					EXE_EXTENSION))
+			{
+				changeApplicationLabel(fileChooser.getSelectedFile());
+				notifyTimeObserversAboutSettings();
+			}
+		}
+	}
+
+	private void changeLocale()
+	{
+		if (bundle.getLocale().equals(LOCALE_EN))
+		{
+			bundle = ResourceBundle.getBundle(LOCALE_NAME, LOCALE_RU);
+		}
+		else
+		{
+			bundle = ResourceBundle.getBundle(LOCALE_NAME, LOCALE_EN);
+		}
+		initText();
 	}
 
 	private JPanel createTopPanel()
@@ -329,88 +377,11 @@ public class ViewImpl implements View, ActionListener
 		}
 	}
 
-	private void changeLocale()
-	{
-		if (bundle.getLocale().equals(LOCALE_EN))
-		{
-			bundle = ResourceBundle.getBundle(LOCALE_NAME, LOCALE_RU);
-		}
-		else
-		{
-			bundle = ResourceBundle.getBundle(LOCALE_NAME, LOCALE_EN);
-		}
-		initText();
-	}
-
-	private String convertTimeToViewFormat(long sec)
-	{
-		long hour = sec / (60 * 60);
-		long day = hour / 24;
-		long min = (sec - hour * 60 * 60) / 60;
-		sec = sec - hour * 60 * 60 - min * 60;
-		hour = hour - day * 24;
-		if (day != 0)
-		{
-			return String.format(
-					"%1$02d" + TIME_DELIMITER + "%2$02d" + TIME_DELIMITER + "%3$02d" + TIME_DELIMITER + "%4$02d", day,
-					hour, min, sec);
-		}
-		return String.format("%1$02d" + TIME_DELIMITER + "%2$02d" + TIME_DELIMITER + "%3$02d", hour, min, sec);
-	}
-
-	private long convertViewFormatToTime(String timeStr)
-	{
-		long[] tmp = Arrays.stream(timeStr.split(TIME_DELIMITER)).mapToLong(Long::parseLong).toArray();
-		if (tmp.length == 3)
-		{
-			return tmp[0] * 60 * 60 + tmp[1] * 60 + tmp[2];
-		}
-		else
-		{
-			return tmp[0] * 24 * 60 * 60 + tmp[0] * 60 * 60 + tmp[1] * 60 + tmp[2];
-		}
-	}
-
 	@Override
 	public boolean isChosenRelax()
 	{
 		int select = showAndGetResultOfConfirmDialogWindowWithTitleAndMessage("title_relax_time", "message_relax_time");
 		return select == JOptionPane.YES_OPTION;
-	}
-
-	private void chooseApplication()
-	{
-		fileChooser = new JFileChooser();
-		fileChooser.setAcceptAllFileFilterUsed(false);
-		fileChooser.setFileFilter(new FileNameExtensionFilter(DOT + EXE_EXTENSION, EXE_EXTENSION));
-		int result = fileChooser.showOpenDialog(frame);
-		if (result == JFileChooser.APPROVE_OPTION)
-		{
-			String fileName = fileChooser.getSelectedFile().getName();
-			int index = fileName.lastIndexOf(DOT);
-			if (index > 0 && index < fileName.length() - 1 && fileName.substring(index + 1).equalsIgnoreCase(
-					EXE_EXTENSION))
-			{
-				changeApplicationLabel(fileChooser.getSelectedFile());
-				notifyTimeObserversAboutSettings();
-			}
-		}
-	}
-
-	private void changeApplicationLabel(File file)
-	{
-		String name = file != null ? file.getName() : null;
-		if (name != null)
-		{
-			applicationLabel.setText(name);
-			applicationLabel.setEnabled(false);
-		}
-		else
-		{
-			applicationLabel.setText(bundle.getString("label_application"));
-			applicationLabel.setForeground(Color.RED);
-			applicationLabel.setEnabled(true);
-		}
 	}
 
 	@Override
@@ -462,6 +433,22 @@ public class ViewImpl implements View, ActionListener
 		}
 	}
 
+	private String convertTimeToViewFormat(long sec)
+	{
+		long hour = sec / (60 * 60);
+		long day = hour / 24;
+		long min = (sec - hour * 60 * 60) / 60;
+		sec = sec - hour * 60 * 60 - min * 60;
+		hour = hour - day * 24;
+		if (day != 0)
+		{
+			return String.format(
+					"%1$02d" + TIME_DELIMITER + "%2$02d" + TIME_DELIMITER + "%3$02d" + TIME_DELIMITER + "%4$02d", day,
+					hour, min, sec);
+		}
+		return String.format("%1$02d" + TIME_DELIMITER + "%2$02d" + TIME_DELIMITER + "%3$02d", hour, min, sec);
+	}
+
 	@Override
 	public void updateSettings(boolean autoChangeDate, boolean relaxReminder, File file)
 	{
@@ -487,6 +474,19 @@ public class ViewImpl implements View, ActionListener
 	{
 		observers.forEach(obs -> obs.updateTime(Arrays.asList(convertViewFormatToTime(currentTimeField.getText()),
 				convertViewFormatToTime(todayTimeField.getText()), convertViewFormatToTime(totalTimeField.getText()))));
+	}
+
+	private long convertViewFormatToTime(String timeStr)
+	{
+		long[] tmp = Arrays.stream(timeStr.split(TIME_DELIMITER)).mapToLong(Long::parseLong).toArray();
+		if (tmp.length == 3)
+		{
+			return tmp[0] * 60 * 60 + tmp[1] * 60 + tmp[2];
+		}
+		else
+		{
+			return tmp[0] * 24 * 60 * 60 + tmp[0] * 60 * 60 + tmp[1] * 60 + tmp[2];
+		}
 	}
 
 	@Override

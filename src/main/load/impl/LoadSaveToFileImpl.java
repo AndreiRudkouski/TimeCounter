@@ -36,6 +36,15 @@ public class LoadSaveToFileImpl implements LoadSaveToFile
 		return result;
 	}
 
+	private String decode(String output)
+	{
+		if (output.length() > 12)
+		{
+			output = output.substring(12);
+		}
+		return new String(Base64.getDecoder().decode(output));
+	}
+
 	@Override
 	public void saveData(List<String> dataToSave)
 	{
@@ -49,23 +58,12 @@ public class LoadSaveToFileImpl implements LoadSaveToFile
 		}
 	}
 
-	// encode string
 	private String encode(String input)
 	{
 		byte[] salt = new byte[8];
 		new SecureRandom().nextBytes(salt);
 		return Base64.getEncoder().encodeToString(salt)
 				+ Base64.getEncoder().encodeToString(input.getBytes());
-	}
-
-	// decode string
-	private String decode(String output)
-	{
-		if (output.length() > 12)
-		{
-			output = output.substring(12);
-		}
-		return new String(Base64.getDecoder().decode(output));
 	}
 
 	@Setter

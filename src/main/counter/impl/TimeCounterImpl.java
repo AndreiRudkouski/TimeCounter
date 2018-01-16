@@ -68,219 +68,7 @@ public class TimeCounterImpl implements TimeCounter
 		setTimeFromMap();
 		if (!timer.hasCommand())
 		{
-			timer.setCommand(this::checkIfApplicationProcessIsRunning);
-		}
-	}
-
-	@Override
-	public void saveData()
-	{
-		if (dateTimeMap.containsKey(todayDate))
-		{
-			dateTimeMap.put(todayDate, todayTime);
-		}
-		else
-		{
-			dateTimeMap.put(todayDate, currentTime);
-		}
-		saveDataToFile();
-	}
-
-	@Override
-	public void closeApplication()
-	{
-		stopTimer();
-		if (isProcessAlive())
-		{
-			applicationProcess.destroy();
-		}
-	}
-
-	@Override
-	public boolean isChangedTimeOrSettings()
-	{
-		stopTimer();
-		return isChangedTime() || isChangedSettings();
-	}
-
-	private void checkRelaxTimeAndWaitEndOfRelax()
-	{
-		if (currentTime.get() % SEC_TO_RELAX == 0 && relaxReminder)
-		{
-			stopTimer();
-			if (!command.executeCommand(CommandName.VIEW_IS_CHOSEN_RELAX.name()))
-			{
-				startTimer();
-			}
-		}
-	}
-
-	private void startTimer()
-	{
-		startApplicationProcess();
-		timer.start();
-		notifyTimeObserversAboutTiming();
-	}
-
-	private void startApplicationProcess()
-	{
-		if (!isProcessAlive() && application != null)
-		{
-			String applicationName = application.getName();
-			if (isProcessWithSameNameAlreadyRun(applicationName))
-			{
-				checkIsRunningApplication = command.executeCommand(
-						CommandName.VIEW_IS_USER_AGREE_TO_CONNECT_SELECTED_APP.name());
-				if (checkIsRunningApplication)
-				{
-					closeAllProcessesWithSameNames(applicationName);
-					startProcessForCurrentApplication();
-				}
-			}
-			else
-			{
-				startProcessForCurrentApplication();
-			}
-		}
-	}
-
-	private void closeAllProcessesWithSameNames(String name)
-	{
-		try
-		{
-			while (isProcessWithSameNameAlreadyRun(name))
-			{
-				Process process = Runtime.getRuntime().exec(TASK_KILL_COMMAND + name);
-				process.waitFor();
-			}
-		}
-		catch (InterruptedException | IOException e)
-		{
-			MainLogger.getLogger().severe(MainLogger.getStackTrace(e));
-		}
-	}
-
-	private void startProcessForCurrentApplication()
-	{
-		try
-		{
-			applicationProcess = Runtime.getRuntime().exec(application.getAbsolutePath());
-		}
-		catch (IOException e)
-		{
-			MainLogger.getLogger().severe(MainLogger.getStackTrace(e));
-		}
-	}
-
-	private void stopTimer()
-	{
-		timer.stop();
-		notifyTimeObserversAboutTiming();
-	}
-
-	private boolean isProcessWithSameNameAlreadyRun(String name)
-	{
-		try (BufferedReader input = new BufferedReader(
-				new InputStreamReader(Runtime.getRuntime().exec(TASK_LIST_COMMAND).getInputStream())))
-		{
-			String line;
-			while ((line = input.readLine()) != null)
-			{
-				if (Stream.of(line.split(DELIMITER_SPACE)).anyMatch(n -> n.equalsIgnoreCase(name)))
-				{
-					return true;
-				}
-			}
-		}
-		catch (IOException e)
-		{
-			MainLogger.getLogger().severe(MainLogger.getStackTrace(e));
-		}
-		return false;
-	}
-
-	private void checkChangingDate()
-	{
-		LocalDate currentDate = LocalDate.now();
-		if (!todayDate.equals(currentDate))
-		{
-			changeDate();
-			todayDate = currentDate;
-		}
-	}
-
-	private void changeDate()
-	{
-		if (autoChangeDate)
-		{
-			if (dateTimeMap.containsKey(todayDate))
-			{
-				dateTimeMap.put(todayDate, new AtomicLong(dateTimeMap.get(todayDate).getAndAdd(currentTime.get())));
-			}
-			else
-			{
-				dateTimeMap.put(todayDate, new AtomicLong(currentTime.get()));
-			}
-			saveDataToFile();
-			currentTime.set(0);
-			todayTime.set(0);
-			notifyTimeObserversAboutTime();
-		}
-	}
-
-	private void setTimeFromMap()
-	{
-		currentTime.set(0);
-		todayTime = dateTimeMap.containsKey(todayDate) ? new AtomicLong(dateTimeMap.get(todayDate).get()) :
-				new AtomicLong(0);
-		totalTime.set(0);
-		dateTimeMap.forEach((date, time) -> totalTime.getAndAdd(time.get()));
-		notifyTimeObserversAboutTime();
-	}
-
-	private void incrementAllTimes()
-	{
-		currentTime.incrementAndGet();
-		todayTime.incrementAndGet();
-		totalTime.incrementAndGet();
-		notifyTimeObserversAboutTime();
-	}
-
-	private void checkIfApplicationProcessIsRunning()
-	{
-		if (!isProcessAlive() && application != null && checkIsRunningApplication)
-		{
-			stopTimer();
-		}
-		else
-		{
-			incrementAllTimes();
-			checkRelaxTimeAndWaitEndOfRelax();
-			checkChangingDate();
-		}
-	}
-
-	private void saveDataToFile()
-	{
-		List<String> dataToSave = new ArrayList<>();
-		convertSettingsAndAddToList(dataToSave);
-		convertTimeAndAddToList(dataToSave);
-		saver.saveData(dataToSave);
-	}
-
-	private void convertSettingsAndAddToList(List<String> dataToSave)
-	{
-		String fileName = application != null ? application.getAbsolutePath() : "";
-		dataToSave.add(fileName + DELIMITER_SLASH + autoChangeDate + DELIMITER_SLASH + relaxReminder);
-	}
-
-	private void convertTimeAndAddToList(List<String> dataToSave)
-	{
-		for (Map.Entry<LocalDate, AtomicLong> tmp : dateTimeMap.entrySet())
-		{
-			dataToSave.add(tmp.getKey().getDayOfMonth() + DELIMITER_SLASH
-					+ tmp.getKey().getMonthValue() + DELIMITER_SLASH +
-					tmp.getKey().getYear() + DELIMITER_SLASH + tmp.getValue());
+			timer.setCommand(this::stopTimerOrIncrementTime);
 		}
 	}
 
@@ -336,6 +124,223 @@ public class TimeCounterImpl implements TimeCounter
 		return Boolean.parseBoolean(strings[2]);
 	}
 
+	private void setTimeFromMap()
+	{
+		currentTime.set(0);
+		todayTime = dateTimeMap.containsKey(todayDate) ? new AtomicLong(dateTimeMap.get(todayDate).get()) :
+				new AtomicLong(0);
+		totalTime.set(0);
+		dateTimeMap.forEach((date, time) -> totalTime.getAndAdd(time.get()));
+		notifyTimeObserversAboutTime();
+	}
+
+	private void stopTimerOrIncrementTime()
+	{
+		if (!isApplicationProcessAlive() && application != null && checkIsRunningApplication)
+		{
+			stopTimer();
+		}
+		else
+		{
+			incrementAllTimes();
+			checkRelaxTimeAndStopTimerIfNeeded();
+			checkChangingDate();
+		}
+	}
+
+	private boolean isApplicationProcessAlive()
+	{
+		return applicationProcess != null && applicationProcess.isAlive();
+	}
+
+	private void stopTimer()
+	{
+		timer.stop();
+		notifyTimeObserversAboutTiming();
+	}
+
+	private void incrementAllTimes()
+	{
+		currentTime.incrementAndGet();
+		todayTime.incrementAndGet();
+		totalTime.incrementAndGet();
+		notifyTimeObserversAboutTime();
+	}
+
+	private void checkRelaxTimeAndStopTimerIfNeeded()
+	{
+		if (currentTime.get() % SEC_TO_RELAX == 0 && relaxReminder)
+		{
+			stopTimer();
+			if (!command.executeCommand(CommandName.VIEW_IS_CHOSEN_RELAX.name()))
+			{
+				startTimer();
+			}
+		}
+	}
+
+	private void startTimer()
+	{
+		startApplicationProcess();
+		timer.start();
+		notifyTimeObserversAboutTiming();
+	}
+
+	private void startApplicationProcess()
+	{
+		if (!isApplicationProcessAlive() && application != null)
+		{
+			String applicationName = application.getName();
+			if (isProcessWithSameNameAlreadyRun(applicationName))
+			{
+				checkIsRunningApplication = command.executeCommand(
+						CommandName.VIEW_IS_USER_AGREE_TO_CONNECT_SELECTED_APP.name());
+				if (checkIsRunningApplication)
+				{
+					closeAllProcessesWithSameNames(applicationName);
+				}
+				else
+				{
+					return;
+				}
+			}
+			startProcessForCurrentApplication();
+		}
+	}
+
+	private void closeAllProcessesWithSameNames(String name)
+	{
+		try
+		{
+			while (isProcessWithSameNameAlreadyRun(name))
+			{
+				Process process = Runtime.getRuntime().exec(TASK_KILL_COMMAND + name);
+				process.waitFor();
+			}
+		}
+		catch (InterruptedException | IOException e)
+		{
+			MainLogger.getLogger().severe(MainLogger.getStackTrace(e));
+		}
+	}
+
+	private boolean isProcessWithSameNameAlreadyRun(String name)
+	{
+		try (BufferedReader input = new BufferedReader(
+				new InputStreamReader(Runtime.getRuntime().exec(TASK_LIST_COMMAND).getInputStream())))
+		{
+			String line;
+			while ((line = input.readLine()) != null)
+			{
+				if (Stream.of(line.split(DELIMITER_SPACE)).anyMatch(n -> n.equalsIgnoreCase(name)))
+				{
+					return true;
+				}
+			}
+		}
+		catch (IOException e)
+		{
+			MainLogger.getLogger().severe(MainLogger.getStackTrace(e));
+		}
+		return false;
+	}
+
+	private void startProcessForCurrentApplication()
+	{
+		try
+		{
+			applicationProcess = Runtime.getRuntime().exec(application.getAbsolutePath());
+		}
+		catch (IOException e)
+		{
+			MainLogger.getLogger().severe(MainLogger.getStackTrace(e));
+		}
+	}
+
+	private void checkChangingDate()
+	{
+		LocalDate currentDate = LocalDate.now();
+		if (!todayDate.equals(currentDate))
+		{
+			changeDate();
+			todayDate = currentDate;
+		}
+	}
+
+	private void changeDate()
+	{
+		if (autoChangeDate)
+		{
+			if (dateTimeMap.containsKey(todayDate))
+			{
+				dateTimeMap.put(todayDate, new AtomicLong(dateTimeMap.get(todayDate).getAndAdd(currentTime.get())));
+			}
+			else
+			{
+				dateTimeMap.put(todayDate, new AtomicLong(currentTime.get()));
+			}
+			saveDataToFile();
+			currentTime.set(0);
+			todayTime.set(0);
+			notifyTimeObserversAboutTime();
+		}
+	}
+
+	@Override
+	public void saveData()
+	{
+		if (dateTimeMap.containsKey(todayDate))
+		{
+			dateTimeMap.put(todayDate, todayTime);
+		}
+		else
+		{
+			dateTimeMap.put(todayDate, currentTime);
+		}
+		saveDataToFile();
+	}
+
+	private void saveDataToFile()
+	{
+		List<String> dataToSave = new ArrayList<>();
+		convertSettingsAndAddToList(dataToSave);
+		convertTimeAndAddToList(dataToSave);
+		saver.saveData(dataToSave);
+	}
+
+	private void convertSettingsAndAddToList(List<String> dataToSave)
+	{
+		String fileName = application != null ? application.getAbsolutePath() : "";
+		dataToSave.add(fileName + DELIMITER_SLASH + autoChangeDate + DELIMITER_SLASH + relaxReminder);
+	}
+
+	private void convertTimeAndAddToList(List<String> dataToSave)
+	{
+		for (Map.Entry<LocalDate, AtomicLong> tmp : dateTimeMap.entrySet())
+		{
+			dataToSave.add(tmp.getKey().getDayOfMonth() + DELIMITER_SLASH
+					+ tmp.getKey().getMonthValue() + DELIMITER_SLASH +
+					tmp.getKey().getYear() + DELIMITER_SLASH + tmp.getValue());
+		}
+	}
+
+	@Override
+	public void closeApplication()
+	{
+		stopTimer();
+		if (isApplicationProcessAlive())
+		{
+			applicationProcess.destroy();
+		}
+	}
+
+	@Override
+	public boolean isChangedTimeOrSettings()
+	{
+		stopTimer();
+		return isChangedTime() || isChangedSettings();
+	}
+
 	private boolean isChangedTime()
 	{
 		return (dateTimeMap.containsKey(todayDate) && dateTimeMap.get(todayDate).get() != todayTime.get())
@@ -370,11 +375,6 @@ public class TimeCounterImpl implements TimeCounter
 	{
 		return application != null || autoChangeDate != DEFAULT_AUTO_CHANGE_DATE
 				|| relaxReminder != DEFAULT_RELAX_REMINDER;
-	}
-
-	private boolean isProcessAlive()
-	{
-		return applicationProcess != null && applicationProcess.isAlive();
 	}
 
 	@Override

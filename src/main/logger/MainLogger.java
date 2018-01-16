@@ -16,7 +16,6 @@ public class MainLogger
 	{
 		try
 		{
-			// Configure the logger with handler and formatter
 			logger = Logger.getLogger("MainLogger");
 			Handler handler = new FileHandler("log." + LocalDate.now() + ".txt", false);
 			logger.addHandler(handler);
