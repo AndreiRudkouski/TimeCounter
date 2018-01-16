@@ -43,7 +43,7 @@ public class MainLogger
 		if (e != null)
 		{
 			return Arrays.stream(e.getStackTrace()).map(StackTraceElement::toString)
-					.reduce((s1, s2) -> s1 + "\n        " + s2).map(s -> e.toString() + "\n  Cause:" + s)
+					.reduce((s1, s2) -> s1 + "\r\n        " + s2).map(s -> e.toString() + "\r\n  Cause:" + s)
 					.orElseGet(e::toString);
 		}
 		return "No exceptions were found";
