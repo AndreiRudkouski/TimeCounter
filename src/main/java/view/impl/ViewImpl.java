@@ -304,8 +304,8 @@ public class ViewImpl implements View, ActionListener
 				{
 					command.executeCommand(CommandName.TIME_COUNTER_SAVE_DATA.name());
 				}
-				command.executeCommand(CommandName.TIME_COUNTER_CLOSE_APP.name());
 			}
+			command.executeCommand(CommandName.TIME_COUNTER_CLOSE_APP.name());
 			System.exit(0);
 		}
 
