@@ -54,19 +54,30 @@ public class TimeCounterImpl implements TimeCounter
 		if (!timer.hasCommand())
 		{
 			timer.setCommand(this::stopTimerOrIncrementTime);
-			container.setAutoChangeDate(DEFAULT_AUTO_CHANGE_DATE);
-			container.setRelaxReminder(DEFAULT_RELAX_REMINDER);
 		}
 	}
 
 	private void loadDataFromFile()
 	{
 		List<String> loadData = saver.loadData();
-		convertDataFromListAndSetThemAsCurrent(loadData);
+		if (!loadData.isEmpty())
+		{
+			convertAndSetDataFromList(loadData);
+		}
+		else
+		{
+			setDefaultSettings();
+		}
 		notifyTimeObserversAboutSettings();
 	}
 
-	private void convertDataFromListAndSetThemAsCurrent(List<String> loadedData)
+	private void setDefaultSettings()
+	{
+		container.setAutoChangeDate(DEFAULT_AUTO_CHANGE_DATE);
+		container.setRelaxReminder(DEFAULT_RELAX_REMINDER);
+	}
+
+	private void convertAndSetDataFromList(List<String> loadedData)
 	{
 		for (String tmp : loadedData)
 		{
