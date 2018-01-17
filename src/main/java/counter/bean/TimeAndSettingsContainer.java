@@ -3,8 +3,11 @@ package main.java.counter.bean;
 import java.io.File;
 import java.time.LocalDate;
 import java.util.Map;
-import java.util.TreeMap;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class TimeAndSettingsContainer
 {
@@ -12,12 +15,12 @@ public class TimeAndSettingsContainer
 	private AtomicLong todayTime = new AtomicLong();
 	private AtomicLong totalTime = new AtomicLong();
 	private LocalDate todayDate = LocalDate.now();
-	private Map<LocalDate, AtomicLong> dateTimeMap = new TreeMap<>();
-	private boolean autoChangeDate;
-	private boolean relaxReminder;
-	private boolean isRunningApplication = true;
-	private File application;
-	private Process applicationProcess;
+	private ConcurrentMap<LocalDate, AtomicLong> dateTimeMap = new ConcurrentHashMap<>();
+	private AtomicBoolean autoChangeDate = new AtomicBoolean();
+	private AtomicBoolean relaxReminder = new AtomicBoolean();
+	private AtomicBoolean isRunningApplication = new AtomicBoolean(true);
+	private AtomicReference<File> application = new AtomicReference<>();
+	private AtomicReference<Process> applicationProcess = new AtomicReference<>();
 
 	public AtomicLong getCurrentTime()
 	{
@@ -64,58 +67,58 @@ public class TimeAndSettingsContainer
 		return dateTimeMap;
 	}
 
-	public void setDateTimeMap(Map<LocalDate, AtomicLong> dateTimeMap)
+	public void setDateTimeMap(ConcurrentMap<LocalDate, AtomicLong> dateTimeMap)
 	{
 		this.dateTimeMap = dateTimeMap;
 	}
 
 	public boolean isAutoChangeDate()
 	{
-		return autoChangeDate;
+		return autoChangeDate.get();
 	}
 
 	public void setAutoChangeDate(boolean autoChangeDate)
 	{
-		this.autoChangeDate = autoChangeDate;
+		this.autoChangeDate.set(autoChangeDate);
 	}
 
 	public boolean isRelaxReminder()
 	{
-		return relaxReminder;
+		return relaxReminder.get();
 	}
 
 	public void setRelaxReminder(boolean relaxReminder)
 	{
-		this.relaxReminder = relaxReminder;
+		this.relaxReminder.set(relaxReminder);
 	}
 
 	public boolean isRunningApplication()
 	{
-		return isRunningApplication;
+		return isRunningApplication.get();
 	}
 
 	public void setIsRunningApplication(boolean isRunningApplication)
 	{
-		this.isRunningApplication = isRunningApplication;
+		this.isRunningApplication.set(isRunningApplication);
 	}
 
 	public File getApplication()
 	{
-		return application;
+		return application.get();
 	}
 
 	public void setApplication(File application)
 	{
-		this.application = application;
+		this.application.set(application);
 	}
 
 	public Process getApplicationProcess()
 	{
-		return applicationProcess;
+		return applicationProcess.get();
 	}
 
 	public void setApplicationProcess(Process applicationProcess)
 	{
-		this.applicationProcess = applicationProcess;
+		this.applicationProcess.set(applicationProcess);
 	}
 }
