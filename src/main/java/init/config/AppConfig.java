@@ -5,6 +5,7 @@ import java.io.File;
 import main.java.command.Command;
 import main.java.command.impl.CommandImpl;
 import main.java.counter.TimeCounter;
+import main.java.counter.bean.TimeAndSettingsContainer;
 import main.java.counter.impl.TimeCounterImpl;
 import main.java.init.annotation.Config;
 import main.java.init.annotation.Instance;
@@ -25,6 +26,12 @@ public class AppConfig
 	public TimeCounter timeCounter()
 	{
 		return new TimeCounterImpl();
+	}
+
+	@Instance
+	public TimeAndSettingsContainer timeAndSettingsContainer()
+	{
+		return new TimeAndSettingsContainer();
 	}
 
 	@Instance
