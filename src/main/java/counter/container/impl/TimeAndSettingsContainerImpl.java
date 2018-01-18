@@ -71,7 +71,7 @@ public class TimeAndSettingsContainerImpl implements TimeAndSettingsContainer
 	@Override
 	public void increaseTodayTimeByDelta(long delta)
 	{
-
+		todayTime.getAndAdd(delta);
 	}
 
 	@Override
