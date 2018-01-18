@@ -1,20 +1,21 @@
-package main.java.init.config;
+package main.java.initApp.config;
 
 import java.io.File;
 
 import main.java.command.Command;
 import main.java.command.impl.CommandImpl;
 import main.java.counter.TimeCounter;
-import main.java.counter.bean.TimeAndSettingsContainer;
+import main.java.counter.container.TimeAndSettingsContainer;
+import main.java.counter.container.impl.TimeAndSettingsContainerImpl;
 import main.java.counter.impl.TimeCounterImpl;
-import main.java.init.annotation.Config;
-import main.java.init.annotation.Instance;
-import main.java.load.LoadSaveToFile;
-import main.java.load.impl.LoadSaveToFileImpl;
-import main.java.timer.Timer;
-import main.java.timer.impl.SecondTimer;
-import main.java.view.View;
-import main.java.view.impl.ViewImpl;
+import main.java.counter.timer.Timer;
+import main.java.counter.timer.impl.SecondTimer;
+import main.java.initApp.annotation.Config;
+import main.java.initApp.annotation.Instance;
+import main.java.loader.LoadSaveToFile;
+import main.java.loader.impl.LoadSaveToFileImpl;
+import main.java.viewer.View;
+import main.java.viewer.impl.ViewImpl;
 
 /**
  * This class contains methods to get instances of all needed classes
@@ -31,7 +32,7 @@ public class AppConfig
 	@Instance
 	public TimeAndSettingsContainer timeAndSettingsContainer()
 	{
-		return new TimeAndSettingsContainer();
+		return new TimeAndSettingsContainerImpl();
 	}
 
 	@Instance

@@ -7,20 +7,20 @@ import java.io.InputStreamReader;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
 
 import main.java.command.Command;
 import main.java.command.CommandName;
 import main.java.counter.TimeCounter;
-import main.java.counter.bean.TimeAndSettingsContainer;
-import main.java.init.annotation.Setter;
-import main.java.load.LoadSaveToFile;
+import main.java.counter.container.TimeAndSettingsContainer;
+import main.java.counter.timer.Timer;
+import main.java.initApp.annotation.Setter;
+import main.java.loader.LoadSaveToFile;
 import main.java.logger.MainLogger;
 import main.java.observer.TimeObserver;
-import main.java.timer.Timer;
 
 public class TimeCounterImpl implements TimeCounter
 {
@@ -50,7 +50,6 @@ public class TimeCounterImpl implements TimeCounter
 	public void loadDataAndInitTimer()
 	{
 		loadDataFromFile();
-		setTimeFromMap();
 		if (!timer.hasCommand())
 		{
 			timer.setCommand(this::stopTimerOrIncrementTime);
@@ -68,6 +67,7 @@ public class TimeCounterImpl implements TimeCounter
 		{
 			setDefaultSettings();
 		}
+		notifyTimeObserversAboutTime();
 		notifyTimeObserversAboutSettings();
 	}
 
@@ -79,12 +79,13 @@ public class TimeCounterImpl implements TimeCounter
 
 	private void convertAndSetDataFromList(List<String> loadedData)
 	{
+		Map<LocalDate, Long> convertedMap = new HashMap<>();
 		for (String tmp : loadedData)
 		{
 			String[] strings = tmp.split(DELIMITER_SLASH);
 			if (strings.length != QTY_OF_SETTING_PARAMETERS_IN_LINE)
 			{
-				convertDataToTimeAndAddToMap(strings);
+				convertDataAndAddToMap(strings, convertedMap);
 			}
 			else
 			{
@@ -93,13 +94,14 @@ public class TimeCounterImpl implements TimeCounter
 				container.setRelaxReminder(convertDataToRelaxReminderSetting(strings));
 			}
 		}
+		container.setDateTimeStorage(convertedMap);
 	}
 
-	private void convertDataToTimeAndAddToMap(String[] strings)
+	private void convertDataAndAddToMap(String[] strings, Map<LocalDate, Long> convertedMap)
 	{
-		container.getDateTimeMap().put(LocalDate.of(Integer.parseInt(strings[2]),
-				Integer.parseInt(strings[1]), Integer.parseInt(strings[0])),
-				new AtomicLong(Long.parseLong(strings[3])));
+		convertedMap.put(
+				LocalDate.of(Integer.parseInt(strings[2]), Integer.parseInt(strings[1]), Integer.parseInt(strings[0])),
+				Long.parseLong(strings[3]));
 	}
 
 	private File convertDataToFile(String[] strings)
@@ -122,17 +124,6 @@ public class TimeCounterImpl implements TimeCounter
 		return Boolean.parseBoolean(strings[2]);
 	}
 
-	private void setTimeFromMap()
-	{
-		container.getCurrentTime().set(0);
-		container.setTodayTime(container.getDateTimeMap().containsKey(container.getTodayDate()) ?
-				new AtomicLong(container.getDateTimeMap().get(container.getTodayDate()).get()) :
-				new AtomicLong(0));
-		container.getTotalTime().set(0);
-		container.getDateTimeMap().forEach((date, time) -> container.getTotalTime().getAndAdd(time.get()));
-		notifyTimeObserversAboutTime();
-	}
-
 	private void stopTimerOrIncrementTime()
 	{
 		if (!isApplicationProcessAlive() && container.getApplication() != null && container.isRunningApplication())
@@ -141,7 +132,7 @@ public class TimeCounterImpl implements TimeCounter
 		}
 		else
 		{
-			incrementAllTimes();
+			increaseAllTimes();
 			checkRelaxTimeAndStopTimerIfNeeded();
 			checkChangingDate();
 		}
@@ -158,17 +149,15 @@ public class TimeCounterImpl implements TimeCounter
 		notifyTimeObserversAboutTiming();
 	}
 
-	private void incrementAllTimes()
+	private void increaseAllTimes()
 	{
-		container.getCurrentTime().incrementAndGet();
-		container.getTodayTime().incrementAndGet();
-		container.getTotalTime().incrementAndGet();
+		container.increaseTimeBySecond();
 		notifyTimeObserversAboutTime();
 	}
 
 	private void checkRelaxTimeAndStopTimerIfNeeded()
 	{
-		if (container.getCurrentTime().get() % SEC_TO_RELAX == 0 && container.isRelaxReminder())
+		if (container.getCurrentTimeValue() % SEC_TO_RELAX == 0 && container.isRelaxReminder())
 		{
 			stopTimer();
 			if (!command.executeCommand(CommandName.VIEW_IS_CHOSEN_RELAX.name()))
@@ -270,20 +259,9 @@ public class TimeCounterImpl implements TimeCounter
 	{
 		if (container.isAutoChangeDate())
 		{
-			if (container.getDateTimeMap().containsKey(container.getTodayDate()))
-			{
-				container.getDateTimeMap().put(container.getTodayDate(), new AtomicLong(
-						container.getDateTimeMap().get(container.getTodayDate())
-								.getAndAdd(container.getCurrentTime().get())));
-			}
-			else
-			{
-				container.getDateTimeMap().put(container.getTodayDate(),
-						new AtomicLong(container.getCurrentTime().get()));
-			}
-			saveDataToFile();
-			container.getCurrentTime().set(0);
-			container.getTodayTime().set(0);
+			saveData();
+			container.setCurrentTimeValue(0);
+			container.setTodayTimeValue(0);
 			notifyTimeObserversAboutTime();
 		}
 	}
@@ -291,14 +269,7 @@ public class TimeCounterImpl implements TimeCounter
 	@Override
 	public void saveData()
 	{
-		if (container.getDateTimeMap().containsKey(container.getTodayDate()))
-		{
-			container.getDateTimeMap().put(container.getTodayDate(), container.getTodayTime());
-		}
-		else
-		{
-			container.getDateTimeMap().put(container.getTodayDate(), container.getCurrentTime());
-		}
+		container.putDateAndTimeToStorage(container.getTodayDate(), container.getTodayTimeValue());
 		saveDataToFile();
 	}
 
@@ -319,11 +290,10 @@ public class TimeCounterImpl implements TimeCounter
 
 	private void convertTimeAndAddToList(List<String> dataToSave)
 	{
-		for (Map.Entry<LocalDate, AtomicLong> tmp : container.getDateTimeMap().entrySet())
+		for (Map.Entry<LocalDate, Long> tmp : container.getDateTimeStorage().entrySet())
 		{
-			dataToSave.add(tmp.getKey().getDayOfMonth() + DELIMITER_SLASH
-					+ tmp.getKey().getMonthValue() + DELIMITER_SLASH +
-					tmp.getKey().getYear() + DELIMITER_SLASH + tmp.getValue());
+			dataToSave.add(tmp.getKey().getDayOfMonth() + DELIMITER_SLASH + tmp.getKey().getMonthValue()
+					+ DELIMITER_SLASH + tmp.getKey().getYear() + DELIMITER_SLASH + tmp.getValue());
 		}
 	}
 
@@ -346,10 +316,8 @@ public class TimeCounterImpl implements TimeCounter
 
 	private boolean isChangedTime()
 	{
-		return (container.getDateTimeMap().containsKey(container.getTodayDate()) && container.getDateTimeMap().get(
-				container.getTodayDate()).get() != container.getTodayTime().get()) || (
-				container.getDateTimeMap().values().stream().mapToLong(AtomicLong::get).sum() != container
-						.getTotalTime().get());
+		return (container.getDateTimeStorage().values().stream().mapToLong(Long::new).sum()
+				!= container.getTotalTimeValue());
 	}
 
 	private boolean isChangedSettings()
@@ -394,8 +362,8 @@ public class TimeCounterImpl implements TimeCounter
 	public void notifyTimeObserversAboutTime()
 	{
 		observers.forEach(obs -> obs.updateTime(
-				Arrays.asList(container.getCurrentTime().get(), container.getTodayTime().get(),
-						container.getTotalTime().get())));
+				Arrays.asList(container.getCurrentTimeValue(), container.getTodayTimeValue(),
+						container.getTotalTimeValue())));
 	}
 
 	@Override
@@ -434,24 +402,27 @@ public class TimeCounterImpl implements TimeCounter
 	private void eraseCurrentTime()
 	{
 		stopTimer();
-		container.getCurrentTime().set(0);
+		container.increaseTodayTimeByDelta(-container.getCurrentTimeValue());
+		container.increaseTotalTimeByDelta(-container.getCurrentTimeValue());
+		container.setCurrentTimeValue(0);
 		notifyTimeObserversAboutTime();
 	}
 
 	private void eraseTodayTime()
 	{
 		stopTimer();
-		container.getCurrentTime().set(0);
-		container.getTodayTime().set(0);
+		container.setCurrentTimeValue(0);
+		container.increaseTotalTimeByDelta(-container.getTodayTimeValue());
+		container.setTodayTimeValue(0);
 		notifyTimeObserversAboutTime();
 	}
 
 	private void eraseTotalTime()
 	{
 		stopTimer();
-		container.getCurrentTime().set(0);
-		container.getTodayTime().set(0);
-		container.getTotalTime().set(0);
+		container.setCurrentTimeValue(0);
+		container.setTodayTimeValue(0);
+		container.setTotalTimeValue(0);
 		notifyTimeObserversAboutTime();
 	}
 

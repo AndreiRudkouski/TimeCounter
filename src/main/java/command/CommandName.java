@@ -4,8 +4,8 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 
 import main.java.counter.TimeCounter;
-import main.java.init.Initializer;
-import main.java.view.View;
+import main.java.initApp.Initializer;
+import main.java.viewer.View;
 
 public enum CommandName
 {

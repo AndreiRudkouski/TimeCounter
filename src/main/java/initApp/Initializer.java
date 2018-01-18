@@ -1,4 +1,4 @@
-package main.java.init;
+package main.java.initApp;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -11,10 +11,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import main.java.init.annotation.Config;
-import main.java.init.annotation.Instance;
-import main.java.init.annotation.Setter;
-import main.java.init.config.AppConfig;
+import main.java.initApp.annotation.Config;
+import main.java.initApp.annotation.Instance;
+import main.java.initApp.annotation.Setter;
+import main.java.initApp.config.AppConfig;
 import main.java.logger.MainLogger;
 
 public final class Initializer

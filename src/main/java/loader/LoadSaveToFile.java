@@ -1,4 +1,4 @@
-package main.java.load;
+package main.java.loader;
 
 import java.util.List;
 

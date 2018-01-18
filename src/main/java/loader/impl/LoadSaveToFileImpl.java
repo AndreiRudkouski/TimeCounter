@@ -1,4 +1,4 @@
-package main.java.load.impl;
+package main.java.loader.impl;
 
 import java.io.File;
 import java.io.IOException;
@@ -10,8 +10,8 @@ import java.util.Base64;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import main.java.init.annotation.Setter;
-import main.java.load.LoadSaveToFile;
+import main.java.initApp.annotation.Setter;
+import main.java.loader.LoadSaveToFile;
 import main.java.logger.MainLogger;
 
 public class LoadSaveToFileImpl implements LoadSaveToFile

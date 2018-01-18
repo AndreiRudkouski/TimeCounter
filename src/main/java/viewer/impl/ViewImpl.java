@@ -1,4 +1,4 @@
-package main.java.view.impl;
+package main.java.viewer.impl;
 
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -19,10 +19,10 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 
 import main.java.command.Command;
 import main.java.command.CommandName;
-import main.java.init.annotation.Setter;
+import main.java.initApp.annotation.Setter;
 import main.java.logger.MainLogger;
 import main.java.observer.TimeObserver;
-import main.java.view.View;
+import main.java.viewer.View;
 
 public class ViewImpl implements View, ActionListener
 {
