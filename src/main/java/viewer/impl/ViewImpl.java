@@ -252,8 +252,9 @@ public class ViewImpl implements View, ActionListener
 		rightPanel.setBorder(BorderFactory.createEmptyBorder(5, 0, 5, 10));
 		startStopButton = new JButton();
 		startStopButton.setPreferredSize(new Dimension(70, 25));
+		startStopButton.setDefaultCapable(false);
 		startStopButton.addActionListener(e -> {
-			updateTiming(!startStopButton.getText().equalsIgnoreCase(bundle.getString("text_button_stop")));
+			updateTiming(!startStopButton.isDefaultCapable());
 			notifyTimeObserversAboutTiming();
 		});
 		rightPanel.add(startStopButton);
@@ -367,7 +368,12 @@ public class ViewImpl implements View, ActionListener
 		localeSettingMenu.setText(bundle.getString("menu_item_setting_locale"));
 		checkBreak.setText(bundle.getString("label_break"));
 		checkDate.setText(bundle.getString("label_date"));
-		if (startStopButton.getText().equalsIgnoreCase(bundle.getString("text_button_start")))
+		setStartStopButtonText();
+	}
+
+	private void setStartStopButtonText()
+	{
+		if (startStopButton.isDefaultCapable())
 		{
 			startStopButton.setText(bundle.getString("text_button_stop"));
 		}
@@ -460,7 +466,8 @@ public class ViewImpl implements View, ActionListener
 	@Override
 	public void updateTiming(boolean isStart)
 	{
-		startStopButton.setText(isStart ? bundle.getString("text_button_stop") : bundle.getString("text_button_start"));
+		startStopButton.setDefaultCapable(isStart);
+		setStartStopButtonText();
 	}
 
 	@Override

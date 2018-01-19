@@ -1,4 +1,4 @@
-package main.java.counter.timer;
+package main.java.timer.timer;
 
 /**
  * This interface identifies methods for executing any {@link Runnable} command every second.

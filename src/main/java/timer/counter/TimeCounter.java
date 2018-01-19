@@ -1,4 +1,4 @@
-package main.java.counter;
+package main.java.timer.counter;
 
 import main.java.observer.TimeObservable;
 import main.java.observer.TimeObserver;

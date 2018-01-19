@@ -25,7 +25,7 @@ public interface TimeObserver
 	void updateSettings(boolean autoChangeDate, boolean relaxReminder, File file);
 
 	/**
-	 * Updates state of time counter (run or stop).
+	 * Updates state of time timer (run or stop).
 	 *
 	 * @param isStart the current state
 	 */

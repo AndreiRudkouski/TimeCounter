@@ -1,7 +1,7 @@
 package main.java.main;
 
-import main.java.counter.TimeCounter;
 import main.java.initApp.Initializer;
+import main.java.timer.counter.TimeCounter;
 import main.java.viewer.View;
 
 public class Main

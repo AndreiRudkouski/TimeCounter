@@ -1,15 +1,15 @@
-package main.java.counter.container.impl;
+package main.java.timer.container.impl;
 
 import java.io.File;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Collectors;
 
-import main.java.counter.container.TimeAndSettingsContainer;
+import main.java.timer.container.TimeAndSettingsContainer;
 
 public class TimeAndSettingsContainerImpl implements TimeAndSettingsContainer
 {
@@ -94,31 +94,35 @@ public class TimeAndSettingsContainerImpl implements TimeAndSettingsContainer
 	@Override
 	public void putDateAndTimeToStorage(LocalDate date, long time)
 	{
+		initTimeFields(date, time);
 		dateTimeStorage.put(date, new AtomicLong(time));
 	}
 
-	@Override
-	public void setDateTimeStorage(Map<LocalDate, Long> map)
+	private void initTimeFields(LocalDate date, long time)
 	{
-		dateTimeStorage = map.entrySet().stream().collect(
-				Collectors.toMap(Map.Entry::getKey, e -> new AtomicLong(e.getValue())));
-		initTimeValuesAfterSetToStorage();
-	}
-
-	private void initTimeValuesAfterSetToStorage()
-	{
-		currentTime.set(0);
-		todayTime = dateTimeStorage.containsKey(todayDate) ?
-				new AtomicLong(dateTimeStorage.get(todayDate).get()) : new AtomicLong(0);
-		totalTime.set(0);
-		dateTimeStorage.forEach((date, time) -> totalTime.getAndAdd(time.get()));
+		if (todayTime.get() != time)
+		{
+			if (todayDate.equals(date))
+			{
+				todayTime.set(time);
+			}
+			else
+			{
+				totalTime.getAndAdd(time);
+			}
+		}
 	}
 
 	@Override
-	public Map<LocalDate, Long> getDateTimeStorage()
+	public long getTimeFromStorageByDate(LocalDate date)
 	{
-		return dateTimeStorage.entrySet().stream().collect(
-				Collectors.toMap(Map.Entry::getKey, e -> e.getValue().get()));
+		return dateTimeStorage.get(date).get();
+	}
+
+	@Override
+	public Set<LocalDate> getDatesFromStorage()
+	{
+		return dateTimeStorage.keySet();
 	}
 
 	@Override

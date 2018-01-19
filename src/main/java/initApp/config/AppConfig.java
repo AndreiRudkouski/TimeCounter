@@ -4,16 +4,16 @@ import java.io.File;
 
 import main.java.command.Command;
 import main.java.command.impl.CommandImpl;
-import main.java.counter.TimeCounter;
-import main.java.counter.container.TimeAndSettingsContainer;
-import main.java.counter.container.impl.TimeAndSettingsContainerImpl;
-import main.java.counter.impl.TimeCounterImpl;
-import main.java.counter.timer.Timer;
-import main.java.counter.timer.impl.SecondTimer;
 import main.java.initApp.annotation.Config;
 import main.java.initApp.annotation.Instance;
 import main.java.loader.LoadSaveToFile;
 import main.java.loader.impl.LoadSaveToFileImpl;
+import main.java.timer.container.TimeAndSettingsContainer;
+import main.java.timer.container.impl.TimeAndSettingsContainerImpl;
+import main.java.timer.counter.TimeCounter;
+import main.java.timer.counter.impl.TimeCounterImpl;
+import main.java.timer.timer.Timer;
+import main.java.timer.timer.impl.SecondTimer;
 import main.java.viewer.View;
 import main.java.viewer.impl.ViewImpl;
 

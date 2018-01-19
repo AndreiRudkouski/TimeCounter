@@ -1,8 +1,8 @@
-package main.java.counter.container;
+package main.java.timer.container;
 
 import java.io.File;
 import java.time.LocalDate;
-import java.util.Map;
+import java.util.Set;
 
 /**
  * This interface identifies methods for any container which contains time and settings.
@@ -85,13 +85,6 @@ public interface TimeAndSettingsContainer
 	void setTodayDate(LocalDate todayDate);
 
 	/**
-	 * Sets the map to the storage of date and time.
-	 *
-	 * @param map which contains pairs of date and appropriate time in seconds
-	 */
-	void setDateTimeStorage(Map<LocalDate, Long> map);
-
-	/**
 	 * Puts pair of of date and appropriate time to the storage of date and time.
 	 *
 	 * @param date value
@@ -100,11 +93,18 @@ public interface TimeAndSettingsContainer
 	void putDateAndTimeToStorage(LocalDate date, long time);
 
 	/**
-	 * Returns storage of date and time.
+	 * Returns stored time from the storage by given date.
 	 *
-	 * @return map which contains pairs of date and appropriate time in seconds
+	 * @return time value in seconds
 	 */
-	Map<LocalDate, Long> getDateTimeStorage();
+	long getTimeFromStorageByDate(LocalDate date);
+
+	/**
+	 * Returns set of dates from storage.
+	 *
+	 * @return set of dates
+	 */
+	Set<LocalDate> getDatesFromStorage();
 
 	/**
 	 * Returns the value of 'AutoChangeDate' flag.

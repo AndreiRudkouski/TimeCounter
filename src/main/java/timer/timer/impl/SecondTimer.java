@@ -1,9 +1,9 @@
-package main.java.counter.timer.impl;
+package main.java.timer.timer.impl;
 
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import main.java.counter.timer.Timer;
+import main.java.timer.timer.Timer;
 
 public class SecondTimer extends ScheduledThreadPoolExecutor implements Timer
 {
