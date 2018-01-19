@@ -128,19 +128,19 @@ public class TimeCounterImpl implements TimeCounter
 
 	private void stopOrIncreaseTime()
 	{
-		if (isApplicationProcessRunning())
+		if (isApplicationProcessShouldBeRunning())
+		{
+			stopTimer();
+		}
+		else
 		{
 			increaseAllTimes();
 			checkRelaxTimeAndStopTimerIfNeeded();
 			checkChangingDate();
 		}
-		else
-		{
-			stopTimer();
-		}
 	}
 
-	private boolean isApplicationProcessRunning()
+	private boolean isApplicationProcessShouldBeRunning()
 	{
 		return isApplicationProcessAlive() && container.getApplication() != null && container.isRunningApplication();
 	}

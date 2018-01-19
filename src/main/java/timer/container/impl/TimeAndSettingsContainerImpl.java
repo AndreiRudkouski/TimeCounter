@@ -106,10 +106,7 @@ public class TimeAndSettingsContainerImpl implements TimeAndSettingsContainer
 			{
 				todayTime.set(time);
 			}
-			else
-			{
-				totalTime.getAndAdd(time);
-			}
+			totalTime.getAndAdd(time);
 		}
 	}
 
