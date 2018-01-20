@@ -5,14 +5,14 @@ import java.util.Arrays;
 
 import main.java.initApp.Initializer;
 import main.java.timer.counter.TimeCounter;
-import main.java.viewer.View;
+import main.java.viewer.manager.ViewManager;
 
 public enum CommandName
 {
 	TIME_COUNTER_LOAD_DATA(TimeCounter.class, "loadDataAndInitTimer"),
 	TIME_COUNTER_SAVE_DATA(TimeCounter.class, "saveData"),
-	VIEW_IS_CHOSEN_RELAX(View.class, "isChosenRelax"),
-	VIEW_IS_USER_AGREE_TO_CONNECT_SELECTED_APP(View.class, "isUserAgreeToConnectSelectedApplication"),
+	VIEW_IS_CHOSEN_RELAX(ViewManager.class, "isChosenRelax"),
+	VIEW_IS_USER_AGREE_TO_CONNECT_SELECTED_APP(ViewManager.class, "isUserAgreeToConnectSelectedApplication"),
 	TIME_COUNTER_CLOSE_APP(TimeCounter.class, "closeApplication"),
 	TIME_COUNTER_IS_CHANGED_TIME_OR_SETTINGS(TimeCounter.class, "isChangedTimeOrSettings");
 

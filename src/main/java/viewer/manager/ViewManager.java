@@ -1,12 +1,15 @@
-package main.java.viewer;
+package main.java.viewer.manager;
 
+import java.awt.event.ActionListener;
+
+import main.java.command.CommandName;
 import main.java.observer.TimeObservable;
 import main.java.observer.TimeObserver;
 
 /**
  * This interface identifies methods for working with GUI.
  */
-public interface View extends TimeObserver, TimeObservable
+public interface ViewManager extends TimeObserver, TimeObservable, ActionListener
 {
 	/**
 	 * Checks if the user has selected relaxation.
@@ -27,4 +30,12 @@ public interface View extends TimeObserver, TimeObservable
 	 * Creates implementation of this interface.
 	 */
 	void createView();
+
+	/**
+	 * Executes command with name witch contains in {@link CommandName}
+	 *
+	 * @param commandName name of command
+	 * @return result of command execution
+	 */
+	boolean executeCommand(String commandName);
 }

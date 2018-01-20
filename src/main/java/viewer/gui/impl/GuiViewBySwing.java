@@ -1,15 +1,13 @@
-package main.java.viewer.impl;
+package main.java.viewer.gui.impl;
+
+import static main.java.viewer.manager.impl.ViewManagerImpl.TIME_FORMAT_WITHOUT_DAY;
 
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
@@ -17,18 +15,19 @@ import java.util.ResourceBundle;
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
-import main.java.command.Command;
 import main.java.command.CommandName;
 import main.java.initApp.annotation.Setter;
 import main.java.logger.MainLogger;
-import main.java.observer.TimeObserver;
-import main.java.viewer.View;
+import main.java.viewer.gui.GuiView;
+import main.java.viewer.manager.ViewManager;
 
-public class ViewImpl implements View, ActionListener
+public class GuiViewBySwing implements GuiView
 {
 	private static final Font FONT_TOP_PANEL = new Font("sanserif", Font.BOLD, 12);
 	private static final Font FONT_LEFT_PANEL = new Font("sanserif", Font.BOLD, 15);
 	private static final Font FONT_CENTER_PANEL = new Font("sanserif", Font.BOLD, 16);
+
+	private static final String EMPTY_TIME_FIELD = String.format(TIME_FORMAT_WITHOUT_DAY, 0, 0, 0);
 
 	private static final String LOCALE_NAME = "main.resources.locale";
 	private static final Locale LOCALE_EN = Locale.ENGLISH;
@@ -38,7 +37,6 @@ public class ViewImpl implements View, ActionListener
 	private static final String ICON_NAME = "main/resources/image/icon.png";
 	private static final String EXE_EXTENSION = "exe";
 	private static final String DOT = ".";
-	private static final String TIME_DELIMITER = ":";
 
 	private JFrame frame;
 	private JLabel applicationLabel;
@@ -62,16 +60,15 @@ public class ViewImpl implements View, ActionListener
 	private JButton startStopButton;
 	private JCheckBox checkBreak;
 	private JCheckBox checkDate;
+
 	private JFileChooser fileChooser;
 	private Image iconImage;
 
 	@Setter
-	private Command command;
-
-	private List<TimeObserver> observers = new ArrayList<>();
+	private ViewManager viewManager;
 
 	@Override
-	public void createView()
+	public void createGuiView()
 	{
 		frame = new JFrame();
 		frame.setAlwaysOnTop(true);
@@ -108,10 +105,10 @@ public class ViewImpl implements View, ActionListener
 	{
 		countingMenu = new JMenu();
 		loadDataCountingMenu = new JMenuItem();
-		loadDataCountingMenu.addActionListener(this);
+		loadDataCountingMenu.addActionListener(viewManager);
 		loadDataCountingMenu.setActionCommand(CommandName.TIME_COUNTER_LOAD_DATA.name());
 		saveDataCountingMenu = new JMenuItem();
-		saveDataCountingMenu.addActionListener(this);
+		saveDataCountingMenu.addActionListener(viewManager);
 		saveDataCountingMenu.setActionCommand(CommandName.TIME_COUNTER_SAVE_DATA.name());
 		countingMenu.add(loadDataCountingMenu);
 		countingMenu.add(saveDataCountingMenu);
@@ -123,45 +120,26 @@ public class ViewImpl implements View, ActionListener
 		eraseMenu = new JMenu();
 		currentTimeEraseMenu = new JMenuItem();
 		currentTimeEraseMenu.addActionListener(e -> {
-			setCurrentTime(0L);
-			notifyTimeObserversAboutTime();
+			setCurrentTime(EMPTY_TIME_FIELD);
+			viewManager.notifyTimeObserversAboutTime();
 		});
 		todayTimeEraseMenu = new JMenuItem();
 		todayTimeEraseMenu.addActionListener(e -> {
-			setTodayTime(0L);
-			notifyTimeObserversAboutTime();
+			setTodayTime(EMPTY_TIME_FIELD);
+			viewManager.notifyTimeObserversAboutTime();
 		});
 		totalTimeEraseMenu = new JMenuItem();
 		totalTimeEraseMenu.addActionListener(e -> {
-			setTotalTime(0L);
-			notifyTimeObserversAboutTime();
+			setTotalTime(EMPTY_TIME_FIELD);
+			viewManager.notifyTimeObserversAboutTime();
 		});
 		applicationEraseMenu = new JMenuItem();
-		applicationEraseMenu.addActionListener(e -> {
-			changeApplicationLabel(null);
-			notifyTimeObserversAboutSettings();
-		});
+		applicationEraseMenu.addActionListener(e -> viewManager.notifyTimeObserversAboutSettings());
 		eraseMenu.add(currentTimeEraseMenu);
 		eraseMenu.add(todayTimeEraseMenu);
 		eraseMenu.add(totalTimeEraseMenu);
 		eraseMenu.add(applicationEraseMenu);
 		return eraseMenu;
-	}
-
-	private void changeApplicationLabel(File file)
-	{
-		String name = file != null ? file.getName() : null;
-		if (name != null)
-		{
-			applicationLabel.setText(name);
-			applicationLabel.setEnabled(false);
-		}
-		else
-		{
-			applicationLabel.setText(bundle.getString("label_application"));
-			applicationLabel.setForeground(Color.RED);
-			applicationLabel.setEnabled(true);
-		}
 	}
 
 	private JMenu createSettingMenu()
@@ -173,9 +151,9 @@ public class ViewImpl implements View, ActionListener
 		localeSettingMenu.addActionListener(e -> changeLocale());
 		// Checkboxes
 		checkBreak = new JCheckBox();
-		checkBreak.addActionListener(e -> notifyTimeObserversAboutSettings());
+		checkBreak.addActionListener(e -> viewManager.notifyTimeObserversAboutSettings());
 		checkDate = new JCheckBox();
-		checkDate.addActionListener(e -> notifyTimeObserversAboutSettings());
+		checkDate.addActionListener(e -> viewManager.notifyTimeObserversAboutSettings());
 		settingMenu.add(applicationSettingMenu);
 		settingMenu.add(localeSettingMenu);
 		settingMenu.add(checkBreak);
@@ -196,8 +174,7 @@ public class ViewImpl implements View, ActionListener
 			if (index > 0 && index < fileName.length() - 1 && fileName.substring(index + 1).equalsIgnoreCase(
 					EXE_EXTENSION))
 			{
-				changeApplicationLabel(fileChooser.getSelectedFile());
-				notifyTimeObserversAboutSettings();
+				viewManager.notifyTimeObserversAboutSettings();
 			}
 		}
 	}
@@ -254,8 +231,8 @@ public class ViewImpl implements View, ActionListener
 		startStopButton.setPreferredSize(new Dimension(70, 25));
 		startStopButton.setDefaultCapable(false);
 		startStopButton.addActionListener(e -> {
-			updateTiming(!startStopButton.isDefaultCapable());
-			notifyTimeObserversAboutTiming();
+			viewManager.updateTiming(!startStopButton.isDefaultCapable());
+			viewManager.notifyTimeObserversAboutTiming();
 		});
 		rightPanel.add(startStopButton);
 		return rightPanel;
@@ -294,7 +271,7 @@ public class ViewImpl implements View, ActionListener
 		@Override
 		public void windowClosing(WindowEvent we)
 		{
-			if (command.executeCommand(CommandName.TIME_COUNTER_IS_CHANGED_TIME_OR_SETTINGS.name()))
+			if (viewManager.executeCommand(CommandName.TIME_COUNTER_IS_CHANGED_TIME_OR_SETTINGS.name()))
 			{
 				int select = showAndGetResultOfConfirmDialogWindowWithTitleAndMessage("title_save", "message_save");
 				if (select != JOptionPane.YES_OPTION && select != JOptionPane.NO_OPTION)
@@ -303,10 +280,10 @@ public class ViewImpl implements View, ActionListener
 				}
 				if (select == JOptionPane.YES_OPTION)
 				{
-					command.executeCommand(CommandName.TIME_COUNTER_SAVE_DATA.name());
+					viewManager.executeCommand(CommandName.TIME_COUNTER_SAVE_DATA.name());
 				}
 			}
-			command.executeCommand(CommandName.TIME_COUNTER_CLOSE_APP.name());
+			viewManager.executeCommand(CommandName.TIME_COUNTER_CLOSE_APP.name());
 			System.exit(0);
 		}
 
@@ -384,28 +361,76 @@ public class ViewImpl implements View, ActionListener
 	}
 
 	@Override
-	public boolean isChosenRelax()
+	public boolean isCheckBreakBoxSelected()
 	{
-		int select = showAndGetResultOfConfirmDialogWindowWithTitleAndMessage("title_relax_time", "message_relax_time");
-		return select == JOptionPane.YES_OPTION;
+		return checkBreak.isSelected();
 	}
 
 	@Override
-	public boolean isUserAgreeToConnectSelectedApplication()
+	public void setCheckBreakBoxSelectedValue(boolean value)
 	{
-		int select = showAndGetResultOfConfirmDialogWindowWithTitleAndMessage("title_application_restart",
-				"massage_application_restart");
-		return select == JOptionPane.YES_OPTION;
+		checkBreak.setSelected(value);
 	}
 
 	@Override
-	public void actionPerformed(ActionEvent event)
+	public boolean isCheckDateBoxSelected()
 	{
-		command.executeCommand(event.getActionCommand());
+		return checkDate.isSelected();
 	}
 
 	@Override
-	public void updateTime(List<Long> timeList)
+	public void setCheckDateBoxSelectedValue(boolean value)
+	{
+		checkDate.setSelected(value);
+	}
+
+	@Override
+	public File getSelectedFile()
+	{
+		return fileChooser != null ? fileChooser.getSelectedFile() : null;
+	}
+
+	@Override
+	public void setSelectedFileLabel(String label)
+	{
+		changeApplicationLabel(label);
+	}
+
+	private void changeApplicationLabel(String label)
+	{
+		if (label != null)
+		{
+			applicationLabel.setText(label);
+			applicationLabel.setEnabled(false);
+		}
+		else
+		{
+			applicationLabel.setText(bundle.getString("label_application"));
+			applicationLabel.setForeground(Color.RED);
+			applicationLabel.setEnabled(true);
+		}
+	}
+
+	@Override
+	public String getCurrentTimeFieldValue()
+	{
+		return currentTimeField.getText();
+	}
+
+	@Override
+	public String getTodayTimeFieldValue()
+	{
+		return todayTimeField.getText();
+	}
+
+	@Override
+	public String getTotalTimeFieldValue()
+	{
+		return totalTimeField.getText();
+	}
+
+	@Override
+	public void updateTimeFields(List<String> timeList)
 	{
 		if (timeList != null && timeList.size() == 3)
 		{
@@ -415,98 +440,55 @@ public class ViewImpl implements View, ActionListener
 		}
 	}
 
-	private void setCurrentTime(Long time)
+	private void setCurrentTime(String time)
 	{
 		if (time != null)
 		{
-			currentTimeField.setText(convertTimeToViewFormat(time));
+			currentTimeField.setText(time);
 		}
 	}
 
-	private void setTodayTime(Long time)
+	private void setTodayTime(String time)
 	{
 		if (time != null)
 		{
-			todayTimeField.setText(convertTimeToViewFormat(time));
+			todayTimeField.setText(time);
 		}
 	}
 
-	private void setTotalTime(Long time)
+	private void setTotalTime(String time)
 	{
 		if (time != null)
 		{
-			totalTimeField.setText(convertTimeToViewFormat(time));
+			totalTimeField.setText(time);
 		}
-	}
-
-	private String convertTimeToViewFormat(long sec)
-	{
-		long hour = sec / (60 * 60);
-		long day = hour / 24;
-		long min = (sec - hour * 60 * 60) / 60;
-		sec = sec - hour * 60 * 60 - min * 60;
-		hour = hour - day * 24;
-		if (day != 0)
-		{
-			return String.format(
-					"%1$02d" + TIME_DELIMITER + "%2$02d" + TIME_DELIMITER + "%3$02d" + TIME_DELIMITER + "%4$02d", day,
-					hour, min, sec);
-		}
-		return String.format("%1$02d" + TIME_DELIMITER + "%2$02d" + TIME_DELIMITER + "%3$02d", hour, min, sec);
 	}
 
 	@Override
-	public void updateSettings(boolean autoChangeDate, boolean relaxReminder, File file)
+	public boolean isStartStopButtonInStartPosition()
 	{
-		checkDate.setSelected(autoChangeDate);
-		checkBreak.setSelected(relaxReminder);
-		changeApplicationLabel(file);
+		return startStopButton.isDefaultCapable();
 	}
 
 	@Override
-	public void updateTiming(boolean isStart)
+	public void setStartStopButtonToStartPosition(boolean position)
 	{
-		startStopButton.setDefaultCapable(isStart);
+		startStopButton.setDefaultCapable(position);
 		setStartStopButtonText();
 	}
 
 	@Override
-	public void addTimeObserver(TimeObserver observer)
+	public boolean callReminderWindowAboutRelax()
 	{
-		observers.add(observer);
+		int select = showAndGetResultOfConfirmDialogWindowWithTitleAndMessage("title_relax_time", "message_relax_time");
+		return select == JOptionPane.YES_OPTION;
 	}
 
 	@Override
-	public void notifyTimeObserversAboutTime()
+	public boolean callReminderWindowAboutSelectApplication()
 	{
-		observers.forEach(obs -> obs.updateTime(Arrays.asList(convertViewFormatToTime(currentTimeField.getText()),
-				convertViewFormatToTime(todayTimeField.getText()), convertViewFormatToTime(totalTimeField.getText()))));
-	}
-
-	private long convertViewFormatToTime(String timeStr)
-	{
-		long[] tmp = Arrays.stream(timeStr.split(TIME_DELIMITER)).mapToLong(Long::parseLong).toArray();
-		if (tmp.length == 3)
-		{
-			return tmp[0] * 60 * 60 + tmp[1] * 60 + tmp[2];
-		}
-		else
-		{
-			return tmp[0] * 24 * 60 * 60 + tmp[0] * 60 * 60 + tmp[1] * 60 + tmp[2];
-		}
-	}
-
-	@Override
-	public void notifyTimeObserversAboutSettings()
-	{
-		observers.forEach(obs -> obs.updateSettings(checkDate.isSelected(), checkBreak.isSelected(),
-				fileChooser != null ? fileChooser.getSelectedFile() : null));
-	}
-
-	@Override
-	public void notifyTimeObserversAboutTiming()
-	{
-		observers.forEach(obs -> obs
-				.updateTiming(startStopButton.getText().equalsIgnoreCase(bundle.getString("text_button_stop"))));
+		int select = showAndGetResultOfConfirmDialogWindowWithTitleAndMessage("title_application_restart",
+				"massage_application_restart");
+		return select == JOptionPane.YES_OPTION;
 	}
 }

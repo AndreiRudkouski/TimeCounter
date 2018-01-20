@@ -14,8 +14,10 @@ import main.java.timer.counter.TimeCounter;
 import main.java.timer.counter.impl.TimeCounterImpl;
 import main.java.timer.timer.Timer;
 import main.java.timer.timer.impl.SecondTimer;
-import main.java.viewer.View;
-import main.java.viewer.impl.ViewImpl;
+import main.java.viewer.gui.GuiView;
+import main.java.viewer.gui.impl.GuiViewBySwing;
+import main.java.viewer.manager.ViewManager;
+import main.java.viewer.manager.impl.ViewManagerImpl;
 
 /**
  * This class contains methods to get instances of all needed classes
@@ -36,9 +38,15 @@ public class AppConfig
 	}
 
 	@Instance
-	public View guiWindow()
+	public ViewManager viewManager()
 	{
-		return new ViewImpl();
+		return new ViewManagerImpl();
+	}
+
+	@Instance
+	public GuiView guiWindow()
+	{
+		return new GuiViewBySwing();
 	}
 
 	@Instance

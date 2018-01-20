@@ -436,6 +436,7 @@ public class TimeCounterImpl implements TimeCounter
 		container.setAutoChangeDate(autoChangeDate);
 		container.setRelaxReminder(relaxReminder);
 		container.setApplication(file);
+		notifyTimeObserversAboutSettings();
 	}
 
 	@Override
