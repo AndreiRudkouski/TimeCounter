@@ -79,7 +79,7 @@ public interface GuiView
 	/**
 	 * Updates time fields of GUI view.
 	 *
-	 * @param timeList list of time values (index 0 - the current time, 2 - the today time and 3 - the total time)
+	 * @param timeList list of time values (index 0 - the current time, 1 - the today time and 2 - the total time)
 	 */
 	void updateTimeFields(List<String> timeList);
 
