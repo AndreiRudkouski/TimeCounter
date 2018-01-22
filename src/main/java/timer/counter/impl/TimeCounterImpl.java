@@ -88,22 +88,27 @@ public class TimeCounterImpl implements TimeCounter
 			String[] strings = tmp.split(DELIMITER_SLASH);
 			if (strings.length != QTY_OF_SETTING_PARAMETERS_IN_LINE)
 			{
-				convertDataAndAddToContainerStorage(strings);
+				convertDataToTimeAndAddToContainer(strings);
 			}
 			else
 			{
-				container.setApplication(convertDataToFile(strings));
-				container.setAutoChangeDate(convertDataToAutoChangeDateSetting(strings));
-				container.setRelaxReminder(convertDataToRelaxReminderSetting(strings));
+				convertDataToSettingsAndAddToContainer(strings);
 			}
 		}
 	}
 
-	private void convertDataAndAddToContainerStorage(String[] strings)
+	private void convertDataToTimeAndAddToContainer(String[] strings)
 	{
 		container.putDateAndTimeToStorage(
 				LocalDate.of(Integer.parseInt(strings[2]), Integer.parseInt(strings[1]), Integer.parseInt(strings[0])),
 				Long.parseLong(strings[3]));
+	}
+
+	private void convertDataToSettingsAndAddToContainer(String[] strings)
+	{
+		container.setApplication(convertDataToFile(strings));
+		container.setAutoChangeDate(convertDataToAutoChangeDateSetting(strings));
+		container.setRelaxReminder(convertDataToRelaxReminderSetting(strings));
 	}
 
 	private File convertDataToFile(String[] strings)
