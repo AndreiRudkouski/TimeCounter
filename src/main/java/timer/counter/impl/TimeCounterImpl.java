@@ -21,7 +21,7 @@ import main.java.timer.timer.Timer;
 
 public class TimeCounterImpl implements TimeCounter
 {
-	private static final int SEC_TO_RELAX = 5;
+	private static final int SEC_TO_RELAX = 3000;
 	private static final int QTY_OF_SETTING_PARAMETERS_IN_LINE = 3;
 
 	private static final boolean DEFAULT_AUTO_CHANGE_DATE = true;
