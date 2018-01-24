@@ -1,24 +1,24 @@
 package main.java.timer.timer;
 
 /**
- * This interface identifies methods for executing any {@link Runnable} command every second.
+ * This interface identifies methods for executing any {@link Runnable} command.
  */
 public interface Timer
 {
 	/**
-	 * Starts or resumes the execution.
+	 * Starts or resumes the command execution.
 	 */
 	void start();
 
 	/**
-	 * Pauses the execution.
+	 * Pauses the command execution.
 	 */
 	void stop();
 
 	/**
-	 * Checks if the execution is running.
+	 * Checks if the execution of command is running.
 	 *
-	 * @return true if the execution is running otherwise false
+	 * @return true if the command execution is running otherwise false
 	 */
 	boolean isRunning();
 

@@ -2,23 +2,14 @@ package main.java.command.impl;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Locale;
 
 import main.java.command.Command;
-import main.java.command.CommandName;
 import main.java.logger.MainLogger;
 
 public class CommandImpl implements Command
 {
 	@Override
-	public boolean executeCommand(String commandName)
-	{
-		CommandName command = CommandName.valueOf(commandName.toUpperCase(Locale.ENGLISH));
-		return executeMethod(command);
-
-	}
-
-	private boolean executeMethod(CommandName command)
+	public boolean executeCommand(Command.Name command)
 	{
 		Object executor = command.getExecutor();
 		Method method = command.getMethod();

@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import main.java.command.Command;
-import main.java.command.CommandName;
 import main.java.initApp.annotation.Setter;
 import main.java.loader.LoadSaveToFile;
 import main.java.logger.MainLogger;
@@ -22,7 +21,7 @@ import main.java.timer.timer.Timer;
 
 public class TimeCounterImpl implements TimeCounter
 {
-	private static final int SEC_TO_RELAX = 3000;
+	private static final int SEC_TO_RELAX = 5;
 	private static final int QTY_OF_SETTING_PARAMETERS_IN_LINE = 3;
 
 	private static final boolean DEFAULT_AUTO_CHANGE_DATE = true;
@@ -133,7 +132,7 @@ public class TimeCounterImpl implements TimeCounter
 
 	private void stopOrIncreaseTime()
 	{
-		if (isTimerShouldBeStopped())
+		if (shouldTimerStop())
 		{
 			stopTimer();
 		}
@@ -145,7 +144,7 @@ public class TimeCounterImpl implements TimeCounter
 		}
 	}
 
-	private boolean isTimerShouldBeStopped()
+	private boolean shouldTimerStop()
 	{
 		return (container.getApplication() != null && container.isRunningApplication())
 				&& !isApplicationProcessAlive();
@@ -173,7 +172,7 @@ public class TimeCounterImpl implements TimeCounter
 		if (container.getCurrentTimeValue() % SEC_TO_RELAX == 0 && container.isRelaxReminder())
 		{
 			stopTimer();
-			if (!command.executeCommand(CommandName.VIEW_IS_CHOSEN_RELAX.name()))
+			if (!command.executeCommand(Command.Name.VIEW_IS_CHOSEN_RELAX))
 			{
 				startTimer();
 			}
@@ -195,7 +194,7 @@ public class TimeCounterImpl implements TimeCounter
 			if (isProcessWithSameNameAlreadyRun(applicationName))
 			{
 				container.setIsRunningApplication(command.executeCommand(
-						CommandName.VIEW_IS_USER_AGREE_TO_CONNECT_SELECTED_APP.name()));
+						Command.Name.VIEW_IS_USER_AGREE_TO_CONNECT_SELECTED_APP));
 				if (container.isRunningApplication())
 				{
 					closeAllProcessesWithSameNames(applicationName);

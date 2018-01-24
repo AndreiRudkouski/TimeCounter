@@ -13,7 +13,7 @@ import main.java.timer.container.impl.TimeAndSettingsContainerImpl;
 import main.java.timer.counter.TimeCounter;
 import main.java.timer.counter.impl.TimeCounterImpl;
 import main.java.timer.timer.Timer;
-import main.java.timer.timer.impl.SecondTimer;
+import main.java.timer.timer.impl.SecondsTimer;
 import main.java.viewer.gui.GuiView;
 import main.java.viewer.gui.impl.GuiViewBySwing;
 import main.java.viewer.manager.ViewManager;
@@ -70,6 +70,6 @@ public class AppConfig
 	@Instance
 	public Timer secondTimer()
 	{
-		return new SecondTimer();
+		return new SecondsTimer();
 	}
 }

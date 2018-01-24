@@ -21,6 +21,10 @@ public class ViewManagerImpl implements ViewManager
 	public static final String TIME_FORMAT_WITH_DAY =
 			"%1$02d" + TIME_DELIMITER + "%2$02d" + TIME_DELIMITER + "%3$02d" + TIME_DELIMITER + "%4$02d";
 
+	private static final int SECONDS_PER_MINUTE = 60;
+	private static final int SECONDS_PER_HOUR = SECONDS_PER_MINUTE * 60;
+	private static final int SECONDS_PER_DAY = SECONDS_PER_HOUR * 24;
+
 	@Setter
 	private Command command;
 	@Setter
@@ -49,11 +53,11 @@ public class ViewManagerImpl implements ViewManager
 	@Override
 	public void actionPerformed(ActionEvent event)
 	{
-		executeCommand(event.getActionCommand());
+		executeCommand(Command.Name.valueOf(event.getActionCommand()));
 	}
 
 	@Override
-	public boolean executeCommand(String commandName)
+	public boolean executeCommand(Command.Name commandName)
 	{
 		return command.executeCommand(commandName);
 	}
@@ -69,11 +73,12 @@ public class ViewManagerImpl implements ViewManager
 
 	private String convertTimeToViewFormat(long sec)
 	{
-		long hour = sec / (60 * 60);
-		long day = hour / 24;
-		long min = (sec - hour * 60 * 60) / 60;
-		sec = sec - hour * 60 * 60 - min * 60;
-		hour = hour - day * 24;
+		long day = sec / SECONDS_PER_DAY;
+		sec = sec - day * SECONDS_PER_DAY;
+		long hour = sec / SECONDS_PER_HOUR;
+		sec = sec - hour * SECONDS_PER_HOUR;
+		long min = sec / SECONDS_PER_MINUTE;
+		sec = sec - min * SECONDS_PER_MINUTE;
 		if (day != 0)
 		{
 			return String.format(TIME_FORMAT_WITH_DAY, day, hour, min, sec);
@@ -112,14 +117,14 @@ public class ViewManagerImpl implements ViewManager
 
 	private long convertViewFormatToTime(String timeStr)
 	{
-		long[] tmp = Arrays.stream(timeStr.split(TIME_DELIMITER)).mapToLong(Long::parseLong).toArray();
-		if (tmp.length == 3)
+		long[] seconds = Arrays.stream(timeStr.split(TIME_DELIMITER)).mapToLong(Long::parseLong).toArray();
+		if (seconds.length == 3)
 		{
-			return tmp[0] * 60 * 60 + tmp[1] * 60 + tmp[2];
+			return seconds[0] * SECONDS_PER_HOUR + seconds[1] * SECONDS_PER_MINUTE + seconds[2];
 		}
 		else
 		{
-			return tmp[0] * 24 * 60 * 60 + tmp[0] * 60 * 60 + tmp[1] * 60 + tmp[2];
+			return seconds[0] * SECONDS_PER_DAY + seconds[0] * SECONDS_PER_HOUR + seconds[1] * SECONDS_PER_MINUTE + seconds[2];
 		}
 	}
 

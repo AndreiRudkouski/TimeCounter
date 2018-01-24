@@ -2,7 +2,7 @@ package main.java.viewer.manager;
 
 import java.awt.event.ActionListener;
 
-import main.java.command.CommandName;
+import main.java.command.Command;
 import main.java.observer.TimeObservable;
 import main.java.observer.TimeObserver;
 
@@ -32,10 +32,10 @@ public interface ViewManager extends TimeObserver, TimeObservable, ActionListene
 	void createView();
 
 	/**
-	 * Executes command with name witch contains in {@link CommandName}
+	 * Executes command with name witch contains in {@link Command.Name}
 	 *
 	 * @param commandName name of command
 	 * @return result of command execution
 	 */
-	boolean executeCommand(String commandName);
+	boolean executeCommand(Command.Name commandName);
 }

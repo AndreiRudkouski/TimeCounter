@@ -15,7 +15,7 @@ import java.util.ResourceBundle;
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
-import main.java.command.CommandName;
+import main.java.command.Command;
 import main.java.initApp.annotation.Setter;
 import main.java.logger.MainLogger;
 import main.java.viewer.gui.GuiView;
@@ -106,10 +106,10 @@ public class GuiViewBySwing implements GuiView
 		countingMenu = new JMenu();
 		loadDataCountingMenu = new JMenuItem();
 		loadDataCountingMenu.addActionListener(viewManager);
-		loadDataCountingMenu.setActionCommand(CommandName.TIME_COUNTER_LOAD_DATA.name());
+		loadDataCountingMenu.setActionCommand(Command.Name.TIME_COUNTER_LOAD_DATA.name());
 		saveDataCountingMenu = new JMenuItem();
 		saveDataCountingMenu.addActionListener(viewManager);
-		saveDataCountingMenu.setActionCommand(CommandName.TIME_COUNTER_SAVE_DATA.name());
+		saveDataCountingMenu.setActionCommand(Command.Name.TIME_COUNTER_SAVE_DATA.name());
 		countingMenu.add(loadDataCountingMenu);
 		countingMenu.add(saveDataCountingMenu);
 		return countingMenu;
@@ -271,7 +271,7 @@ public class GuiViewBySwing implements GuiView
 		@Override
 		public void windowClosing(WindowEvent we)
 		{
-			if (viewManager.executeCommand(CommandName.TIME_COUNTER_IS_CHANGED_TIME_OR_SETTINGS.name()))
+			if (viewManager.executeCommand(Command.Name.TIME_COUNTER_IS_CHANGED_TIME_OR_SETTINGS))
 			{
 				int select = showAndGetResultOfConfirmDialogWindowWithTitleAndMessage("title_save", "message_save");
 				if (select != JOptionPane.YES_OPTION && select != JOptionPane.NO_OPTION)
@@ -280,10 +280,10 @@ public class GuiViewBySwing implements GuiView
 				}
 				if (select == JOptionPane.YES_OPTION)
 				{
-					viewManager.executeCommand(CommandName.TIME_COUNTER_SAVE_DATA.name());
+					viewManager.executeCommand(Command.Name.TIME_COUNTER_SAVE_DATA);
 				}
 			}
-			viewManager.executeCommand(CommandName.TIME_COUNTER_CLOSE_APP.name());
+			viewManager.executeCommand(Command.Name.TIME_COUNTER_CLOSE_APP);
 			System.exit(0);
 		}
 
