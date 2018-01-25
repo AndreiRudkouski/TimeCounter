@@ -19,6 +19,9 @@ import main.java.logger.MainLogger;
 
 public final class Initializer
 {
+	private static final String EMPTY_STRING = "";
+	private static final String SET_VALUE = "set";
+
 	private static final Map<String, Object> CLASS_INSTANCES = new HashMap<>();
 	private static final Initializer INSTANCE = new Initializer(AppConfig.class);
 
@@ -76,7 +79,7 @@ public final class Initializer
 			if (method.isAnnotationPresent(Instance.class))
 			{
 				Instance instanceAnnotation = method.getAnnotation(Instance.class);
-				if (instanceAnnotation.name().equals(""))
+				if (instanceAnnotation.name().equals(EMPTY_STRING))
 				{
 					CLASS_INSTANCES.put(method.getReturnType().getSimpleName(),
 							method.invoke(classInstance.getValue()));
@@ -126,14 +129,14 @@ public final class Initializer
 	private static void addSetterAnnotatedMethods(List<Method> annotatedMethods, Class clazz)
 	{
 		annotatedMethods.addAll(Arrays.stream(clazz.getDeclaredMethods())
-				.filter(m -> m.isAnnotationPresent(Setter.class) && m.getName().startsWith("set"))
+				.filter(m -> m.isAnnotationPresent(Setter.class) && m.getName().startsWith(SET_VALUE))
 				.collect(Collectors.toList()));
 	}
 
 	private static void addSetterAnnotatedFieldsAndMethodsFromAbstractSuperClasses(List<Field> annotatedFields,
 			List<Method> annotatedMethods, Class clazz)
 	{
-		while (!clazz.getSuperclass().getSimpleName().equals("Object") && Modifier.isAbstract(
+		while (!clazz.getSuperclass().getSimpleName().equals(Object.class.getSimpleName()) && Modifier.isAbstract(
 				clazz.getSuperclass().getModifiers()))
 		{
 			clazz = clazz.getSuperclass();
@@ -148,7 +151,7 @@ public final class Initializer
 		{
 			Setter setterAnnotation = field.getAnnotation(Setter.class);
 			field.setAccessible(true);
-			if (setterAnnotation.name().equals(""))
+			if (setterAnnotation.name().equals(EMPTY_STRING))
 			{
 				field.set(instance, CLASS_INSTANCES.get(field.getType().getSimpleName()));
 			}
@@ -165,7 +168,7 @@ public final class Initializer
 		for (Method method : annotatedMethods)
 		{
 			Setter setterAnnotation = method.getAnnotation(Setter.class);
-			if (setterAnnotation.name().equals(""))
+			if (setterAnnotation.name().equals(EMPTY_STRING))
 			{
 				method.invoke(instance, CLASS_INSTANCES.get(method.getParameterTypes()[0].getSimpleName()));
 			}
