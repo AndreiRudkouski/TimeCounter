@@ -41,10 +41,7 @@ public final class Initializer
 			createConfigClassInstances(configClasses);
 			for (Map.Entry<String, Object> classInstance : CLASS_INSTANCES.entrySet())
 			{
-				if (isAnnotatedAsConfig(classInstance))
-				{
-					createInstancesOfAnnotatedMethods(classInstance);
-				}
+				createInstancesOfAnnotatedMethods(classInstance);
 			}
 		}
 		catch (InstantiationException | IllegalAccessException | InvocationTargetException e)
@@ -58,13 +55,15 @@ public final class Initializer
 	{
 		for (Class configClass : configClasses)
 		{
-			CLASS_INSTANCES.put(configClass.getSimpleName(), configClass.newInstance());
+			if (isAnnotatedAsConfig(configClass))
+			{
+				CLASS_INSTANCES.put(configClass.getSimpleName(), configClass.newInstance());
+			}
 		}
 	}
 
-	private static boolean isAnnotatedAsConfig(Map.Entry<String, Object> classInstance)
+	private static boolean isAnnotatedAsConfig(Class clazz)
 	{
-		Class clazz = classInstance.getValue().getClass();
 		return clazz.isAnnotationPresent(Config.class);
 	}
 
