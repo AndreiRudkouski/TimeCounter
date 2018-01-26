@@ -22,7 +22,6 @@ public interface Command
 
 	/**
 	 * Enumeration of command names
-	 *
 	 */
 	enum Name
 	{
@@ -39,7 +38,7 @@ public interface Command
 
 		Name(Class clazz, String methodName)
 		{
-			executor = Initializer.getClassInstanceByName(clazz.getSimpleName());
+			executor = Initializer.instance().getClassInstanceByName(clazz.getSimpleName());
 			method = Arrays.stream(executor.getClass().getMethods()).filter(
 					m -> m.getName().equalsIgnoreCase(methodName)).findFirst().get();
 			isBooleanReturn = method.getReturnType().getSimpleName().equalsIgnoreCase(Boolean.class.getSimpleName());

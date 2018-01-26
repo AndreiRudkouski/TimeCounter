@@ -179,7 +179,12 @@ public final class Initializer
 		}
 	}
 
-	public static Object getClassInstanceByName(String name)
+	public static Initializer instance()
+	{
+		return INSTANCE;
+	}
+
+	public Object getClassInstanceByName(String name)
 	{
 		return CLASS_INSTANCES.get(name);
 	}

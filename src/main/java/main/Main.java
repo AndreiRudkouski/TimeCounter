@@ -8,8 +8,10 @@ public class Main
 {
 	public static void main(String[] args)
 	{
-		TimeCounter timeCounter = (TimeCounter) Initializer.getClassInstanceByName(TimeCounter.class.getSimpleName());
-		ViewManager view = (ViewManager) Initializer.getClassInstanceByName(ViewManager.class.getSimpleName());
+		TimeCounter timeCounter = (TimeCounter) Initializer.instance().getClassInstanceByName(
+				TimeCounter.class.getSimpleName());
+		ViewManager view = (ViewManager) Initializer.instance().getClassInstanceByName(
+				ViewManager.class.getSimpleName());
 		timeCounter.addTimeObserver(view);
 		view.addTimeObserver(timeCounter);
 		view.createView();
