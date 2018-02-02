@@ -1,4 +1,4 @@
-package main.java.timer.container;
+package main.java.data.container;
 
 import java.io.File;
 import java.time.LocalDate;
@@ -7,7 +7,7 @@ import java.util.Set;
 /**
  * This interface identifies methods for any container which contains time and settings.
  */
-public interface TimeAndSettingsContainer
+public interface DataContainer
 {
 	/**
 	 * Returns the value of the current time.
@@ -107,60 +107,116 @@ public interface TimeAndSettingsContainer
 	Set<LocalDate> getDatesFromStorage();
 
 	/**
-	 * Returns the value of 'AutoChangeDate' flag.
+	 * Returns the value of 'CurrentAutoChangeDate' flag.
 	 *
 	 * @return value of the flag
 	 */
-	boolean isAutoChangeDate();
+	boolean getCurrentAutoChangeDateFlag();
 
 	/**
-	 * Sets the value to 'AutoChangeDate' flag.
+	 * Sets the value to 'CurrentAutoChangeDate' flag.
 	 *
-	 * @param autoChangeDate value to set
+	 * @param currentAutoChangeDate value to set
 	 */
-	void setAutoChangeDate(boolean autoChangeDate);
+	void setCurrentAutoChangeDateFlag(boolean currentAutoChangeDate);
 
 	/**
-	 * Returns the value of 'RelaxReminder' flag.
-	 *
-	 * @return value of the flag
-	 */
-	boolean isRelaxReminder();
-
-	/**
-	 * Sets the value to 'RelaxReminder' flag.
-	 *
-	 * @param relaxReminder value to set
-	 */
-	void setRelaxReminder(boolean relaxReminder);
-
-	/**
-	 * Returns the value of 'RunningApplication' flag.
+	 * Returns the value of 'CurrentRelaxReminder' flag.
 	 *
 	 * @return value of the flag
 	 */
-	boolean isRunningApplication();
+	boolean getCurrentRelaxReminderFlag();
 
 	/**
-	 * Sets the value to 'RunningApplication' flag.
+	 * Sets the value to 'CurrentRelaxReminder' flag.
 	 *
-	 * @param isRunningApplication value to set
+	 * @param currentRelaxReminder value to set
 	 */
-	void setIsRunningApplication(boolean isRunningApplication);
+	void setCurrentRelaxReminderFlag(boolean currentRelaxReminder);
 
 	/**
-	 * Returns the application from the container.
+	 * Returns the value of 'CurrentRunningApplication' flag.
+	 *
+	 * @return value of the flag
+	 */
+	boolean getCurrentRunningApplicationFlag();
+
+	/**
+	 * Sets the value to 'CurrentRunningApplication' flag.
+	 *
+	 * @param currentRunningApplication value to set
+	 */
+	void setCurrentRunningApplicationFlag(boolean currentRunningApplication);
+
+	/**
+	 * Returns the current application from the container.
 	 *
 	 * @return application
 	 */
-	File getApplication();
+	File getCurrentApplication();
 
 	/**
-	 * Sets the application to the container.
+	 * Sets the current application to the container.
 	 *
-	 * @param application to sets
+	 * @param currentApplication to sets
 	 */
-	void setApplication(File application);
+	void setCurrentApplication(File currentApplication);
+
+	/**
+	 * Returns the value of 'LoadedAutoChangeDate' flag.
+	 *
+	 * @return value of the flag
+	 */
+	boolean getLoadedAutoChangeDateFlag();
+
+	/**
+	 * Sets the value to 'LoadedAutoChangeDate' flag.
+	 *
+	 * @param loadedAutoChangeDate value to set
+	 */
+	void setLoadedAutoChangeDateFlag(boolean loadedAutoChangeDate);
+
+	/**
+	 * Returns the value of 'LoadedRelaxReminder' flag.
+	 *
+	 * @return value of the flag
+	 */
+	boolean getLoadedRelaxReminderFlag();
+
+	/**
+	 * Sets the value to 'LoadedRelaxReminder' flag.
+	 *
+	 * @param loadedRelaxReminder value to set
+	 */
+	void setLoadedRelaxReminderFlag(boolean loadedRelaxReminder);
+
+	/**
+	 * Returns the value of 'LoadedRunningApplication' flag.
+	 *
+	 * @return value of the flag
+	 */
+	boolean getLoadedRunningApplicationFlag();
+
+	/**
+	 * Sets the value to 'LoadedRunningApplication' flag.
+	 *
+	 * @param loadedRunningApplication value to set
+	 */
+	void setLoadedRunningApplicationFlag(boolean loadedRunningApplication);
+
+	/**
+	 * Returns the loaded application from the container.
+	 *
+	 * @return application
+	 */
+	File getLoadedApplication();
+
+	/**
+	 * Sets the loaded application to the container.
+	 *
+	 * @param loadedApplication to sets
+	 */
+	void setLoadedApplication(File loadedApplication);
 
 	/**
 	 * Returns the application process from the container.

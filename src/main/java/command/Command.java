@@ -25,7 +25,7 @@ public interface Command
 	 */
 	enum Name
 	{
-		TIME_COUNTER_LOAD_DATA(TimeCounter.class, "loadDataAndInitTimer"),
+		TIME_COUNTER_LOAD_DATA(TimeCounter.class, "loadData"),
 		TIME_COUNTER_SAVE_DATA(TimeCounter.class, "saveData"),
 		VIEW_IS_CHOSEN_RELAX(ViewManager.class, "isChosenRelax"),
 		VIEW_IS_USER_AGREE_TO_CONNECT_SELECTED_APP(ViewManager.class, "isUserAgreeToConnectSelectedApplication"),

@@ -1,4 +1,4 @@
-package main.java.loader.impl;
+package main.java.data.loadSave.impl;
 
 import java.io.File;
 import java.io.IOException;
@@ -10,16 +10,20 @@ import java.util.Base64;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import main.java.data.converter.DataConverter;
+import main.java.data.loadSave.LoadSaveToFile;
 import main.java.initApp.annotation.Setter;
-import main.java.loader.LoadSaveToFile;
 import main.java.logger.MainLogger;
 
 public class LoadSaveToFileImpl implements LoadSaveToFile
 {
+	@Setter
+	private DataConverter converter;
+
 	private File file;
 
 	@Override
-	public List<String> loadData()
+	public void loadAndInitData()
 	{
 		List<String> result = new ArrayList<>();
 		if (file.exists() && !file.isDirectory())
@@ -33,7 +37,7 @@ public class LoadSaveToFileImpl implements LoadSaveToFile
 				MainLogger.getLogger().severe(MainLogger.getStackTrace(e));
 			}
 		}
-		return result;
+		converter.convertDataAndInitTimeContainer(result);
 	}
 
 	private String decode(String output)
@@ -46,8 +50,9 @@ public class LoadSaveToFileImpl implements LoadSaveToFile
 	}
 
 	@Override
-	public void saveData(List<String> dataToSave)
+	public void saveData()
 	{
+		List<String> dataToSave = converter.convertDataFromTimeContainer();
 		try
 		{
 			Files.write(Paths.get(file.getName()), (Iterable<String>) dataToSave.stream().map(this::encode)::iterator);

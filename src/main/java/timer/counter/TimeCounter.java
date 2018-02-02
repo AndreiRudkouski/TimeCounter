@@ -11,7 +11,7 @@ public interface TimeCounter extends TimeObserver, TimeObservable
 	/**
 	 * Loads data from the saved file.
 	 */
-	void loadDataAndInitTimer();
+	void loadData();
 
 	/**
 	 * Saves data to the saved file.

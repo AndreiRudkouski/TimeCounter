@@ -15,6 +15,6 @@ public class Main
 		timeCounter.addTimeObserver(view);
 		view.addTimeObserver(timeCounter);
 		view.createView();
-		timeCounter.loadDataAndInitTimer();
+		timeCounter.loadData();
 	}
 }

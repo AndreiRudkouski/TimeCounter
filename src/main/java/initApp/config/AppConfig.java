@@ -4,12 +4,14 @@ import java.io.File;
 
 import main.java.command.Command;
 import main.java.command.impl.CommandImpl;
+import main.java.data.container.DataContainer;
+import main.java.data.container.impl.DataContainerImpl;
+import main.java.data.converter.DataConverter;
+import main.java.data.converter.impl.DataConverterImpl;
+import main.java.data.loadSave.LoadSaveToFile;
+import main.java.data.loadSave.impl.LoadSaveToFileImpl;
 import main.java.initApp.annotation.Config;
 import main.java.initApp.annotation.Instance;
-import main.java.loader.LoadSaveToFile;
-import main.java.loader.impl.LoadSaveToFileImpl;
-import main.java.timer.container.TimeAndSettingsContainer;
-import main.java.timer.container.impl.TimeAndSettingsContainerImpl;
 import main.java.timer.counter.TimeCounter;
 import main.java.timer.counter.impl.TimeCounterImpl;
 import main.java.timer.timer.Timer;
@@ -32,9 +34,15 @@ public class AppConfig
 	}
 
 	@Instance
-	public TimeAndSettingsContainer timeAndSettingsContainer()
+	public DataContainer timeAndSettingsContainer()
 	{
-		return new TimeAndSettingsContainerImpl();
+		return new DataContainerImpl();
+	}
+
+	@Instance
+	public DataConverter converter()
+	{
+		return new DataConverterImpl();
 	}
 
 	@Instance

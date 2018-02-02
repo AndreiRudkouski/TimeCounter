@@ -11,30 +11,24 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import main.java.command.Command;
+import main.java.data.container.DataContainer;
+import main.java.data.loadSave.LoadSaveToFile;
 import main.java.initApp.annotation.Setter;
-import main.java.loader.LoadSaveToFile;
 import main.java.logger.MainLogger;
 import main.java.observer.TimeObserver;
-import main.java.timer.container.TimeAndSettingsContainer;
 import main.java.timer.counter.TimeCounter;
 import main.java.timer.timer.Timer;
 
 public class TimeCounterImpl implements TimeCounter
 {
 	private static final int SEC_TO_RELAX = 3000;
-	private static final int QTY_OF_SETTING_PARAMETERS_IN_LINE = 3;
 
-	private static final boolean DEFAULT_AUTO_CHANGE_DATE = true;
-	private static final boolean DEFAULT_RELAX_REMINDER = true;
-	private static final boolean DEFAULT_IS_RUNNING_APPLICATION = true;
-
-	private static final String DELIMITER_SLASH = "/";
 	private static final String DELIMITER_SPACE = " ";
 	private static final String TASK_LIST_COMMAND = "tasklist";
 	private static final String TASK_KILL_COMMAND = "taskkill /IM ";
 
 	@Setter
-	private TimeAndSettingsContainer container;
+	private DataContainer container;
 	@Setter
 	private Command command;
 	@Setter
@@ -45,89 +39,15 @@ public class TimeCounterImpl implements TimeCounter
 	private List<TimeObserver> observers = new ArrayList<>();
 
 	@Override
-	public void loadDataAndInitTimer()
+	public void loadData()
 	{
-		loadDataFromFile();
+		saver.loadAndInitData();
 		if (!timer.hasCommand())
 		{
 			timer.setCommand(this::stopOrIncreaseTime);
 		}
-	}
-
-	private void loadDataFromFile()
-	{
-		setDefaultTime();
-		setDefaultSettings();
-
-		List<String> loadData = saver.loadData();
-		convertAndSetDataFromList(loadData);
-
 		notifyTimeObserversAboutTime();
 		notifyTimeObserversAboutSettings();
-	}
-
-	private void setDefaultTime()
-	{
-		container.setCurrentTimeValue(0);
-		container.setTodayTimeValue(0);
-		container.setTotalTimeValue(0);
-	}
-
-	private void setDefaultSettings()
-	{
-		container.setAutoChangeDate(DEFAULT_AUTO_CHANGE_DATE);
-		container.setRelaxReminder(DEFAULT_RELAX_REMINDER);
-		container.setIsRunningApplication(DEFAULT_IS_RUNNING_APPLICATION);
-	}
-
-	private void convertAndSetDataFromList(List<String> loadedData)
-	{
-		for (String tmp : loadedData)
-		{
-			String[] strings = tmp.split(DELIMITER_SLASH);
-			if (strings.length != QTY_OF_SETTING_PARAMETERS_IN_LINE)
-			{
-				convertDataToTimeAndAddToContainer(strings);
-			}
-			else
-			{
-				convertDataToSettingsAndAddToContainer(strings);
-			}
-		}
-	}
-
-	private void convertDataToTimeAndAddToContainer(String[] strings)
-	{
-		container.putDateAndTimeToStorage(
-				LocalDate.of(Integer.parseInt(strings[2]), Integer.parseInt(strings[1]), Integer.parseInt(strings[0])),
-				Long.parseLong(strings[3]));
-	}
-
-	private void convertDataToSettingsAndAddToContainer(String[] strings)
-	{
-		container.setApplication(convertDataToFile(strings));
-		container.setAutoChangeDate(convertDataToAutoChangeDateSetting(strings));
-		container.setRelaxReminder(convertDataToRelaxReminderSetting(strings));
-	}
-
-	private File convertDataToFile(String[] strings)
-	{
-		File loadedFile = null;
-		if (strings[0] != null && !strings[0].isEmpty())
-		{
-			loadedFile = new File(strings[0]);
-		}
-		return loadedFile;
-	}
-
-	private boolean convertDataToAutoChangeDateSetting(String[] strings)
-	{
-		return Boolean.parseBoolean(strings[1]);
-	}
-
-	private boolean convertDataToRelaxReminderSetting(String[] strings)
-	{
-		return Boolean.parseBoolean(strings[2]);
 	}
 
 	private void stopOrIncreaseTime()
@@ -146,7 +66,7 @@ public class TimeCounterImpl implements TimeCounter
 
 	private boolean shouldTimerStop()
 	{
-		return (container.getApplication() != null && container.isRunningApplication())
+		return (container.getCurrentApplication() != null && container.getCurrentRunningApplicationFlag())
 				&& !isApplicationProcessAlive();
 	}
 
@@ -169,7 +89,7 @@ public class TimeCounterImpl implements TimeCounter
 
 	private void checkRelaxTimeAndStopTimerIfNeeded()
 	{
-		if (container.getCurrentTimeValue() % SEC_TO_RELAX == 0 && container.isRelaxReminder())
+		if (container.getCurrentTimeValue() % SEC_TO_RELAX == 0 && container.getCurrentRelaxReminderFlag())
 		{
 			stopTimer();
 			if (!command.executeCommand(Command.Name.VIEW_IS_CHOSEN_RELAX))
@@ -188,14 +108,14 @@ public class TimeCounterImpl implements TimeCounter
 
 	private void startApplicationProcess()
 	{
-		if (!isApplicationProcessAlive() && container.getApplication() != null)
+		if (!isApplicationProcessAlive() && container.getCurrentApplication() != null)
 		{
-			String applicationName = container.getApplication().getName();
+			String applicationName = container.getCurrentApplication().getName();
 			if (isProcessWithSameNameAlreadyRun(applicationName))
 			{
-				container.setIsRunningApplication(command.executeCommand(
+				container.setCurrentRunningApplicationFlag(command.executeCommand(
 						Command.Name.VIEW_IS_USER_AGREE_TO_CONNECT_SELECTED_APP));
-				if (container.isRunningApplication())
+				if (container.getCurrentRunningApplicationFlag())
 				{
 					closeAllProcessesWithSameNames(applicationName);
 				}
@@ -249,7 +169,8 @@ public class TimeCounterImpl implements TimeCounter
 	{
 		try
 		{
-			container.setApplicationProcess(Runtime.getRuntime().exec(container.getApplication().getAbsolutePath()));
+			container.setApplicationProcess(
+					Runtime.getRuntime().exec(container.getCurrentApplication().getAbsolutePath()));
 		}
 		catch (IOException e)
 		{
@@ -269,7 +190,7 @@ public class TimeCounterImpl implements TimeCounter
 
 	private void changeDate()
 	{
-		if (container.isAutoChangeDate())
+		if (container.getCurrentAutoChangeDateFlag())
 		{
 			saveData();
 			container.setCurrentTimeValue(0);
@@ -281,30 +202,7 @@ public class TimeCounterImpl implements TimeCounter
 	@Override
 	public void saveData()
 	{
-		container.putDateAndTimeToStorage(container.getTodayDate(), container.getTodayTimeValue());
-		saveDataToFile();
-	}
-
-	private void saveDataToFile()
-	{
-		List<String> dataToSave = new ArrayList<>();
-		convertSettingsAndAddToList(dataToSave);
-		convertTimeAndAddToList(dataToSave);
-		saver.saveData(dataToSave);
-	}
-
-	private void convertSettingsAndAddToList(List<String> dataToSave)
-	{
-		String fileName = container.getApplication() != null ? container.getApplication().getAbsolutePath() : "";
-		dataToSave.add(fileName + DELIMITER_SLASH + container.isAutoChangeDate() + DELIMITER_SLASH
-				+ container.isRelaxReminder());
-	}
-
-	private void convertTimeAndAddToList(List<String> dataToSave)
-	{
-		container.getDatesFromStorage().forEach(date -> dataToSave
-				.add(date.getDayOfMonth() + DELIMITER_SLASH + date.getMonthValue() + DELIMITER_SLASH + date.getYear()
-						+ DELIMITER_SLASH + container.getTimeFromStorageByDate(date)));
+		saver.saveData();
 	}
 
 	@Override
@@ -332,34 +230,21 @@ public class TimeCounterImpl implements TimeCounter
 
 	private boolean isChangedSettings()
 	{
-		List<String> loadData = saver.loadData();
-		for (String tmp : loadData)
-		{
-			String[] strings = tmp.split(DELIMITER_SLASH);
-			if (strings.length == QTY_OF_SETTING_PARAMETERS_IN_LINE)
-			{
-				File loadedFile = convertDataToFile(strings);
-				boolean loadedAutoChangeDate = convertDataToAutoChangeDateSetting(strings);
-				boolean loadedRelaxReminder = convertDataToRelaxReminderSetting(strings);
-				return !isEqualsCurrentAndLoadedSettings(loadedFile, loadedAutoChangeDate, loadedRelaxReminder);
-			}
-		}
-		return isEqualsCurrentAndDefaultSettings();
+		return !(isEqualsCurrentAndLoadedApplication() && isEqualsCurrentAndLoadedSettings());
 	}
 
-	private boolean isEqualsCurrentAndLoadedSettings(File loadedFile, boolean loadedAutoChangeDate,
-			boolean loadedRelaxReminder)
+	private boolean isEqualsCurrentAndLoadedApplication()
 	{
-		return ((container.getApplication() != null && container.getApplication().equals(loadedFile))
-				|| (container.getApplication() == null && loadedFile == null))
-				&& container.isAutoChangeDate() == loadedAutoChangeDate
-				&& container.isRelaxReminder() == loadedRelaxReminder;
+		return (container.getCurrentApplication() != null && container.getCurrentApplication().equals(
+				container.getLoadedApplication()))
+				|| (container.getCurrentApplication() == null && container.getLoadedApplication() == null);
 	}
 
-	private boolean isEqualsCurrentAndDefaultSettings()
+	private boolean isEqualsCurrentAndLoadedSettings()
 	{
-		return container.getApplication() != null || container.isAutoChangeDate() != DEFAULT_AUTO_CHANGE_DATE
-				|| container.isRelaxReminder() != DEFAULT_RELAX_REMINDER;
+		return container.getCurrentAutoChangeDateFlag() != container.getLoadedAutoChangeDateFlag()
+				|| container.getCurrentRelaxReminderFlag() != container.getLoadedRelaxReminderFlag()
+				|| container.getCurrentRunningApplicationFlag() != container.getLoadedRunningApplicationFlag();
 	}
 
 	@Override
@@ -380,7 +265,8 @@ public class TimeCounterImpl implements TimeCounter
 	public void notifyTimeObserversAboutSettings()
 	{
 		observers.forEach(obs -> obs
-				.updateSettings(container.isAutoChangeDate(), container.isRelaxReminder(), container.getApplication()));
+				.updateSettings(container.getCurrentAutoChangeDateFlag(), container.getCurrentRelaxReminderFlag(),
+						container.getCurrentApplication()));
 	}
 
 	@Override
@@ -430,16 +316,18 @@ public class TimeCounterImpl implements TimeCounter
 	private void eraseTotalTime()
 	{
 		stopTimer();
-		setDefaultTime();
+		container.setCurrentTimeValue(0);
+		container.setTodayTimeValue(0);
+		container.setTotalTimeValue(0);
 		notifyTimeObserversAboutTime();
 	}
 
 	@Override
 	public void updateSettings(boolean autoChangeDate, boolean relaxReminder, File file)
 	{
-		container.setAutoChangeDate(autoChangeDate);
-		container.setRelaxReminder(relaxReminder);
-		container.setApplication(file);
+		container.setCurrentAutoChangeDateFlag(autoChangeDate);
+		container.setCurrentRelaxReminderFlag(relaxReminder);
+		container.setCurrentApplication(file);
 		notifyTimeObserversAboutSettings();
 	}
 
