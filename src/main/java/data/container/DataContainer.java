@@ -170,7 +170,7 @@ public interface DataContainer
 	boolean getLoadedAutoChangeDateFlag();
 
 	/**
-	 * Sets the value to 'LoadedAutoChangeDate' flag.
+	 * Sets the value to 'LoadedAutoChangeDate' flag and sets the same value to 'CurrentAutoChangeDate' flag too.
 	 *
 	 * @param loadedAutoChangeDate value to set
 	 */
@@ -184,7 +184,7 @@ public interface DataContainer
 	boolean getLoadedRelaxReminderFlag();
 
 	/**
-	 * Sets the value to 'LoadedRelaxReminder' flag.
+	 * Sets the value to 'LoadedRelaxReminder' flag and sets the same value to 'CurrentRelaxReminder' flag too.
 	 *
 	 * @param loadedRelaxReminder value to set
 	 */
@@ -198,7 +198,7 @@ public interface DataContainer
 	boolean getLoadedRunningApplicationFlag();
 
 	/**
-	 * Sets the value to 'LoadedRunningApplication' flag.
+	 * Sets the value to 'LoadedRunningApplication' flag and sets the same value to 'CurrentRunningApplication' flag too.
 	 *
 	 * @param loadedRunningApplication value to set
 	 */
@@ -212,7 +212,7 @@ public interface DataContainer
 	File getLoadedApplication();
 
 	/**
-	 * Sets the loaded application to the container.
+	 * Sets the loaded application to the container and sets the same value to the current application.
 	 *
 	 * @param loadedApplication to sets
 	 */

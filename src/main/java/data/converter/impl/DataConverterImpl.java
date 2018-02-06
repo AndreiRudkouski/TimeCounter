@@ -71,9 +71,9 @@ public class DataConverterImpl implements DataConverter
 
 	private void convertDataToSettingsAndAddToContainer(String[] strings)
 	{
-		container.setCurrentApplication(convertDataToFile(strings));
-		container.setCurrentAutoChangeDateFlag(convertDataToAutoChangeDateSetting(strings));
-		container.setCurrentRelaxReminderFlag(convertDataToRelaxReminderSetting(strings));
+		container.setLoadedApplication(convertDataToFile(strings));
+		container.setLoadedAutoChangeDateFlag(convertDataToAutoChangeDateSetting(strings));
+		container.setLoadedRelaxReminderFlag(convertDataToRelaxReminderSetting(strings));
 	}
 
 	private File convertDataToFile(String[] strings)
@@ -103,6 +103,7 @@ public class DataConverterImpl implements DataConverter
 		List<String> dataToSave = new ArrayList<>();
 		convertSettingsAndAddToList(dataToSave);
 		convertTimeAndAddToList(dataToSave);
+		setCurrentSettingsToLoaded();
 		return dataToSave;
 	}
 
@@ -119,5 +120,13 @@ public class DataConverterImpl implements DataConverter
 		container.getDatesFromStorage().forEach(date -> dataToSave
 				.add(date.getDayOfMonth() + DELIMITER_SLASH + date.getMonthValue() + DELIMITER_SLASH + date.getYear()
 						+ DELIMITER_SLASH + container.getTimeFromStorageByDate(date)));
+	}
+
+	private void setCurrentSettingsToLoaded()
+	{
+		container.setLoadedRunningApplicationFlag(container.getCurrentRunningApplicationFlag());
+		container.setLoadedAutoChangeDateFlag(container.getCurrentAutoChangeDateFlag());
+		container.setLoadedRelaxReminderFlag(container.getCurrentRelaxReminderFlag());
+		container.setLoadedApplication(container.getCurrentApplication());
 	}
 }

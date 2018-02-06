@@ -242,9 +242,9 @@ public class TimeCounterImpl implements TimeCounter
 
 	private boolean isEqualsCurrentAndLoadedSettings()
 	{
-		return container.getCurrentAutoChangeDateFlag() != container.getLoadedAutoChangeDateFlag()
-				|| container.getCurrentRelaxReminderFlag() != container.getLoadedRelaxReminderFlag()
-				|| container.getCurrentRunningApplicationFlag() != container.getLoadedRunningApplicationFlag();
+		return container.getCurrentAutoChangeDateFlag() == container.getLoadedAutoChangeDateFlag()
+				&& container.getCurrentRelaxReminderFlag() == container.getLoadedRelaxReminderFlag()
+				&& container.getCurrentRunningApplicationFlag() == container.getLoadedRunningApplicationFlag();
 	}
 
 	@Override

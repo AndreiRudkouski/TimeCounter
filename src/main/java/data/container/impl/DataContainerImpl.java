@@ -20,7 +20,7 @@ public class DataContainerImpl implements DataContainer
 	private Map<LocalDate, AtomicLong> dateTimeStorage = new HashMap<>();
 	private AtomicBoolean currentAutoChangeDateFlag = new AtomicBoolean();
 	private AtomicBoolean currentRelaxReminderFlag = new AtomicBoolean();
-	private AtomicBoolean currentRunningApplication = new AtomicBoolean();
+	private AtomicBoolean currentRunningApplicationFlag = new AtomicBoolean();
 	private AtomicReference<File> currentApplication = new AtomicReference<>();
 	private AtomicBoolean loadedAutoChangeDateFlag = new AtomicBoolean();
 	private AtomicBoolean loadedRelaxReminderFlag = new AtomicBoolean();
@@ -153,13 +153,13 @@ public class DataContainerImpl implements DataContainer
 	@Override
 	public boolean getCurrentRunningApplicationFlag()
 	{
-		return currentRunningApplication.get();
+		return currentRunningApplicationFlag.get();
 	}
 
 	@Override
-	public void setCurrentRunningApplicationFlag(boolean currentRunningApplication)
+	public void setCurrentRunningApplicationFlag(boolean currentRunningApplicationFlag)
 	{
-		this.currentRunningApplication.set(currentRunningApplication);
+		this.currentRunningApplicationFlag.set(currentRunningApplicationFlag);
 	}
 
 	@Override
@@ -223,6 +223,7 @@ public class DataContainerImpl implements DataContainer
 	public void setLoadedApplication(File loadedApplication)
 	{
 		this.loadedApplication.set(loadedApplication);
+		setCurrentApplication(loadedApplication);
 	}
 
 	@Override
