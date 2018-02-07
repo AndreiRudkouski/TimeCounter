@@ -37,7 +37,7 @@ public class LoadSaveToFileImpl implements LoadSaveToFile
 				MainLogger.getLogger().severe(MainLogger.getStackTrace(e));
 			}
 		}
-		converter.convertDataAndInitTimeContainer(result);
+		converter.convertDataAndSetToContainer(result);
 	}
 
 	private String decode(String output)

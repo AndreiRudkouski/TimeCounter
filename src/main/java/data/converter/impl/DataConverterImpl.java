@@ -5,45 +5,25 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-import main.java.data.container.DataContainer;
+import main.java.data.container.DataContainerHelper;
 import main.java.data.converter.DataConverter;
 import main.java.initApp.annotation.Setter;
 
 public class DataConverterImpl implements DataConverter
 {
-	private static final boolean DEFAULT_AUTO_CHANGE_DATE = true;
-	private static final boolean DEFAULT_RELAX_REMINDER = true;
-	private static final boolean DEFAULT_IS_RUNNING_APPLICATION = true;
-
 	private static final String DELIMITER_SLASH = "/";
 
 	private static final int QTY_OF_SETTING_PARAMETERS_IN_LINE = 3;
 
 	@Setter
-	private DataContainer container;
+	private DataContainerHelper containerHelper;
 
 	@Override
-	public void convertDataAndInitTimeContainer(List<String> loadedData)
+	public void convertDataAndSetToContainer(List<String> loadedData)
 	{
-		setDefaultTime();
-		setDefaultSettings();
-
+		containerHelper.setDefaultTime();
+		containerHelper.setDefaultSettings();
 		convertAndSetDataFromList(loadedData);
-	}
-
-	private void setDefaultTime()
-	{
-		container.setCurrentTimeValue(0);
-		container.setTodayTimeValue(0);
-		container.setTotalTimeValue(0);
-	}
-
-	private void setDefaultSettings()
-	{
-		container.setLoadedAutoChangeDateFlag(DEFAULT_AUTO_CHANGE_DATE);
-		container.setLoadedRelaxReminderFlag(DEFAULT_RELAX_REMINDER);
-		container.setLoadedRunningApplicationFlag(DEFAULT_IS_RUNNING_APPLICATION);
-		container.setLoadedApplication(null);
 	}
 
 	private void convertAndSetDataFromList(List<String> loadedData)
@@ -64,16 +44,16 @@ public class DataConverterImpl implements DataConverter
 
 	private void convertDataToTimeAndAddToContainer(String[] strings)
 	{
-		container.putDateAndTimeToStorage(
+		containerHelper.putDateAndTimeToStorage(
 				LocalDate.of(Integer.parseInt(strings[2]), Integer.parseInt(strings[1]), Integer.parseInt(strings[0])),
 				Long.parseLong(strings[3]));
 	}
 
 	private void convertDataToSettingsAndAddToContainer(String[] strings)
 	{
-		container.setLoadedApplication(convertDataToFile(strings));
-		container.setLoadedAutoChangeDateFlag(convertDataToAutoChangeDateSetting(strings));
-		container.setLoadedRelaxReminderFlag(convertDataToRelaxReminderSetting(strings));
+		containerHelper.initApplication(convertDataToFile(strings));
+		containerHelper.initAutoChangeDateFlag(convertDataToAutoChangeDateSetting(strings));
+		containerHelper.initRelaxReminderFlag(convertDataToRelaxReminderSetting(strings));
 	}
 
 	private File convertDataToFile(String[] strings)
@@ -99,34 +79,24 @@ public class DataConverterImpl implements DataConverter
 	@Override
 	public List<String> convertDataFromTimeContainer()
 	{
-		container.putDateAndTimeToStorage(container.getTodayDate(), container.getTodayTimeValue());
 		List<String> dataToSave = new ArrayList<>();
 		convertSettingsAndAddToList(dataToSave);
 		convertTimeAndAddToList(dataToSave);
-		setCurrentSettingsToLoaded();
 		return dataToSave;
 	}
 
 	private void convertSettingsAndAddToList(List<String> dataToSave)
 	{
 		String fileName =
-				container.getCurrentApplication() != null ? container.getCurrentApplication().getAbsolutePath() : "";
-		dataToSave.add(fileName + DELIMITER_SLASH + container.getCurrentAutoChangeDateFlag() + DELIMITER_SLASH
-				+ container.getCurrentRelaxReminderFlag());
+				containerHelper.getApplication() != null ? containerHelper.getApplication().getAbsolutePath() : "";
+		dataToSave.add(fileName + DELIMITER_SLASH + containerHelper.getAutoChangeDateFlag() + DELIMITER_SLASH
+				+ containerHelper.getRelaxReminderFlag());
 	}
 
 	private void convertTimeAndAddToList(List<String> dataToSave)
 	{
-		container.getDatesFromStorage().forEach(date -> dataToSave
+		containerHelper.getDatesFromStorage().forEach(date -> dataToSave
 				.add(date.getDayOfMonth() + DELIMITER_SLASH + date.getMonthValue() + DELIMITER_SLASH + date.getYear()
-						+ DELIMITER_SLASH + container.getTimeFromStorageByDate(date)));
-	}
-
-	private void setCurrentSettingsToLoaded()
-	{
-		container.setLoadedRunningApplicationFlag(container.getCurrentRunningApplicationFlag());
-		container.setLoadedAutoChangeDateFlag(container.getCurrentAutoChangeDateFlag());
-		container.setLoadedRelaxReminderFlag(container.getCurrentRelaxReminderFlag());
-		container.setLoadedApplication(container.getCurrentApplication());
+						+ DELIMITER_SLASH + containerHelper.getTimeFromStorageByDate(date)));
 	}
 }

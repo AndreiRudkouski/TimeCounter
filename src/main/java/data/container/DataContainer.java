@@ -52,9 +52,11 @@ public interface DataContainer
 	void setTotalTimeValue(long value);
 
 	/**
-	 * Adds one second to the time.
+	 * Adds the given delta to the current time.
+	 *
+	 * @param delta the value to add in seconds
 	 */
-	void increaseTimeBySecond();
+	void increaseCurrentTimeByDelta(long delta);
 
 	/**
 	 * Adds the given delta to the today time.
@@ -100,6 +102,11 @@ public interface DataContainer
 	long getTimeFromStorageByDate(LocalDate date);
 
 	/**
+	 * Erases the storage of date and time.
+	 */
+	void eraseDateAndTimeToStorage();
+
+	/**
 	 * Returns set of dates from storage.
 	 *
 	 * @return set of dates
@@ -116,9 +123,9 @@ public interface DataContainer
 	/**
 	 * Sets the value to 'CurrentAutoChangeDate' flag.
 	 *
-	 * @param currentAutoChangeDate value to set
+	 * @param flag value to set
 	 */
-	void setCurrentAutoChangeDateFlag(boolean currentAutoChangeDate);
+	void setCurrentAutoChangeDateFlag(boolean flag);
 
 	/**
 	 * Returns the value of 'CurrentRelaxReminder' flag.
@@ -130,9 +137,9 @@ public interface DataContainer
 	/**
 	 * Sets the value to 'CurrentRelaxReminder' flag.
 	 *
-	 * @param currentRelaxReminder value to set
+	 * @param flag value to set
 	 */
-	void setCurrentRelaxReminderFlag(boolean currentRelaxReminder);
+	void setCurrentRelaxReminderFlag(boolean flag);
 
 	/**
 	 * Returns the value of 'CurrentRunningApplication' flag.
@@ -144,9 +151,9 @@ public interface DataContainer
 	/**
 	 * Sets the value to 'CurrentRunningApplication' flag.
 	 *
-	 * @param currentRunningApplication value to set
+	 * @param flag value to set
 	 */
-	void setCurrentRunningApplicationFlag(boolean currentRunningApplication);
+	void setCurrentRunningApplicationFlag(boolean flag);
 
 	/**
 	 * Returns the current application from the container.
@@ -172,9 +179,9 @@ public interface DataContainer
 	/**
 	 * Sets the value to 'LoadedAutoChangeDate' flag and sets the same value to 'CurrentAutoChangeDate' flag too.
 	 *
-	 * @param loadedAutoChangeDate value to set
+	 * @param flag value to set
 	 */
-	void setLoadedAutoChangeDateFlag(boolean loadedAutoChangeDate);
+	void setLoadedAutoChangeDateFlag(boolean flag);
 
 	/**
 	 * Returns the value of 'LoadedRelaxReminder' flag.
@@ -186,9 +193,9 @@ public interface DataContainer
 	/**
 	 * Sets the value to 'LoadedRelaxReminder' flag and sets the same value to 'CurrentRelaxReminder' flag too.
 	 *
-	 * @param loadedRelaxReminder value to set
+	 * @param flag value to set
 	 */
-	void setLoadedRelaxReminderFlag(boolean loadedRelaxReminder);
+	void setLoadedRelaxReminderFlag(boolean flag);
 
 	/**
 	 * Returns the value of 'LoadedRunningApplication' flag.
@@ -200,9 +207,9 @@ public interface DataContainer
 	/**
 	 * Sets the value to 'LoadedRunningApplication' flag and sets the same value to 'CurrentRunningApplication' flag too.
 	 *
-	 * @param loadedRunningApplication value to set
+	 * @param flag value to set
 	 */
-	void setLoadedRunningApplicationFlag(boolean loadedRunningApplication);
+	void setLoadedRunningApplicationFlag(boolean flag);
 
 	/**
 	 * Returns the loaded application from the container.

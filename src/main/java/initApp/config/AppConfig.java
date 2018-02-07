@@ -5,6 +5,8 @@ import java.io.File;
 import main.java.command.Command;
 import main.java.command.impl.CommandImpl;
 import main.java.data.container.DataContainer;
+import main.java.data.container.DataContainerHelper;
+import main.java.data.container.impl.DataContainerHelperImpl;
 import main.java.data.container.impl.DataContainerImpl;
 import main.java.data.converter.DataConverter;
 import main.java.data.converter.impl.DataConverterImpl;
@@ -28,55 +30,61 @@ import main.java.viewer.manager.impl.ViewManagerImpl;
 public class AppConfig
 {
 	@Instance
-	public TimeCounter timeCounter()
+	public TimeCounter getTimeCounter()
 	{
 		return new TimeCounterImpl();
 	}
 
 	@Instance
-	public DataContainer timeAndSettingsContainer()
+	public DataContainer getTimeAndSettingsContainer()
 	{
 		return new DataContainerImpl();
 	}
 
 	@Instance
-	public DataConverter converter()
+	public DataConverter getConverter()
 	{
 		return new DataConverterImpl();
 	}
 
 	@Instance
-	public ViewManager viewManager()
+	public DataContainerHelper getContainerHelper()
+	{
+		return new DataContainerHelperImpl();
+	}
+
+	@Instance
+	public ViewManager getViewManager()
 	{
 		return new ViewManagerImpl();
 	}
 
 	@Instance
-	public GuiView guiWindow()
+	public GuiView getGuiWindow()
 	{
 		return new GuiViewBySwing();
 	}
 
 	@Instance
-	public Command command()
+	public Command getCommand()
 	{
 		return new CommandImpl();
 	}
 
 	@Instance
-	public LoadSaveToFile loadSaveToFile()
+	public LoadSaveToFile getLoadSaveToFile()
 	{
 		return new LoadSaveToFileImpl();
 	}
 
 	@Instance
-	public File file()
+	public File getFile()
 	{
 		return new File("set.txt");
 	}
 
 	@Instance
-	public Timer secondTimer()
+	public Timer getSecondTimer()
 	{
 		return new SecondsTimer();
 	}

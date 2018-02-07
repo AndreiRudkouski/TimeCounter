@@ -65,11 +65,9 @@ public class DataContainerImpl implements DataContainer
 	}
 
 	@Override
-	public void increaseTimeBySecond()
+	public void increaseCurrentTimeByDelta(long delta)
 	{
-		currentTime.incrementAndGet();
-		todayTime.incrementAndGet();
-		totalTime.incrementAndGet();
+		currentTime.getAndAdd(delta);
 	}
 
 	@Override
@@ -98,20 +96,7 @@ public class DataContainerImpl implements DataContainer
 	@Override
 	public void putDateAndTimeToStorage(LocalDate date, long time)
 	{
-		initTimeFields(date, time);
 		dateTimeStorage.put(date, new AtomicLong(time));
-	}
-
-	private void initTimeFields(LocalDate date, long time)
-	{
-		if (todayTime.get() != time)
-		{
-			if (todayDate.equals(date))
-			{
-				todayTime.set(time);
-			}
-			totalTime.getAndAdd(time);
-		}
 	}
 
 	@Override
@@ -127,15 +112,21 @@ public class DataContainerImpl implements DataContainer
 	}
 
 	@Override
+	public void eraseDateAndTimeToStorage()
+	{
+		dateTimeStorage.clear();
+	}
+
+	@Override
 	public boolean getCurrentAutoChangeDateFlag()
 	{
 		return currentAutoChangeDateFlag.get();
 	}
 
 	@Override
-	public void setCurrentAutoChangeDateFlag(boolean currentAutoChangeDate)
+	public void setCurrentAutoChangeDateFlag(boolean flag)
 	{
-		this.currentAutoChangeDateFlag.set(currentAutoChangeDate);
+		this.currentAutoChangeDateFlag.set(flag);
 	}
 
 	@Override
@@ -145,9 +136,9 @@ public class DataContainerImpl implements DataContainer
 	}
 
 	@Override
-	public void setCurrentRelaxReminderFlag(boolean currentRelaxReminder)
+	public void setCurrentRelaxReminderFlag(boolean flag)
 	{
-		this.currentRelaxReminderFlag.set(currentRelaxReminder);
+		this.currentRelaxReminderFlag.set(flag);
 	}
 
 	@Override
@@ -157,9 +148,9 @@ public class DataContainerImpl implements DataContainer
 	}
 
 	@Override
-	public void setCurrentRunningApplicationFlag(boolean currentRunningApplicationFlag)
+	public void setCurrentRunningApplicationFlag(boolean flag)
 	{
-		this.currentRunningApplicationFlag.set(currentRunningApplicationFlag);
+		this.currentRunningApplicationFlag.set(flag);
 	}
 
 	@Override
@@ -181,10 +172,9 @@ public class DataContainerImpl implements DataContainer
 	}
 
 	@Override
-	public void setLoadedAutoChangeDateFlag(boolean loadedAutoChangeDate)
+	public void setLoadedAutoChangeDateFlag(boolean flag)
 	{
-		loadedAutoChangeDateFlag.set(loadedAutoChangeDate);
-		setCurrentAutoChangeDateFlag(loadedAutoChangeDate);
+		loadedAutoChangeDateFlag.set(flag);
 	}
 
 	@Override
@@ -194,10 +184,9 @@ public class DataContainerImpl implements DataContainer
 	}
 
 	@Override
-	public void setLoadedRelaxReminderFlag(boolean loadedRelaxReminder)
+	public void setLoadedRelaxReminderFlag(boolean flag)
 	{
-		loadedRelaxReminderFlag.set(loadedRelaxReminder);
-		setCurrentRelaxReminderFlag(loadedRelaxReminder);
+		loadedRelaxReminderFlag.set(flag);
 	}
 
 	@Override
@@ -207,10 +196,10 @@ public class DataContainerImpl implements DataContainer
 	}
 
 	@Override
-	public void setLoadedRunningApplicationFlag(boolean loadedRunningApplication)
+	public void setLoadedRunningApplicationFlag(boolean flag)
 	{
-		loadedRunningApplicationFlag.set(loadedRunningApplication);
-		setCurrentRunningApplicationFlag(loadedRunningApplication);
+		loadedRunningApplicationFlag.set(flag);
+		setCurrentRunningApplicationFlag(flag);
 	}
 
 	@Override
@@ -223,7 +212,6 @@ public class DataContainerImpl implements DataContainer
 	public void setLoadedApplication(File loadedApplication)
 	{
 		this.loadedApplication.set(loadedApplication);
-		setCurrentApplication(loadedApplication);
 	}
 
 	@Override
